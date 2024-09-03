@@ -27,10 +27,11 @@ const FilesContainer = ({}) => {
 
     const [loading, setLoading] = React.useState<boolean>(true); 
     const [search, setSearch] = React.useState<string>(""); 
-    const [type, setType] = React.useState<LayoutType>("grid"); 
+    // const [type, setType] = React.useState<LayoutType>("list"); 
 
     const [files, setFiles] = React.useState<AttachmentType[]>([]); 
     const [count, setCount] = React.useState<number>(0); 
+    const [size, setSize] = React.useState<number>(0); 
 
     const [openNewFileModal, setOpenNewFileModal] = React.useState<boolean>(false)
     const [newFiles, setNewFiles] = React.useState<string[]>([]);
@@ -40,10 +41,10 @@ const FilesContainer = ({}) => {
 
 
     const searchParams = useSearch(); 
-    const layout: any = searchParams?.get("layout") ? searchParams.get("layout"): "grid"; 
+    const layout: any = searchParams?.get("layout") || "list"; 
     const folder = searchParams?.get("folder") || "";
 
-    React.useEffect(() => {setType(layout)}, [layout]);
+    // React.useEffect(() => {setType(layout)}, [layout]);
 
     const fetchFiles = async () => {
         setLoading(true); 
@@ -52,7 +53,8 @@ const FilesContainer = ({}) => {
 
         if (res) {
             setFiles(res.docs);
-            setCount(res.count)
+            setCount(res.count);
+            setSize(res.size); 
         };
 
         setLoading(false); 
@@ -61,7 +63,7 @@ const FilesContainer = ({}) => {
     useCustomEffect(fetchFiles, [folder]);
 
     let className = cn(
-        type === "grid" ? "grid grid-cols-3 md:grid-cols-4 lg:grid-cols-12 gap-2":
+        layout === "grid" ? "grid grid-cols-3 md:grid-cols-4 lg:grid-cols-12 gap-2":
         "flex flex-col", "w-full overflow-auto pb-12"
     )
     return (
@@ -69,6 +71,10 @@ const FilesContainer = ({}) => {
             <AddFolderModal 
                 isOpen={addFolderModal}
                 onClose={() => setAddFolderModal(false)}
+                setFiles={setFiles}
+                files={files}
+                count={count}
+                setCount={setCount}
             />
 
             <ImageUploadModal
@@ -80,6 +86,8 @@ const FilesContainer = ({}) => {
             <Header
                 setOpenNewFileModal={setOpenNewFileModal}
                 setAddFolderModal={setAddFolderModal}
+                count={count}
+                size={size}
             />
             {
                 count ? (
@@ -105,7 +113,7 @@ const FilesContainer = ({}) => {
                     <div className={className}>
                         <>
                             {
-                                createArray(40).map((_, index) => type === "grid" ? <GridPlaceholder key={index}/>: <ListPlaceholder key={index}/>)
+                                createArray(40).map((_, index) => layout === "grid" ? <GridPlaceholder key={index}/>: <ListPlaceholder key={index}/>)
                             }
                         </>
                     </div>
@@ -115,7 +123,7 @@ const FilesContainer = ({}) => {
                 !loading && files.length > 0 && (
                     <div className={className}>
                         <>
-                            {files.map((file, index) => type === "grid" ? <Grid key={index} {...file}/>: <List key={index} {...file}/>)}
+                            {files.map((file, index) => layout === "grid" ? <Grid key={index} {...file}/>: <List key={index} {...file}/>)}
                         </>
                     </div>
                 )

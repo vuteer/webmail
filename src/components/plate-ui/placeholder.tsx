@@ -36,7 +36,7 @@ export const withPlaceholders = (components: any) =>
   withPlaceholdersPrimitive(components, [
     {
       key: ELEMENT_PARAGRAPH,
-      placeholder: 'Type a paragraph',
+      placeholder: 'Type here...',
       hideOnBlur: true,
       query: {
         maxLevel: 1,

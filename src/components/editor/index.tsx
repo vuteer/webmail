@@ -76,7 +76,7 @@ export default function EditorContainer({
           <div className="my-1" />
           <Editor 
             className="h-[30vh] outline-none border-none focus:border-none bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
-            placeholder="Type here..."
+            // placeholder="Type here..."
             
           />
 

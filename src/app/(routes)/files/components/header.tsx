@@ -11,15 +11,20 @@ import {Separator} from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useSearch } from "@/hooks";
+import { formatBytes } from "@/utils/size";
 
 interface HeaderProps {
     setOpenNewFileModal: React.Dispatch<boolean>;
     setAddFolderModal: React.Dispatch<boolean>;
+    count: number;
+    size: number; 
 }
 
 const Header: React.FC<HeaderProps> = ({
     setOpenNewFileModal,
-    setAddFolderModal
+    setAddFolderModal,
+    count, 
+    size
 }) => {
     const [layout, setLayout] = React.useState<LayoutType>("list"); 
 
@@ -27,8 +32,8 @@ const Header: React.FC<HeaderProps> = ({
         <>
             <div className="py-2 flex justify-between items-center">
                 <div>
-                    <Heading3 className="text-xs lg:text-sm">Total Files - 78</Heading3>
-                    <Heading3 className="text-xs lg:text-sm">Total Size - 54MB</Heading3>
+                    <Heading3 className="text-xs lg:text-sm">Total Files & Folders - {count}</Heading3>
+                    <Heading3 className="text-xs lg:text-sm">Total Size - {formatBytes(size)}</Heading3>
                 </div>
 
                 <div className="flex gap-2">
@@ -65,7 +70,7 @@ export type LayoutType = "grid" | "list"
 const TabItems = ({layout, setLayout}: {layout: LayoutType, setLayout: React.Dispatch<LayoutType>}) => {
     const {push} = useRouter(); 
     const searchParams = useSearch(); 
-    const currentLayout = searchParams?.get("layout") || "grid"; 
+    const currentLayout = searchParams?.get("layout") || "list"; 
 
     const handleTabClick = (type: LayoutType) => {
         const entries: any = searchParams?.entries(); 
