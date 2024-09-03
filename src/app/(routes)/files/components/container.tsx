@@ -27,7 +27,6 @@ const FilesContainer = ({}) => {
 
     const [loading, setLoading] = React.useState<boolean>(true); 
     const [search, setSearch] = React.useState<string>(""); 
-    // const [type, setType] = React.useState<LayoutType>("list"); 
 
     const [files, setFiles] = React.useState<AttachmentType[]>([]); 
     const [count, setCount] = React.useState<number>(0); 
@@ -37,14 +36,10 @@ const FilesContainer = ({}) => {
     const [newFiles, setNewFiles] = React.useState<string[]>([]);
 
     const [addFolderModal, setAddFolderModal] = React.useState<boolean>(false);
-    // const [openNewFileModal, setOpenNewFileModal] = React.useState<boolean>(false)
-
 
     const searchParams = useSearch(); 
     const layout: any = searchParams?.get("layout") || "list"; 
     const folder = searchParams?.get("folder") || "";
-
-    // React.useEffect(() => {setType(layout)}, [layout]);
 
     const fetchFiles = async () => {
         setLoading(true); 
@@ -65,7 +60,8 @@ const FilesContainer = ({}) => {
     let className = cn(
         layout === "grid" ? "grid grid-cols-3 md:grid-cols-4 lg:grid-cols-12 gap-2":
         "flex flex-col", "w-full overflow-auto pb-12"
-    )
+    );
+
     return (
         <>
             <AddFolderModal 
@@ -152,11 +148,3 @@ const FilesContainer = ({}) => {
 } 
 
 export default FilesContainer; 
-
-// icon - title - date created - (download) size (share) (delete button)
-
-// npx shadcn-ui@latest add avatar button card checkbox command table dialog form input textarea popover separator tooltip chart
-
-// yarn add @tanstack/react-table axios sonner next-themes zustand date-fns cookies-next socket.io-client uuid
-
-// yarn add -D @types/uuid

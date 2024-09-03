@@ -13,6 +13,7 @@ import {AttachmentType, FileType} from "@/types";
 import FileShareModal from "@/components/modals/file-share";
 import React from "react";
 import Confirm from "@/components/modals/confirm";
+import { cn } from "@/lib/utils";
 
 interface GridProps extends AttachmentType {};
 
@@ -36,7 +37,7 @@ const Grid: React.FC<GridProps> = ({
 
 
     return (
-        <div className="flex flex-col items-center gap-1">
+        <div className={cn("flex flex-col items-center gap-1 cursor-pointer ", type === "folder" ? "hover:text-main-color": "")}>
             <div className="relative w-[30px] h-[40px] lg:w-[30px] lg:h-[30px] overflow-hidden">
                 <AppImage 
                     src={src}

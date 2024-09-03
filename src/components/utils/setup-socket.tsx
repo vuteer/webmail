@@ -59,10 +59,10 @@ const SetupSocket = () => {
 
       // setup states here
       // AI field to be set for later 
-      let { ai, drafts, finalized_setup, inbox, junk } = res.state;
+      let { ai, drafts, contact_mail, finalized_setup, inbox, junk } = res.state;
        
       setInitialNumbers(inbox, junk, drafts);
-      updateFieldsInitially(ai, finalized_setup, false, avatar, true);
+      updateFieldsInitially(ai, finalized_setup, contact_mail, false, avatar, true);
     }
     setSoundModal(true)
   };

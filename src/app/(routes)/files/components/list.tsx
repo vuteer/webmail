@@ -10,6 +10,7 @@ import { icons } from "@/assets";
 import { formatBytes } from "@/utils/size";
 import {formatDateToString} from "@/utils/dates"
 import {AttachmentType, FileType} from "@/types"; 
+import { cn } from "@/lib/utils";
 
 interface ListProps extends AttachmentType {};
 
@@ -32,7 +33,7 @@ const List: React.FC<ListProps> = ({
 
     return (
         <>
-            <div className="flex items-center gap-2 my-2">
+            <div className={cn("flex items-center gap-2 my-2 cursor-pointer", type == "folder" ? "hover:text-main-color": "")}>
                 <div className="mr-3 relative w-[20px] h-[30px] lg:w-[30px] lg:h-[40px] overflow-hidden">
                     <AppImage 
                         src={src}
