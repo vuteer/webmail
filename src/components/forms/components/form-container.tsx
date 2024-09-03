@@ -64,7 +64,7 @@ const FormContainer: React.FC<FormProps> = ({
               loading={loading}
               placeholder={item.placeholder}
               textarea={item.textarea}
-              type={item.type}
+              // type={item.type}
               subtitle={item.subtitle}
               // editor={item.editor}
               // file={item.file}
@@ -81,7 +81,7 @@ const FormContainer: React.FC<FormProps> = ({
               placeholder={item.placeholder}
               textarea={item.textarea}
               subtitle={item.subtitle}
-              type={item.type}
+              // type={item.type}
               // editor={item.editor}
               // file={item.file}
             />

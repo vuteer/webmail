@@ -1,4 +1,4 @@
-import {getDoc, postDoc, patchDoc} from '@/utils/api-wrappers';
+import {getDoc, postDoc, patchDoc} from '@/utils/api-calls';
 
 export const login = async (data: {email: string, password: string}, admin?: boolean) => {
     const res = await postDoc (`/auth/login?${admin ? "role=admin": ""}`, data, true);
