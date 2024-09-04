@@ -28,8 +28,6 @@ interface AuthProps {
     admin?: boolean; 
 }
 
-
-
 const AuthForm: React.FC<AuthProps> = ({buttonText, screen, values, className, admin}) => {
     const [loading, setLoading] = React.useState(screen === 'welcome' ? true: false); 
     const [activated, setActivated] = React.useState(false); 
@@ -41,10 +39,6 @@ const AuthForm: React.FC<AuthProps> = ({buttonText, screen, values, className, a
     const searchParams = useSearchParams(); 
     const token = searchParams.get("token") || "";
     const registered = searchParams.get("registered"); 
-
-    // React.useEffect(() => {
-    //     if (token && screen === 'welcome' && !admin) handleActivation(token, setActivated, setMessage, setLoading, push)
-    // }, [token]); 
 
     let schema = getSchema(screen)
    
