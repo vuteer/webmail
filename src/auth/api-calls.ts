@@ -1,15 +1,14 @@
 import {getDoc, postDoc, patchDoc} from '@/utils/api-calls';
 
-export const login = async (data: {email: string, password: string}, admin?: boolean) => {
-    const res = await postDoc (`/auth/login?${admin ? "role=admin": ""}`, data, true);
-   
-    if (res?.status === "success") {
-      let {user, token} = res.data; 
-      return {user, token}; 
-    }  
-    return null; 
+export const login = async (data: {email: string, password: string}) => {
+  const res = await postDoc (`/auth/login`, data, true);
+  if (res?.status === "success") {
+    let user = res.data; 
+    let token = res.token; 
+    return {user, token}; 
+  }  
+  return null; 
 };
-
  
 
 export const requestPasswordToken = async (data: {email: string}, admin?: boolean) => {

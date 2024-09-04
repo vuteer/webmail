@@ -3,28 +3,6 @@ import {createToast} from "@/utils/toast";
 // import { validatePhone } from "@/utils/validation";
 import { signInFunctionParams } from "../authTypes";
 
-// handle activation
-// const handleActivation = async (
-//     token: string, setActivated: React.Dispatch<boolean>, 
-//     setMessage: React.Dispatch<string>, setLoading: React.Dispatch<boolean>,
-//     push: (str: string) => void
-//     ) => {
-//     const res = await activateUser(token); 
-//     if (res?.status === 'success') {
-//         createToast("success", "Activation successful.");
-//         setActivated(true); 
-
-//         setTimeout(() => {
-//             push("/auth/login"); 
-
-//         }, 1000)
-//     } else {
-//         setMessage(res.message); 
-//     }
-
-//     setLoading(false); 
-// }
-
 const handleSubmit = async (
     data: any, screen: string, setLoading: React.Dispatch<boolean>,
     push: (path: string) => void, refresh: () => void, token: string, 
@@ -36,7 +14,7 @@ const handleSubmit = async (
             setLoading(true); 
     
             if (screen === 'login') {
-                res = await login(data, admin); 
+                res = await login(data); 
                 if (res) {
                     signIn({
                         token: res.token, 
@@ -47,7 +25,7 @@ const handleSubmit = async (
                         // refreshTokenExpireIn: 60 * 60 * 1000,
                     }); 
                     createToast("success", "Login successful");
-                    push("/admin/dashboard")
+                    push("/?sec=inbox")
                      
                     refresh();
                 }

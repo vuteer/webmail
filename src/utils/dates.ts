@@ -3,7 +3,7 @@
 import {format, formatRelative, formatDistance} from 'date-fns'; 
 
 export const formatDateToString = (date: Date | string) => {
-  return format(new Date(date), "MMM dd, yyyy")
+  return format(new Date(date), "MMMM dd, yyyy HH:mm:ss")
 }
 
 export const formatDateRelative = (date: Date | string) => `${format(new Date(date), "MMM dd, yyyy - H:mm:ss a")}`

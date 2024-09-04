@@ -10,7 +10,7 @@ import {useForm } from "react-hook-form";
 import {Button} from "@/components/ui/button"; 
 import { Form } from "@/components/ui/form";
 
-import {useSignIn} from '../authHooks';
+import {useAuthUser, useSignIn} from '../authHooks';
 
 import GenerateAuthPageForm from "./auth-components/generate-auth-form"; 
 // auth schemas
@@ -19,6 +19,7 @@ import { getSchema } from "./values";
 // functions 
 import { handleSubmit} from "./functions"
 import {cn} from "@/lib/utils"; 
+import { createToast } from '@/utils/toast';
 
 interface AuthProps {
     buttonText: string;   
@@ -35,6 +36,8 @@ const AuthForm: React.FC<AuthProps> = ({buttonText, screen, values, className, a
 
     const {push, refresh} = useRouter(); 
     const signIn = useSignIn() 
+    const auth = useAuthUser(); 
+    let user = auth(); 
 
     const searchParams = useSearchParams(); 
     const token = searchParams.get("token") || "";
@@ -54,6 +57,13 @@ const AuthForm: React.FC<AuthProps> = ({buttonText, screen, values, className, a
             data, screen, setLoading, push, refresh, token, setMessage, signIn, admin
         )
     }
+
+    React.useEffect(() => {
+        if (user) {
+            createToast("success", "Welcome back!"); 
+            push("/?sec=inbox")
+        }
+    }, [])
     
     return (
         <Form {...form}>
