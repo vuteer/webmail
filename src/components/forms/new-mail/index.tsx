@@ -176,6 +176,7 @@ const NewMailForm = () => {
                 {
                   emails.length > 0 && (
                     <div className="ml-3 flex gap-2 items-center mb-1">
+                      
                       {
                         emails.map((mail, index) => (
                           <Card key={index} className={"flex gap-2 items-center text-sm p-2 border-none bg-secondary"}>
@@ -191,7 +192,10 @@ const NewMailForm = () => {
             }
           />
 
-          <Card className={cn(openSuggestions ? `flex flex-col gap-2 h-[150px] overflow-auto`: "hidden h-0 overflow-hidden", "duration-700  p-3 w-[40%] absolute top-8 mt-3 left-0 z-[250]")}>
+          <Card className={cn(openSuggestions ? `flex flex-col gap-2 h-[250px] overflow-auto`: "hidden h-0 overflow-hidden", "duration-700  p-3 w-[40%] absolute top-8 mt-3 left-0 z-[250]")}>
+              <Button className="self-end" size={"sm"} variant={"ghost"} onClick={() => setOpenSuggestions(false)}>
+                <X size={18}/>
+              </Button>
               {
                 suggestionsLoading && createArray(6).map(itm => <Skeleton className="w-full h-[20px] rounded-full" key={itm}/>)
               }

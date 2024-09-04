@@ -164,13 +164,13 @@ export const ReplyButtons = ({
 }) => (
   <>
     <Separator />
-    <div className="flex justify-between items-center gap-2 w-full my-2">
-      <div className="flex gap-3 my-2">
+    <div className="flex justify-end items-center gap-2 w-full my-2">
+      {/* <div className="flex gap-3 my-2"> */}
     
         <Button
           variant="outline"
           onClick={() => handleSend(true)}
-          className="flex gap-2 items-center hover:text-main"
+          className="flex gap-2 items-center hover:text-main rounded-full"
           disabled={loading}
         >
           <SquarePen size={18} /> Save to drafts
@@ -178,18 +178,19 @@ export const ReplyButtons = ({
         <Button
           variant="outline"
           onClick={() => setOpenFileUpload(true)}
-          className="flex gap-2 items-center hover:text-main"
+          className="flex gap-2 items-center hover:text-main rounded-full"
           disabled={loading}
 
         >
           <Paperclip size={18} /> Attach file
         </Button>
-      </div>
+      {/* </div> */}
       
       <Button 
         onClick={() => handleSend(false)} 
-        className="flex gap-2 items-center hover:text-main" variant="outline">
-        <Send size={18} /> Send{loading ? "ing..." : ""}
+        disabled={loading}
+        className="flex gap-2 items-center hover:text-main rounded-full" variant="outline">
+        <Send size={18} /> Send
       </Button>
     </div>
     <Card className="shadow-none border-destructive w-fit p-2 flex items-center gap-2">
