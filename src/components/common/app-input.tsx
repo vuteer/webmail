@@ -19,6 +19,7 @@ interface InputProps {
     icon?: React.ReactNode; 
     button?: React.ReactNode;
     label?: string;
+    containerClassName?: string; 
 }
 
 export const resetClass = 'bg-transparent border-none text-sm lg:text-md focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0';
@@ -35,7 +36,8 @@ const AppInput: React.FC<InputProps> = ({
     textarea = false,
     icon,
     button,
-    label
+    label,
+    containerClassName
 }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setValue(e.target.value);
@@ -47,7 +49,7 @@ const AppInput: React.FC<InputProps> = ({
         <>
             {label && <FormTitle title={label}/>}
         
-            <div className={cn(active ? "border-main-color": "border-transparent", "bg-secondary flex items-center gap-1 px-2 py-[.02rem] pr-[.02rem] border-[.01rem] rounded-lg overflow-hidden")}>
+            <div className={cn(active ? "border-main-color": "border-transparent", "bg-secondary flex items-center gap-1 px-2 py-[.02rem] pr-[.02rem] border-[.01rem] rounded-lg overflow-hidden", containerClassName)}>
                 {icon && icon}
                 {textarea ? (
                     <Textarea

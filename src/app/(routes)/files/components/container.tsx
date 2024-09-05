@@ -2,7 +2,7 @@
 "use client"; 
 
 import React from "react"; 
-import { HelpCircle, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, HelpCircle, Plus } from "lucide-react";
 import {v4 as uuidv4} from "uuid"; 
 
 import {AppInput} from "@/components";
@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { useSearch, useCustomEffect } from "@/hooks";
 import { AttachmentType } from "@/types";
 import { getFiles } from "@/lib/api-calls/files";
+import { useRouter } from "next/navigation";
 
 const FilesContainer = ({}) => {
 
@@ -36,6 +37,8 @@ const FilesContainer = ({}) => {
     const [newFiles, setNewFiles] = React.useState<string[]>([]);
 
     const [addFolderModal, setAddFolderModal] = React.useState<boolean>(false);
+
+    const {back} = useRouter(); 
 
     const searchParams = useSearch(); 
     const layout: any = searchParams?.get("layout") || "list"; 
@@ -86,23 +89,37 @@ const FilesContainer = ({}) => {
                 size={size}
             />
             {
-                count ? (
+                
                     <>
-                        <div className="mt-3 flex justify-end gap-2">
-
-                            <AppInput 
-                                value={search}
-                                setValue={setSearch}
-                                placeholder={"Search for file..."}
-                                cls="w-[350px]"
-                            />
-                            <Button variant="outline" size="icon">
-                                <HelpCircle size={18}/>
-                            </Button>
+                        <div className="mt-3 flex justify-between gap-2">
+                            {
+                                folder ? (
+                                    <Button 
+                                        variant={"ghost"} 
+                                        className="gap-2 items-center"
+                                        onClick={() => back()}
+                                    >
+                                        <ChevronLeft size={18}/>
+                                        Back
+                                    </Button>
+                                ): <div />
+                            }
+                            {count ? 
+                                (
+                                    <AppInput 
+                                        value={search}
+                                        setValue={setSearch}
+                                        placeholder={"Search for file..."}
+                                        cls="w-[200px] lg:w-[300px]"
+                                        containerClassName="rounded-full"
+                                    />
+                                ): <></>
+                            }
+                            
                         </div>
                         <Separator className="mb-3"/>
                     </>
-                ): <></>
+                 
             }
             {
                 loading && (
