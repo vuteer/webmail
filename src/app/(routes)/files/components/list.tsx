@@ -1,3 +1,5 @@
+import React from "react";
+import { useRouter } from "next/navigation";
 // list type layout 
 import { AppImage } from "@/components";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +13,7 @@ import { formatBytes } from "@/utils/size";
 import {formatDateToString} from "@/utils/dates"
 import {AttachmentType, FileType} from "@/types"; 
 import { cn } from "@/lib/utils";
+
 
 interface ListProps extends AttachmentType {};
 
@@ -29,11 +32,21 @@ export const ListPlaceholder = () => (
 const List: React.FC<ListProps> = ({
     id, type, title, size, visibility, createdAt
 }) => {
+    const [loading, setLoading] = React.useState<boolean>(false); 
+    const {push} = useRouter(); 
+
     let src: string = icons[type as FileType]; 
 
     return (
         <>
-            <div className={cn("flex items-center gap-2 my-2 cursor-pointer", type == "folder" ? "hover:text-main-color": "")}>
+            <div 
+                className={cn("flex items-center gap-2 my-2 cursor-pointer", type == "folder" ? "hover:text-main-color": "")}
+                onClick={() => {
+                    type === "folder" ? 
+                        push(`/files?folder=${id}`):
+                        {}
+                }}
+            >
                 <div className="mr-3 relative w-[20px] h-[30px] lg:w-[30px] lg:h-[40px] overflow-hidden">
                     <AppImage 
                         src={src}
@@ -51,7 +64,7 @@ const List: React.FC<ListProps> = ({
                 {type !== "folder" && <Paragraph className="min-w-[70px] text-xs lg:text-xs uppercase">{formatBytes(size)}</Paragraph>}
                 
                 {
-                    type !== "folder" ? <Buttons />: <></>
+                    type !== "folder" ? <Buttons fileId={id}/>: <></>
                 }
 
             </div>

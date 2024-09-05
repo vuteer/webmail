@@ -12,6 +12,29 @@ import {FileType} from "@/types";
 import { getFile } from "@/lib/api-calls/files";
 import { createToast } from "@/utils/toast";
 
+export const handleDownload = async (id: string, setLoading: React.Dispatch<boolean>) => {
+    setLoading(true); 
+
+    let res = await getFile(id);
+    
+    if (res) {
+        // Create a temporary <a> element
+        const link = document.createElement('a');
+        link.target = "_blank";
+        link.href = res.download_url;
+        link.download = ''; // Optional: specify a default filename if desired
+        document.body.appendChild(link);
+        
+        // Trigger a click event on the link to start the download
+        link.click();
+        
+        // Remove the link from the document
+        document.body.removeChild(link);
+        createToast("success", "Download has been initiated!");
+    };
+
+    setLoading(false)
+}
 const GenerateIcon = (
     {id, type, title, size}: 
     {id: string, type: FileType, title: string, size: number}
@@ -19,29 +42,7 @@ const GenerateIcon = (
     const [loading, setLoading] = React.useState<boolean>(false); 
     let src: string = icons[type as FileType]; 
   
-    const handleDownload = async () => {
-        setLoading(true); 
-
-        let res = await getFile(id);
-        
-        if (res) {
-            // Create a temporary <a> element
-            const link = document.createElement('a');
-            link.target = "_blank";
-            link.href = res.download_url;
-            link.download = ''; // Optional: specify a default filename if desired
-            document.body.appendChild(link);
-            
-            // Trigger a click event on the link to start the download
-            link.click();
-            
-            // Remove the link from the document
-            document.body.removeChild(link);
-            createToast("success", "Download has been initiated!");
-        };
-
-        setLoading(false)
-    }
+    
     return (
         <Card className="flex gap-2 items-center min-w-[200px] w-fit max-w-[250px] px-2">
             <div className="relative w-[30px] h-[40px] lg:w-[50px] lg:h-[60px] overflow-hidden">
@@ -62,7 +63,7 @@ const GenerateIcon = (
                 variant="ghost" 
                 size="sm" 
                 disabled={loading}
-                onClick={handleDownload}
+                onClick={() => handleDownload(id, setLoading)}
             >
                 <Download size={18}/>
             </Button>

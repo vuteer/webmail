@@ -1,5 +1,7 @@
+import React from "react";
+import { useRouter } from "next/navigation";
 // file grid layout @
-import { Download, Eye, Info, Share2, Trash2 } from "lucide-react";
+import { Download, Share2, Trash2 } from "lucide-react";
 
 import { AppImage } from "@/components";
 import { Heading3, Paragraph } from "@/components/ui/typography";
@@ -11,9 +13,9 @@ import { formatBytes } from "@/utils/size";
 
 import {AttachmentType, FileType} from "@/types"; 
 import FileShareModal from "@/components/modals/file-share";
-import React from "react";
 import Confirm from "@/components/modals/confirm";
 import { cn } from "@/lib/utils";
+import { handleDownload } from "@/components/utils/generate-icon";
 
 interface GridProps extends AttachmentType {};
 
@@ -33,11 +35,20 @@ export const GridPlaceholder = () => {
 const Grid: React.FC<GridProps> = ({
     id, type, title, size, visibility
 }) => {
+    const [loading, setLoading] = React.useState<boolean>(false); 
     let src: string = icons[type as FileType]; 
+    const {push} = useRouter(); 
 
 
     return (
-        <div className={cn("flex flex-col items-center gap-1 cursor-pointer ", type === "folder" ? "hover:text-main-color": "")}>
+        <div 
+            className={cn("flex flex-col items-center gap-1 cursor-pointer ", type === "folder" ? "hover:text-main-color": "")}
+            onClick={() => {
+                type === "folder" ? 
+                    push(`/files?folder=${id}`):
+                    {}
+            }}
+        >
             <div className="relative w-[30px] h-[40px] lg:w-[30px] lg:h-[30px] overflow-hidden">
                 <AppImage 
                     src={src}
@@ -59,11 +70,12 @@ const Grid: React.FC<GridProps> = ({
 
 export default Grid; 
 
-export const Buttons = () => {
+export const Buttons = ({fileId}: {fileId: string}) => {
     const [openShareModal, setOpenShareModal] = React.useState<boolean>(false);
     const [openDeleteModal, setOpenDeleteModal] = React.useState<boolean>(false);
 
-    
+    const [loading, setLoading] = React.useState<boolean>(false); 
+
     return (
         <>
             <FileShareModal 
@@ -82,6 +94,7 @@ export const Buttons = () => {
                 <div className="flex justify-end">
                     <Button
                         variant="destructive"
+                        disabled={loading}
                     >
                         Delete
                     </Button>
@@ -89,13 +102,19 @@ export const Buttons = () => {
             </Confirm>
         
             <div className="flex gap-2 items-center">
-                <Button variant="ghost" size={"sm"}>
+                <Button 
+                    variant="ghost" 
+                    size={"sm"}
+                    disabled={loading}
+                    onClick={() => handleDownload(fileId, setLoading)}
+                >
                     <Download size={18}/>
                 </Button>
                 <Button 
                     variant="ghost" 
                     size={"sm"}
                     onClick={() => setOpenShareModal(true)}
+                    disabled={loading}
                 >
                     <Share2 size={18}/>
                 </Button>
@@ -103,12 +122,10 @@ export const Buttons = () => {
                     variant="ghost" 
                     size={"sm"}
                     onClick={() => setOpenDeleteModal(true)}
+                    disabled={loading}
                 >
                     <Trash2 size={18}/>
                 </Button>
-                {/* <Button variant="ghost" size={"sm"}>
-                    <Info size={18}/>
-                </Button> */}
             </div>
         </>
 )}; 
