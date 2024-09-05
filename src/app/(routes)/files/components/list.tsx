@@ -57,10 +57,10 @@ const List: React.FC<ListProps> = ({
                         nonBlur={true}
                     />
                 </div>
-                <Paragraph className={"flex-1 text-sm lg:text-md max-w-[60%] capitalize"}>{title}</Paragraph>
+                <Paragraph className={"flex-1 text-sm lg:text-md max-w-[60%]"}>{title}</Paragraph>
                 
-                <Paragraph className="min-w-[70px] text-xs lg:text-xs capitalize">{type}</Paragraph>
-                <Paragraph className="min-w-[100px] text-xs lg:text-xs capitalize">{formatDateToString(createdAt)}</Paragraph>
+                <Paragraph className="min-w-[70px] text-xs lg:text-xs">{type}</Paragraph>
+                <Paragraph className="min-w-[100px] text-xs lg:text-xs">{formatDateToString(createdAt)}</Paragraph>
                 {type !== "folder" && <Paragraph className="min-w-[70px] text-xs lg:text-xs uppercase">{formatBytes(size)}</Paragraph>}
                 
                 {

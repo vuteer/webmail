@@ -35,7 +35,6 @@ export const GridPlaceholder = () => {
 const Grid: React.FC<GridProps> = ({
     id, type, title, size, visibility
 }) => {
-    const [loading, setLoading] = React.useState<boolean>(false); 
     let src: string = icons[type as FileType]; 
     const {push} = useRouter(); 
 
@@ -60,7 +59,7 @@ const Grid: React.FC<GridProps> = ({
                 />
             </div>
             <div className="flex flex-col flex-1">
-                <Heading3 className={"text-center text-xs lg:text-sm line-clamp-1 capitalize"}>{title}</Heading3>
+                <Heading3 className={"text-center text-xs lg:text-sm line-clamp-1"}>{title}</Heading3>
                 {type !== "folder" && <Paragraph className="text-center text-xs lg:text-xs uppercase">{formatBytes(size)}</Paragraph>}
             </div>
             {/* <Buttons /> */}
