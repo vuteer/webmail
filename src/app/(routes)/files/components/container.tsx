@@ -2,7 +2,7 @@
 "use client"; 
 
 import React from "react"; 
-import { ChevronLeft, ChevronRight, HelpCircle, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, HelpCircle, Home, Plus } from "lucide-react";
 import {v4 as uuidv4} from "uuid"; 
 
 import {AppInput} from "@/components";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import {Card} from "@/components/ui/card"; 
 import {Paragraph} from "@/components/ui/typography";
 import {Separator} from "@/components/ui/separator";
-import {LayoutType} from "./header"; 
+ 
 import Header from "./header"; 
 import Grid, { GridPlaceholder } from "./grid";
 import List, {ListPlaceholder} from "./list";
@@ -23,6 +23,7 @@ import { useSearch, useCustomEffect } from "@/hooks";
 import { AttachmentType } from "@/types";
 import { getFiles } from "@/lib/api-calls/files";
 import { useRouter } from "next/navigation";
+import SearchFile from "./search";
 
 const FilesContainer = ({}) => {
 
@@ -38,16 +39,18 @@ const FilesContainer = ({}) => {
 
     const [addFolderModal, setAddFolderModal] = React.useState<boolean>(false);
 
-    const {back} = useRouter(); 
+    const {back, push} = useRouter(); 
 
     const searchParams = useSearch(); 
     const layout: any = searchParams?.get("layout") || "list"; 
     const folder = searchParams?.get("folder") || "";
+    const q = searchParams?.get("q") || ""; 
 
     const fetchFiles = async () => {
+        setFiles([])
         setLoading(true); 
 
-        let res = await getFiles(folder); 
+        let res = await getFiles(folder, q); 
 
         if (res) {
             setFiles(res.docs);
@@ -58,11 +61,11 @@ const FilesContainer = ({}) => {
         setLoading(false); 
     }
 
-    useCustomEffect(fetchFiles, [folder]);
+    useCustomEffect(fetchFiles, [folder, q]);
 
     let className = cn(
         layout === "grid" ? "grid grid-cols-3 md:grid-cols-4 lg:grid-cols-12 gap-2":
-        "flex flex-col", "w-full overflow-auto pb-12"
+        "flex flex-col", "w-full overflow-auto pb-[20rem]"
     );
 
     return (
@@ -94,25 +97,27 @@ const FilesContainer = ({}) => {
                         <div className="mt-3 flex justify-between gap-2">
                             {
                                 folder ? (
-                                    <Button 
-                                        variant={"ghost"} 
-                                        className="gap-2 items-center"
-                                        onClick={() => back()}
-                                    >
-                                        <ChevronLeft size={18}/>
-                                        Back
-                                    </Button>
+                                    <div className="flex gap-2 items-center">
+                                        <Button 
+                                            variant={"ghost"} 
+                                            className="gap-2 items-center"
+                                            onClick={() => back()}
+                                        >
+                                            <ChevronLeft size={18}/>
+                                            Back
+                                        </Button>
+                                        <Button
+                                            variant={"ghost"}
+                                            onClick={() => push("/files")}
+                                        >
+                                            <Home size={18}/>
+                                        </Button>
+                                    </div>
                                 ): <div />
                             }
-                            {count ? 
+                            {(count || q) ? 
                                 (
-                                    <AppInput 
-                                        value={search}
-                                        setValue={setSearch}
-                                        placeholder={"Search for file..."}
-                                        cls="w-[200px] lg:w-[300px]"
-                                        containerClassName="rounded-full"
-                                    />
+                                    <SearchFile />
                                 ): <></>
                             }
                             
@@ -136,7 +141,22 @@ const FilesContainer = ({}) => {
                 !loading && files.length > 0 && (
                     <div className={className}>
                         <>
-                            {files.map((file, index) => layout === "grid" ? <Grid key={index} {...file}/>: <List key={index} {...file}/>)}
+                            {
+                                files.map((file, index) => layout === "grid" ? 
+                                    <Grid 
+                                        key={index} 
+                                        file={file}
+                                        files={files}
+                                        setFiles={setFiles}
+                                    />: 
+                                    <List 
+                                        key={index} 
+                                        files={files}
+                                        setFiles={setFiles}
+                                        file={file}
+                                    />
+                                )
+                            }
                         </>
                     </div>
                 )

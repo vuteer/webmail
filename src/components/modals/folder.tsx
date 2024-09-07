@@ -44,15 +44,20 @@ const AddFolderModal: React.FC<AddFolderModalProps> = (
             createToast('success', 'Folder has been created!'); 
 
             let f: AttachmentType = {
-                id: res, 
+                id: res.doc, 
                 title: folderName, 
                 size: 0, 
                 type: "folder",
                 createdAt: new Date()
             };
 
-            setFiles([f, ...files]);
+             
+            let newFiles = [...files, f];
+            setFiles([])
+            setFiles(newFiles);
+
             setCount(count + 1); 
+            setFolderName("")
             onClose(); 
         };
         setLoading(false)

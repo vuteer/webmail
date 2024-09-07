@@ -11,9 +11,7 @@ import ContactPopover from "@/components/popovers/contact-popover";
 
 import { ContactType } from "@/types";
 
-interface ContactItemProps extends ContactType {
-    type: "saved" | "organization";
-};
+interface ContactItemProps extends ContactType {};
 
 export const ContactItemPlaceholder = ({type}: {type: "saved" | "organization"}) => (
     <div className="flex items-center gap-2">
@@ -27,7 +25,7 @@ export const ContactItemPlaceholder = ({type}: {type: "saved" | "organization"})
 )
 
 const ContactItem: React.FC<ContactItemProps> = ({
-    id, avatar, name, saved, email, type
+    id, avatar, name, email, type
 }) => {
 
     return (
@@ -35,7 +33,8 @@ const ContactItem: React.FC<ContactItemProps> = ({
             <div className="flex items-center gap-2 my-1">
                 <AppAvatar src={avatar} name={name} dimension="w-9 h-9"/>
                 <Paragraph className="ml-8 flex-1 line-clamp-1">{name}</Paragraph>
-                {type === "saved" && <Paragraph className="flex-1 line-clamp-1">{email}</Paragraph>}
+                <Paragraph className="flex-1 line-clamp-1">{email}</Paragraph>
+                <Paragraph className="flex-1 line-clamp-1 capitalize">{type}</Paragraph>
                 <ContactPopover type={type} email={email} id={id}/>
             </div>
             <Separator />

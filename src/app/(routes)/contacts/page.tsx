@@ -8,7 +8,7 @@ const Page = () => {
         <Protected title="My contacts">
             <div className="flex flex-col lg:flex-row gap-2">
                 <Contacts type="saved"/>
-                <Contacts type="organization"/>
+                {/* <Contacts type="organization"/> */}
             </div>
         </Protected>
     )

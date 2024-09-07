@@ -11,7 +11,7 @@ import Confirm from "../modals/confirm";
 import { Paragraph } from "@/components/ui/typography";
 
 
-const ContactPopover = ({type, email, id}: {type: "saved" | "organization", email: string, id: string}) => {
+const ContactPopover = ({type, email, id}: {type:"internal" | "external", email: string, id: string}) => {
     const [openDeleteModal, setOpenDeleteModal] = React.useState<boolean>(false)
     const {push} = useRouter(); 
     return (
@@ -45,7 +45,7 @@ const ContactPopover = ({type, email, id}: {type: "saved" | "organization", emai
                         className="text-xs lg:text-sm cursor-pointer duration-700 hover:text-main-color"
                         onClick={() => push(`/write?to=${email}`)}
                     >Send mail</Paragraph>
-                    {type === "saved" && (
+                    {type === "external" && (
                         <Paragraph 
                             className="text-xs lg:text-sm cursor-pointer duration-700 hover:text-destructive"
                             onClick={() => setOpenDeleteModal(true)}

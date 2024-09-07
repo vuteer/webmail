@@ -6,14 +6,18 @@ export type ContactType = {
     name: string; 
     saved: boolean; 
     email: string; 
+    type: "internal" | "external";
 }
 export type FileType = "audio" | "document" | "other" | "PDF" | "image" | "video" | "excel"| "CSV" | "zip" | "folder"; 
+export type VisibilityType = "public" | "organization" | "private" | "limited"; 
+
 export type AttachmentType = {
     id: string; 
     title: string; 
     size: number; 
     type: FileType; 
-    visibility?: "public" | "pulic"; 
+    visibility?: VisibilityType; 
+    sharedWith?: string[]; 
     createdAt: Date;
 }
 

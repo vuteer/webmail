@@ -4,18 +4,23 @@ import { useRouter } from "next/navigation";
 import { AppImage } from "@/components";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Heading3, Paragraph } from "@/components/ui/typography";
- 
+import { Paragraph } from "@/components/ui/typography";
+import FileButtons from "./buttons";
+import { SkeletonButtons } from "./grid";
 
-import {Buttons, SkeletonButtons} from "./grid"; 
 import { icons } from "@/assets";
 import { formatBytes } from "@/utils/size";
-import {formatDateToString} from "@/utils/dates"
-import {AttachmentType, FileType} from "@/types"; 
+import { formatDateToString } from "@/utils/dates"
+import { AttachmentType, FileType } from "@/types";
 import { cn } from "@/lib/utils";
+import { getFileName } from "./utils";
 
 
-interface ListProps extends AttachmentType {};
+interface ListProps {
+    file: AttachmentType; 
+    files: AttachmentType[];
+    setFiles: React.Dispatch<AttachmentType[]>;
+ };
 
 export const ListPlaceholder = () => (
     <div className="flex items-center gap-2 my-1">
@@ -30,42 +35,69 @@ export const ListPlaceholder = () => (
 );
 
 const List: React.FC<ListProps> = ({
-    id, type, title, size, visibility, createdAt
+    file, files, setFiles
 }) => {
-    const [loading, setLoading] = React.useState<boolean>(false); 
-    const {push} = useRouter(); 
+    // const [loading, setLoading] = React.useState<boolean>(false); 
+    const [fileName, setFileName] = React.useState<string>(getFileName(file.title))
+    const { push } = useRouter();
 
-    let src: string = icons[type as FileType]; 
+    let src: string = icons[file.type as FileType];
 
+    console.log(file)
+
+    const handleOpenFolder = () => {
+        file.type === "folder" ?
+            push(`/files?folder=${file.id}`) :
+            {}
+    }
     return (
         <>
-            <div 
-                className={cn("flex items-center gap-2 my-2 cursor-pointer", type == "folder" ? "hover:text-main-color": "")}
-                onClick={() => {
-                    type === "folder" ? 
-                        push(`/files?folder=${id}`):
-                        {}
-                }}
+            <div
+                className={cn("flex items-center gap-2 my-2 cursor-pointer", file.type == "folder" ? "hover:text-main-color" : "")}
             >
-                <div className="mr-3 relative w-[20px] h-[30px] lg:w-[30px] lg:h-[40px] overflow-hidden">
-                    <AppImage 
+                <div 
+                    className="mr-3 relative w-[20px] h-[30px] lg:w-[30px] lg:h-[40px] overflow-hidden"
+                    onClick={handleOpenFolder}
+                >
+                    <AppImage
                         src={src}
                         fill
-                        title={title}
-                        alt={title}
+                        title={file.title}
+                        alt={file.title}
                         objectFit="contain"
                         nonBlur={true}
                     />
                 </div>
-                <Paragraph className={"flex-1 text-sm lg:text-md max-w-[60%]"}>{title}</Paragraph>
+                <Paragraph 
+                    className={cn("flex-1 text-sm lg:text-md max-w-[55%]")}
+                    onClick={handleOpenFolder}
+                >{fileName}</Paragraph>
+
+                <Paragraph className="min-w-[70px] text-xs lg:text-xs capitalize">{file.type}</Paragraph>
+                <Paragraph className="min-w-[100px] text-xs lg:text-xs">{formatDateToString(file.createdAt)}</Paragraph>
+                <Paragraph className={cn("min-w-[70px] text-xs lg:text-xs uppercase", file.type === "folder" ? "": "")}>{file.type !== "folder" ? formatBytes(file.size): "34.5KB"}</Paragraph>
+
+
+                <>
+                    {
+                        file.type === "folder" && (file.title === "sent" || file.title === "received") ? (
+                            <></>
+                        ): (
+                            <FileButtons 
+                                fileId={file.id} 
+                                setFileName={setFileName} 
+                                fileName={fileName} 
+                                type={file.type}
+                                files={files}
+                                setFiles={setFiles}
+                                visibility={file.visibility || "private"}
+                                sharedWith={file.sharedWith || []}
+                            /> 
+                        )
+                    }
+                </>
+
                 
-                <Paragraph className="min-w-[70px] text-xs lg:text-xs">{type}</Paragraph>
-                <Paragraph className="min-w-[100px] text-xs lg:text-xs">{formatDateToString(createdAt)}</Paragraph>
-                {type !== "folder" && <Paragraph className="min-w-[70px] text-xs lg:text-xs uppercase">{formatBytes(size)}</Paragraph>}
-                
-                {
-                    type !== "folder" ? <Buttons fileId={id}/>: <></>
-                }
 
             </div>
             <Separator />

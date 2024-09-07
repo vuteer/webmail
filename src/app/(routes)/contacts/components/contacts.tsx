@@ -51,11 +51,9 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                 isOpen={openAddContactModal}
                 onClose={() => setOpenAddContactModal(false)}
             />
-            <Card className={cn(type === "organization" ? "w-[30%]":"flex-1", "p-2 h-[92.5vh] flex-col flex gap-1")}>
+            <Card className={cn(type === "organization" ? "w-[30%]":"flex-1", "p-2 h-[89vh] flex-col flex gap-1")}>
                 <Heading2 className="text-sm lg:text-md text-center py-2">
-                    {
-                        type === "saved" ? "Saved": "Organization"
-                    } Contacts
+                    My Contacts
                     ({numberWithCommas(count)})
                 </Heading2>
                 <Separator />
@@ -67,36 +65,36 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                             value={search}
                             setValue={setSearch}
                             placeholder="Search contact"
-                            cls="w-[200px]"
+                            cls="w-[250px]"
                             disabled={loading}
-
+                            containerClassName="rounded-full"
                         />
-                        {
-                            type === "saved" ? (
-                                <>
-                                    <Button 
-                                        variant="outline" 
-                                        size="icon" 
-                                        disabled={loading}
-                                        onClick={() => setOpenAddContactModal(true)}
-                                    >
-                                        <Plus size={18}/>
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        size="icon"
-                                        onClick={fetchContacts}
-                                        disabled={loading}
-                                    >
-                                        <RefreshCcw size={18}/>
-                                    </Button>
-                                </>
-                            ): <></>
-                        }
+                         
+                        <>
+                            <Button 
+                                variant="outline" 
+                                size="icon"
+                                className="rounded-full" 
+                                disabled={loading}
+                                onClick={() => setOpenAddContactModal(true)}
+                            >
+                                <Plus size={18}/>
+                            </Button>
+                            <Button 
+                                variant="default" 
+                                size="icon"
+                                className="rounded-full"
+                                onClick={fetchContacts}
+                                disabled={loading}
+                            >
+                                <RefreshCcw size={18}/>
+                            </Button>
+                        </>
+                         
                     </div>
                 </div>
                 <Separator />
-                <div className="overflow-auto h-[90vh]">
+                <div className="overflow-auto h-[80vh]">
                     {
                         loading && (
                             <div className="flex flex-col gap-2">
@@ -113,7 +111,7 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                             <div className="flex flex-col gap-2">
                                 {
                                     contacts.map((contact, index) => (
-                                        <ContactItem key={index} type={type} {...contact}/>
+                                        <ContactItem key={index} {...contact}/>
                                     ))
                                 }
                             </div>
