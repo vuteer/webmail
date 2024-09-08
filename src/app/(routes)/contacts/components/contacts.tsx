@@ -18,7 +18,8 @@ import AddContactModal from "@/components/modals/add-contact";
 import { getContacts } from "@/lib/api-calls/contacts"
 import { ContactType } from "@/types";
 import { cn } from "@/lib/utils"; 
-import { useCustomEffect } from "@/hooks"
+import { useCustomEffect, useSearch } from "@/hooks"
+import SearchContact from "./search-contact";
 
 const Contacts = ({type}: {type: "saved" | "organization"}) => {
 
@@ -26,14 +27,16 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
     const [count, setCount] = React.useState<number>(0); 
     const [loading, setLoading] = React.useState<boolean>(true); 
 
-    const [search, setSearch] = React.useState<string>("");
-
     const [openAddContactModal, setOpenAddContactModal] = React.useState<boolean>(false); 
     
+    const searchParams = useSearch(); 
+    const q = searchParams?.get("q") || ""; 
+    const page = searchParams?.get("page") || "0"; 
+
     const fetchContacts = async () => {
         setLoading(true);
 
-        let res = await getContacts();
+        let res = await getContacts(page, "30", q);
 
         if (res) {
             setContacts(res.docs)
@@ -43,13 +46,15 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
         setTimeout(() => setLoading(false), 1500)
     }
 
-    useCustomEffect(fetchContacts, [])
+    useCustomEffect(fetchContacts, [q])
 
     return (
         <>
             <AddContactModal 
                 isOpen={openAddContactModal}
                 onClose={() => setOpenAddContactModal(false)}
+                contacts={contacts}
+                setContacts={setContacts}
             />
             <Card className={cn(type === "organization" ? "w-[30%]":"flex-1", "p-2 h-[89vh] flex-col flex gap-1")}>
                 <Heading2 className="text-sm lg:text-md text-center py-2">
@@ -61,14 +66,7 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                 <div className="flex justify-between items-center my-2">
                     <Paragraph></Paragraph>
                     <div className="flex items-center gap-1">
-                        <AppInput 
-                            value={search}
-                            setValue={setSearch}
-                            placeholder="Search contact"
-                            cls="w-[250px]"
-                            disabled={loading}
-                            containerClassName="rounded-full"
-                        />
+                         <SearchContact />
                          
                         <>
                             <Button 
@@ -100,25 +98,25 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                             <div className="flex flex-col gap-2">
                                 {
                                     createArray(25).map((_, index) => (
-                                        <ContactItemPlaceholder key={index} type={type}/>
+                                        <ContactItemPlaceholder key={index} />
                                     ))
                                 }
                             </div>
                         )
                     }
                     {
-                        !loading && count ? (
+                        !loading && contacts.length > 0 ? (
                             <div className="flex flex-col gap-2">
                                 {
                                     contacts.map((contact, index) => (
-                                        <ContactItem key={index} {...contact}/>
+                                        <ContactItem key={index} {...contact} contacts={contacts} setContacts={setContacts}/>
                                     ))
                                 }
                             </div>
                         ): <></>
                     }
                     {
-                        !loading && !count ? (
+                        !loading && contacts.length === 0 ? (
                             <div className="h-full w-full flex items-center justify-center">
                                 <Heading3 className="text-sm lg:text-md">You have no contacts.</Heading3>
                             </div> 

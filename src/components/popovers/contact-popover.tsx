@@ -9,11 +9,37 @@ import {Button} from "@/components/ui/button";
 import PopoverContainer from "./container";
 import Confirm from "../modals/confirm";
 import { Paragraph } from "@/components/ui/typography";
+import { deleteContact } from "@/lib/api-calls/contacts";
+import { createToast } from "@/utils/toast";
+import { ContactType } from "@/types";
 
 
-const ContactPopover = ({type, email, id}: {type:"internal" | "external", email: string, id: string}) => {
+const ContactPopover = (
+    {type, email, id, contacts, setContacts}: 
+    {
+        type:"internal" | "external"; 
+        email: string; 
+        id: string;
+        contacts: ContactType[];
+        setContacts: React.Dispatch<ContactType[]>; 
+    }) => {
     const [openDeleteModal, setOpenDeleteModal] = React.useState<boolean>(false)
+    const [loading, setLoading] = React.useState<boolean>(false);
+
     const {push} = useRouter(); 
+
+    const handleDelete = async () => {
+        setLoading(true); 
+
+        let res = await deleteContact(id); 
+
+        if (res) {
+            setContacts([]); 
+            setContacts([...contacts.filter(cnt => cnt.id !== id)]); 
+            createToast("success", "Contact has been deleted!"); 
+        };
+        setLoading(false); 
+    }
     return (
         <>
              <Confirm
@@ -23,7 +49,12 @@ const ContactPopover = ({type, email, id}: {type:"internal" | "external", email:
                 onClose={() => setOpenDeleteModal(false)}
              >
                 <div className="flex justify-end">
-                    <Button className="gap-2 items-center" variant="destructive">
+                    <Button 
+                        className="gap-2 items-center" 
+                        variant="destructive"
+                        disabled={loading}
+                        onClick={handleDelete}
+                    >
                         <Trash2 /> Proceed
                     </Button>
                 </div>

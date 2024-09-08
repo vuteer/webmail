@@ -1,22 +1,21 @@
 import {getDoc, postDoc, deleteDoc, patchDoc} from "@/utils/api-calls"; 
 
 
-// search contact 
-export const searchContact = async (q: string, page?: string, limit?: string) => {
-    let res = await getDoc(`/contacts/search?q=${q}&page=${page || 0}&limit=${5}`, true); 
-    return res?.data || false; 
-}
-
 // get user contacts
-export const getContacts = async (page?: string, limit?: string) => {
-    let res = await getDoc(`/contacts?page=${page || 0}&limit=${limit || 30}`);
+export const getContacts = async (page?: string, limit?: string, q?: string) => {
+    let url = `/contacts?`; 
+    if (page) url = url + `page=${page}&`;
+    if (limit) url = url + `limit=${limit}&`; 
+    if (q) url = url + `q=${q}`; 
+
+    let res = await getDoc(url);
     return res?.data || false; 
 };
 
 // save contact 
 export const saveContact = async (data: any) => {
     let res = await postDoc(`/contacts`, data, true); 
-    return res?.status === "success" || false; 
+    return res?.data?.doc || false; 
 }; 
 
 // update contact 

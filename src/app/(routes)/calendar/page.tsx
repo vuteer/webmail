@@ -1,7 +1,7 @@
 // calender page 
 
+import Calendar from "@/components/calendar";
 import Protected from "../components/protected";
-import Calendar from "@/components/calendar"
 
 const Page = () => {
 
