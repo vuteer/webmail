@@ -32,7 +32,7 @@ const AddEvent: React.FC<AddEventProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title="Add Event"
+            title="Add to schedule"
             description="Add an event to your schedule. You can add a group event such as an organization level event and add the people to be notified or group"
         >
             <AppInput 

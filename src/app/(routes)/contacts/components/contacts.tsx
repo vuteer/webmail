@@ -4,7 +4,6 @@
 import React from "react";
 import { Plus, RefreshCcw } from "lucide-react"; 
 
-import {AppInput} from "@/components"; 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heading2, Heading3, Paragraph } from "@/components/ui/typography";
@@ -14,14 +13,16 @@ import { Separator } from "@/components/ui/separator";
 import { numberWithCommas, createArray } from "@/utils/format-numbers";
 import ContactItem, { ContactItemPlaceholder }  from "./contact-item"; 
 import AddContactModal from "@/components/modals/add-contact"; 
+import TabItems from "./contact-tabs"; 
+import SearchContact from "./search-contact";
 
 import { getContacts } from "@/lib/api-calls/contacts"
 import { ContactType } from "@/types";
 import { cn } from "@/lib/utils"; 
 import { useCustomEffect, useSearch } from "@/hooks"
-import SearchContact from "./search-contact";
 
-const Contacts = ({type}: {type: "saved" | "organization"}) => {
+const Contacts = () => {
+    const [mounted, setMounted] = React.useState<boolean>(false); 
 
     const [contacts, setContacts] = React.useState<ContactType[]>([]); 
     const [count, setCount] = React.useState<number>(0); 
@@ -32,11 +33,16 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
     const searchParams = useSearch(); 
     const q = searchParams?.get("q") || ""; 
     const page = searchParams?.get("page") || "0"; 
+    const type = searchParams?.get("type") || "internal"; 
+
+    React.useEffect(() => setMounted(true)); 
 
     const fetchContacts = async () => {
+        if (!mounted) return; 
+
         setLoading(true);
 
-        let res = await getContacts(page, "30", q);
+        let res = await getContacts(type, page, "30", q);
 
         if (res) {
             setContacts(res.docs)
@@ -46,7 +52,7 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
         setTimeout(() => setLoading(false), 1500)
     }
 
-    useCustomEffect(fetchContacts, [q])
+    useCustomEffect(fetchContacts, [q, type, mounted])
 
     return (
         <>
@@ -56,7 +62,7 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                 contacts={contacts}
                 setContacts={setContacts}
             />
-            <Card className={cn(type === "organization" ? "w-[30%]":"flex-1", "p-2 h-[89vh] flex-col flex gap-1")}>
+            <Card className={cn("flex-1 p-2 h-[89vh] flex-col flex gap-1")}>
                 <Heading2 className="text-sm lg:text-md text-center py-2">
                     My Contacts
                     ({numberWithCommas(count)})
@@ -64,7 +70,7 @@ const Contacts = ({type}: {type: "saved" | "organization"}) => {
                 <Separator />
 
                 <div className="flex justify-between items-center my-2">
-                    <Paragraph></Paragraph>
+                    <TabItems />
                     <div className="flex items-center gap-1">
                          <SearchContact />
                          

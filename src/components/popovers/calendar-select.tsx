@@ -10,19 +10,19 @@ import { useSearch } from "@/hooks";
 
 const CalendarPopover = () => {
     const searchParams = useSearch(); 
-    const cal = searchParams?.get("cal") || "day"; 
+    const cal = searchParams?.get("cal") || "month"; 
 
     return (
         <>
             <PopoverContainer
-                contentClassName="w-[150px] absolute  -right-12"
+                contentClassName="w-[150px] absolute  -right-[4rem]"
                 trigger={
                     <AppLinkButton
                         type="outline"
                         size="sm"
-                        className="w-[100px] flex gap-2 items-center"
+                        className="w-[130px] flex gap-2 items-center rounded-full capitalize justify-between"
                     >
-                        Day <ChevronDown size={20}/>
+                        {cal} <ChevronDown size={20}/>
                     </AppLinkButton>
                 }
             >
@@ -33,10 +33,13 @@ const CalendarPopover = () => {
                                 key={index}
                                 href={`/calendar${item.href}`}
                                 title={item.title}
-                                className="flex gap-2 items-center text-xs lg:text-sm hover:text-main-color duration"
+                                className="flex gap-2 items-center justify-between text-xs lg:text-sm hover:text-main-color duration"
                             >
-                                <CheckCheck size={18} color={`?cal=${cal}`=== item.href ? "#1C63EA": "transparent"}/>
-                                {item.title}
+                                <span className="flex justify-between items-center gap-2">
+                                    <CheckCheck size={18} color={`?cal=${cal}`=== item.href ? "#1C63EA": "transparent"}/>
+                                    {item.title}
+                                </span>
+                                <span className="text-xs lg:text-xs text-gray-500">{item.abbrv}</span>
                             </Link>
                         ))
                    }
@@ -52,28 +55,34 @@ export default CalendarPopover;
 type CalendarPopoverType = {
     title: string; 
     href: string; 
+    abbrv: string; 
 }
 
 const calendarItems: CalendarPopoverType[] = [
     {
         title: "Day",
-        href: "?cal=day"
+        href: "?cal=day",
+        abbrv: "D"
+
     },
     {
         title: "Week",
-        href: "?cal=week"
+        href: "?cal=week",
+        abbrv: "W"
+        
     },
     {
         title: "Month",
-        href: "?cal=month"
+        href: "?cal=month",
+        abbrv: "M"
+
     },
     {
         title: "Year",
-        href: "?cal=year"
+        href: "?cal=year",
+        abbrv: "Y"
+
     },
-    {
-        title: "1 Week",
-        href: "?cal=1week"
-    }
+  
 ]
 //  Day, Week, Month, Year, Schedule, 1 Week

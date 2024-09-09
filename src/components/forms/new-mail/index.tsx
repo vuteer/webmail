@@ -24,6 +24,7 @@ import { ReplyButtons,  }  from '@/app/(routes)/(home)/components/reply';
 import {generateHTMLStr, removeHtmlTags} from "@/utils/html-string"; 
 import { sendMail } from "@/lib/api-calls/mails";
 import { searchContact } from "@/lib/api-calls/contacts";
+
 import { createArray } from "@/utils/format-numbers";
 
 import {cn} from "@/lib/utils"; 
@@ -136,6 +137,7 @@ const NewMailForm = () => {
     let res = await searchContact(str); 
 
     if (res) {
+      console.log(res)
       setSuggestions(res.docs); 
     }
 
@@ -192,47 +194,50 @@ const NewMailForm = () => {
             }
           />
 
-          <Card className={cn(openSuggestions ? `flex flex-col gap-2 h-[250px] overflow-auto`: "hidden h-0 overflow-hidden", "duration-700  p-3 w-[40%] absolute top-8 mt-3 left-0 z-[250]")}>
+          <Card className={cn(openSuggestions ? `flex flex-col gap-2 h-[250px] `: "hidden h-0 overflow-hidden", "duration-700  p-3 w-[40%] absolute top-8 mt-3 left-0 z-[250]")}>
               <Button className="self-end" size={"sm"} variant={"ghost"} onClick={() => setOpenSuggestions(false)}>
                 <X size={18}/>
               </Button>
-              {
-                suggestionsLoading && createArray(6).map(itm => <Skeleton className="w-full h-[20px] rounded-full" key={itm}/>)
-              }
-              {
-                !suggestionsLoading && suggestions.length > 0 && (
-                  <>
-                    {
-                      suggestions.map((contact: {avatar: string, email: string, name: string}, index) => (
-                        <div 
-                          key={index} 
-                          className="w-full p-1 hover:bg-secondary rounded-lg duration-700 flex items-center gap-2 cursor-pointer hover:text-main-color"
-                          onClick={() => handleSelectEmail(contact.email)}
-                        >
-                            <AppAvatar 
-                              src={contact.avatar}
-                              name={contact.name}
-                              dimension="w-10 h-10"
-                            />
-                            <div>
-                              <Paragraph 
-                                className={"w-full text-xs lg:text-xs text-gray-500 line-clamp-1"}  
-                              >
-                                  {contact.name}
-                              </Paragraph>
-                              <Paragraph 
-                                className={"w-full text-sm lg:text-sm font-bold line-clamp-1"}  
-                              >
-                                  {contact.email}
-                              </Paragraph>
+              <div className="flex-1 overflow-auto">
+                {
+                  suggestionsLoading && createArray(6).map(itm => <Skeleton className="w-full h-[20px] rounded-full" key={itm}/>)
+                }
+                {
+                  !suggestionsLoading && suggestions.length > 0 && (
+                    <>
+                      {
+                        suggestions.map((contact: {avatar: string, email: string, name: string}, index) => (
+                          <div 
+                            key={index} 
+                            className="w-full p-1 hover:bg-secondary rounded-lg duration-700 flex items-center gap-2 cursor-pointer hover:text-main-color"
+                            onClick={() => handleSelectEmail(contact.email)}
+                          >
+                              <AppAvatar 
+                                src={contact.avatar}
+                                name={contact.name}
+                                dimension="w-10 h-10"
+                              />
+                              <div>
+                                <Paragraph 
+                                  className={"w-full text-xs lg:text-xs text-gray-500 line-clamp-1"}  
+                                >
+                                    {contact.name}
+                                </Paragraph>
+                                <Paragraph 
+                                  className={"w-full text-sm lg:text-sm font-bold line-clamp-1"}  
+                                >
+                                    {contact.email}
+                                </Paragraph>
 
-                            </div>
-                        </div>
-                      ))
-                    }
-                  </>
-                )
-              }
+                              </div>
+                          </div>
+                        ))
+                      }
+                    </>
+                  )
+                }
+
+              </div>
           </Card>
 
         </div>

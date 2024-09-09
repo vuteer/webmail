@@ -37,7 +37,7 @@ const Contacts = () => {
 
     const fetchContacts = async () => {
         setLoading(true); 
-        let res = await getContacts("0", "5"); 
+        let res = await getContacts("internal", "0", "5"); 
 
         if (res) {
             setContacts(res.docs)

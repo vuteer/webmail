@@ -1,58 +1,61 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
-// import GlobalContext from "../context/GlobalContext";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { Separator } from "../ui/separator";
+ 
 import { getMonth } from "@/utils/month";
+import { calendarStateStore } from "@/stores/calendar";
+
+import {cn} from "@/lib/utils"
 
 export default function SmallCalendar() {
-  const [currentMonthIdx, setCurrentMonthIdx] = useState(
-    dayjs().month()
-  );
   const [currentMonth, setCurrentMonth] = useState(getMonth());
+  const {
+    smallCalendarMonth,
+    setSmallCalendarMonth,
+    setDaySelected,
+    daySelected,
+  } = calendarStateStore();
+
   useEffect(() => {
-    setCurrentMonth(getMonth(currentMonthIdx));
-  }, [currentMonthIdx]);
+    setCurrentMonth(getMonth(smallCalendarMonth));
+  }, [smallCalendarMonth]);
 
-//   const {
-//     monthIndex,
-//     setSmallCalendarMonth,
-//     setDaySelected,
-//     daySelected,
-//   } = useContext(GlobalContext);
 
-//   useEffect(() => {
-//     setCurrentMonthIdx(monthIndex);
-//   }, [monthIndex]);
+ 
+
+  // useEffect(() => {
+  //   setSmallCalendarMonth(smallCalendarMonth);
+  // }, [smallCalendarMonth]);
 
   function handlePrevMonth() {
-    setCurrentMonthIdx(currentMonthIdx - 1);
+    setSmallCalendarMonth(smallCalendarMonth - 1);
   }
   function handleNextMonth() {
-    setCurrentMonthIdx(currentMonthIdx + 1);
+    setSmallCalendarMonth(smallCalendarMonth + 1);
   }
   function getDayClass(day: any) {
   
     const format = "DD-MM-YY";
     const nowDay = dayjs().format(format);
     const currDay = day.format(format);
-    // const slcDay = daySelected && daySelected.format(format);
-    // if (nowDay === currDay) {
-    //   return "bg-blue-500 rounded-full text-white";
-    // } else if (currDay === slcDay) {
-    //   return "bg-blue-100 rounded-full text-blue-600 font-bold";
-    // } else {
-    //   return "";
-    // }
+    const slcDay = ""; 
+    // daySelected && daySelected.format(format);
+    if (nowDay === currDay) {
+      return "bg-blue-500 rounded-full text-white";
+    } else if (currDay === slcDay) {
+      return "bg-blue-100 rounded-full text-blue-600 font-bold";
+    } else {
+      return "";
+    }
   }
   return (
     <div className="mt-1">
       <header className="flex items-center justify-between my-1">
         <p className="text-gray-500 font-bold my-2">
-          {dayjs(new Date(dayjs().year(), currentMonthIdx)).format(
-            "MMMM YYYY"
+          {dayjs(new Date(dayjs().year(), smallCalendarMonth)).format(
+            "MMM YYYY"
           )}
         </p>
         <div className="flex gap-2 self-end">
@@ -74,18 +77,18 @@ export default function SmallCalendar() {
         {currentMonth.map((row: any, i: number) => (
           <React.Fragment key={i}>
             {row.map((day: any, idx: any) => (
-              <Button
+              <span
                 key={idx}
                 // onClick={() => {
                 //   setSmallCalendarMonth(currentMonthIdx);
                 //   setDaySelected(day);
                 // }}
-                variant={"ghost"}
-                size="sm"
-                className={` ${getDayClass(day)}`}
+                // variant={"ghost"}
+                // size="icon"
+                className={cn("cursor-pointer duration-700  flex items-center justify-center", `${getDayClass(day)}`, "hover:bg-secondary rounded-full")}
               >
                 <span className="text-xs font-normal">{day.format("D")}</span>
-              </Button>
+              </span>
             ))}
           </React.Fragment>
         ))}

@@ -1,34 +1,58 @@
 "use client"; 
 
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
  
-import { getMonth } from "@/utils/month";
+import { getMonth, getYear } from "@/utils/month";
 import CalendarHeader from "./calendar-header";
 import Sidebar from "./sidebar";
 import Month from "./month";
-// import GlobalContext from "./context/GlobalContext";
-// import EventModal from "./event-modal";
+import Year from "./year"; 
+
+import { calendarStateStore } from "@/stores/calendar";
+import AddEvent from "../modals/add-event";
+import { useSearch } from "@/hooks"; 
+
+type CalendarType = "day" | "week" | "month" | "year"; 
 
 const Calendar = () => {
   const [currenMonth, setCurrentMonth] = useState(getMonth());
-  // const { monthIndex, showEventModal } = useContext(GlobalContext);
+  const {monthIndex, showEventModal, setShowEventModal} = calendarStateStore(); 
 
-  // useEffect(() => {
-  //   setCurrentMonth(getMonth(monthIndex));
-  // }, [monthIndex]);
+  const searchParams = useSearch(); 
+  const cal = searchParams?.get("cal") || "month"; 
 
+  useEffect(() => {
+    setCurrentMonth(getMonth(monthIndex));
+  }, [monthIndex]);
+
+  
   return (
-    <React.Fragment>
+    <>
       {/* {showEventModal && <EventModal />} */}
+      <AddEvent 
+        isOpen={showEventModal}
+        onClose={() => setShowEventModal()}
+      />
 
       <div className="h-screen flex flex-col">
         <CalendarHeader />
         <div className="flex flex-1">
-          <Sidebar />
-          <Month month={currenMonth} />
+          {
+            cal === "month" && (
+              <>
+                <Sidebar />
+                <Month month={currenMonth} />
+              </>
+            )
+          }
+          {
+            cal === "year" && (
+              <Year />
+            )
+          }
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 }
 

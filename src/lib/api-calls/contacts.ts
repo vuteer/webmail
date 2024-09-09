@@ -1,11 +1,16 @@
 import {getDoc, postDoc, deleteDoc, patchDoc} from "@/utils/api-calls"; 
 
-
+// search contact for prediction 
+export const searchContact = async (q: string) => {
+    let res = await getDoc(`/contacts/search?q=${q}`, true); 
+    return res?.data || false; 
+}
 // get user contacts
-export const getContacts = async (page?: string, limit?: string, q?: string) => {
+export const getContacts = async (type: "internal" | "external", page?: string, limit?: string, q?: string) => {
     let url = `/contacts?`; 
     if (page) url = url + `page=${page}&`;
     if (limit) url = url + `limit=${limit}&`; 
+    if (type) url = url + `type=${type}&`; 
     if (q) url = url + `q=${q}`; 
 
     let res = await getDoc(url);

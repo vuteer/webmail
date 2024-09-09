@@ -1,15 +1,16 @@
-// import dayjs from "dayjs";
+import dayjs from "dayjs";
 import React, { useContext, useState, useEffect } from "react";
-// import GlobalContext from "../context/GlobalContext";
+import { calendarStateStore } from "@/stores/calendar";
+
 
 export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
   const [dayEvents, setDayEvents] = useState([]);
-//   const {
-//     setDaySelected,
-//     setShowEventModal,
+  const {
+    setDaySelected,
+    setShowEventModal,
 //     filteredEvents,
 //     setSelectedEvent,
-//   } = useContext(GlobalContext);
+  } = calendarStateStore();
 
 //   useEffect(() => {
 //     const events = filteredEvents.filter(
@@ -20,10 +21,9 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
 //   }, [filteredEvents, day]);
 
   function getCurrentDayClass() {
-    return ""
-    // day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
-    //   ? "bg-blue-600 text-white rounded-full w-7"
-    //   : "";
+    return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
+      ? "bg-blue-600 text-white rounded-full w-7"
+      : "";
   }
   return (
     <div className="border-[0.05rem]  flex flex-col">
@@ -41,10 +41,10 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
       </header>
       <div
         className="flex-1 cursor-pointer"
-        // onClick={() => {
-        //   setDaySelected(day);
-        //   setShowEventModal(true);
-        // }}
+        onClick={() => {
+          setDaySelected(day);
+          setShowEventModal();
+        }}
       >
         {dayEvents.map((evt: any, idx) => (
           <div

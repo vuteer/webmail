@@ -3,40 +3,48 @@ import { ChevronDown, ChevronLeft, ChevronRight, Plus, Search } from "lucide-rea
 
 import dayjs from "dayjs";
 import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
 import { Heading2 } from "../ui/typography";
 import CalendarPopover from "@/components/popovers/calendar-select"
-import AddEvent from "../modals/add-event";
+import { calendarStateStore } from "@/stores/calendar";
+import { useSearch } from "@/hooks"; 
 
-// import logo from "../assets/logo.png";
-// import GlobalContext from "../context/GlobalContext";
+
 export default function CalendarHeader() {
-  const [openAddEventModal, setOpenAddEventModal] = React.useState<boolean>(false); 
+  // const [openAddEventModal, setOpenAddEventModal] = React.useState<boolean>(false); 
 
-//   const { monthIndex, setMonthIndex } = useContext(GlobalContext);
-  function handlePrevMonth() {
-    // setMonthIndex(monthIndex - 1);
+  const { year, monthIndex, setMonthIndex, setYear, setShowEventModal } = calendarStateStore(); 
+
+  const searchParams = useSearch(); 
+  const cal = searchParams?.get("cal") || "month"; 
+
+  function handlePrev() {
+    if (cal === "month") setMonthIndex(monthIndex - 1);
+    if (cal === "year") setYear(year - 1)
   }
-  function handleNextMonth() {
+  function handleNext() {
+    if (cal === "month") setMonthIndex(monthIndex + 1);
+    if (cal === "year") setYear(year + 1)
     // setMonthIndex(monthIndex + 1);
   }
   function handleReset() {
-    // setMonthIndex(
-    //   monthIndex === dayjs().month()
-    //     ? monthIndex + Math.random()
-    //     : dayjs().month()
-    // );
+    if (cal === "month") {
+      setMonthIndex(
+        monthIndex === dayjs().month()
+          ? monthIndex + Math.random()
+          : dayjs().month()
+      );
+    }
+    if (cal === "year") setYear(new Date().getFullYear())
   }
   return (
     <>
-      <AddEvent 
-        isOpen={openAddEventModal}
-        onClose={() => setOpenAddEventModal(false)}
-      />
+      
     
       <header className="px-4 py-2 flex gap-2 items-center justify-between">
         <div className="flex justify-between items-center gap-2">
           <Button
-            onClick={() => setOpenAddEventModal(true)}
+            onClick={() => setShowEventModal()}
             className="rounded-full flex gap-2 items-center min-w-[150px]"
           >
             <Plus size={18}/>
@@ -45,16 +53,19 @@ export default function CalendarHeader() {
           <Button onClick={handleReset} variant="secondary" className="rounded-full min-w-[150px]">
             Today
           </Button>
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
+          <Button variant="ghost" size="icon" onClick={handlePrev}>
             <ChevronLeft size={18}/>
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth}>
+          <Button variant="ghost" size="icon" onClick={handleNext}>
             <ChevronRight size={18}/>
           </Button>
           <Heading2 className="ml-4 text-lg lg:text-xl text-gray-500 font-bold">
-            {dayjs(new Date(dayjs().year(), 0)).format(
+            {cal === "month" && dayjs(new Date(dayjs().year(), monthIndex)).format(
               "MMMM YYYY"
             )}
+            {
+              cal === "year" && year
+            }
           </Heading2>
 
         </div>
@@ -65,6 +76,7 @@ export default function CalendarHeader() {
           <CalendarPopover />
         </div>
       </header>
+      <Separator />
     </>
   );
 }

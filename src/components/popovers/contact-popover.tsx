@@ -17,7 +17,7 @@ import { ContactType } from "@/types";
 const ContactPopover = (
     {type, email, id, contacts, setContacts}: 
     {
-        type:"internal" | "external"; 
+        type: "internal" | "external"; 
         email: string; 
         id: string;
         contacts: ContactType[];
