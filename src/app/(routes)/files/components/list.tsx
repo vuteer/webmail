@@ -72,13 +72,13 @@ const List: React.FC<ListProps> = ({
                     className={cn("flex-1 text-sm lg:text-md max-w-[55%]")}
                     onClick={handleOpenFolder}
                 >{fileName}</Paragraph>
-
+                
                 <Paragraph className="min-w-[70px] text-xs lg:text-xs capitalize">{file.type}</Paragraph>
                 <Paragraph className="min-w-[100px] text-xs lg:text-xs">{formatDateToString(file.createdAt)}</Paragraph>
-                <Paragraph className={cn("min-w-[70px] text-xs lg:text-xs uppercase", file.type === "folder" ? "": "")}>{file.type !== "folder" ? formatBytes(file.size): "34.5KB"}</Paragraph>
+                <Paragraph className={cn("min-w-[70px] text-xs lg:text-xs uppercase", file.type === "folder" ? "text-transparent ": "")}>{file.type !== "folder" ? formatBytes(file.size): "34.5KB"}</Paragraph>
 
 
-                <>
+                <div className="min-w-[30%] flex justify-end">
                     {
                         file.type === "folder" && (file.title === "sent" || file.title === "received") ? (
                             <></>
@@ -95,7 +95,7 @@ const List: React.FC<ListProps> = ({
                             /> 
                         )
                     }
-                </>
+                </div>
 
                 
 

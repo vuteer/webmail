@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 import { getYear } from "@/utils/month";
 import React from "react"; 
-import { Card } from "../ui/card";
+ 
 import { cn } from "@/lib/utils";
 import { calendarStateStore } from "@/stores/calendar";
 
@@ -38,7 +38,7 @@ const Year = () => {
                     <div  key={index} className="p-3">
                         <p className="px-3 text-gray-500 font-bold my-2">
                             {dayjs(new Date(year, index)).format(
-                                "MMMM YYYY"
+                                "MMMM"
                             )}
                         </p>
                         <div className="grid grid-cols-7 grid-rows-6 gap-1">

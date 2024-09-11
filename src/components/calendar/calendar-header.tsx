@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, Plus, Search } from "lucide-react";
-
 import dayjs from "dayjs";
+
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { Heading2 } from "../ui/typography";
@@ -13,18 +13,22 @@ import { useSearch } from "@/hooks";
 export default function CalendarHeader() {
   // const [openAddEventModal, setOpenAddEventModal] = React.useState<boolean>(false); 
 
-  const { year, monthIndex, setMonthIndex, setYear, setShowEventModal } = calendarStateStore(); 
+  const { day, week, year, monthIndex, setDay, setWeek, setMonthIndex, setYear, setShowEventModal } = calendarStateStore(); 
 
   const searchParams = useSearch(); 
-  const cal = searchParams?.get("cal") || "month"; 
+  const cal = searchParams?.get("cal") || "week"; 
 
   function handlePrev() {
     if (cal === "month") setMonthIndex(monthIndex - 1);
     if (cal === "year") setYear(year - 1)
+    if (cal === "week") setWeek(week - 1); 
+    if (cal === "day") setDay(day - 1); 
   }
   function handleNext() {
     if (cal === "month") setMonthIndex(monthIndex + 1);
-    if (cal === "year") setYear(year + 1)
+    if (cal === "year") setYear(year + 1);
+    if (cal === "week") setWeek(week + 1); 
+    if (cal === "day") setDay(day + 1); 
     // setMonthIndex(monthIndex + 1);
   }
   function handleReset() {
@@ -36,6 +40,8 @@ export default function CalendarHeader() {
       );
     }
     if (cal === "year") setYear(new Date().getFullYear())
+    if (cal === "week") setWeek(dayjs().week())
+    if (cal === "day") setDay(dayjs().date())
   }
   return (
     <>
@@ -65,6 +71,18 @@ export default function CalendarHeader() {
             )}
             {
               cal === "year" && year
+            }
+            {
+              cal === "week" && (
+                <>
+                  Week {week} - {dayjs(new Date(year, monthIndex)).format("MMM, YYYY")}
+                </>
+              )
+            }
+            {
+              cal === "day" && (
+                dayjs(new Date(year, monthIndex, day)).format("DD MMM, YYYY")
+              )
             }
           </Heading2>
 

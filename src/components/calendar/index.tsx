@@ -7,6 +7,8 @@ import CalendarHeader from "./calendar-header";
 import Sidebar from "./sidebar";
 import Month from "./month";
 import Year from "./year"; 
+import Week from "./week"; 
+import DayContainer from "./day-container"; 
 
 import { calendarStateStore } from "@/stores/calendar";
 import AddEvent from "../modals/add-event";
@@ -19,7 +21,7 @@ const Calendar = () => {
   const {monthIndex, showEventModal, setShowEventModal} = calendarStateStore(); 
 
   const searchParams = useSearch(); 
-  const cal = searchParams?.get("cal") || "month"; 
+  const cal = searchParams?.get("cal") || "week"; 
 
   useEffect(() => {
     setCurrentMonth(getMonth(monthIndex));
@@ -28,7 +30,7 @@ const Calendar = () => {
   
   return (
     <>
-      {/* {showEventModal && <EventModal />} */}
+       
       <AddEvent 
         isOpen={showEventModal}
         onClose={() => setShowEventModal()}
@@ -37,17 +39,25 @@ const Calendar = () => {
       <div className="h-screen flex flex-col">
         <CalendarHeader />
         <div className="flex flex-1">
+          <Sidebar />
           {
             cal === "month" && (
-              <>
-                <Sidebar />
                 <Month month={currenMonth} />
-              </>
             )
           }
           {
             cal === "year" && (
               <Year />
+            )
+          }
+          {
+            (cal === "week" || !cal) && (
+              <Week />
+            )
+          }
+          {
+            cal === "day" && (
+              <DayContainer />
             )
           }
         </div>
