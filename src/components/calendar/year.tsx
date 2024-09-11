@@ -32,7 +32,7 @@ const Year = () => {
         }
       }
     return (
-        <div className="px-2 py-3 w-full grid grid-cols-5 gap-5">
+        <div className="px-2 py-3 w-full grid grid-cols-5 gap-5 h-[80vh] overflow-auto">
             {
                 currentYear.map((month: any, index: number) => (
                     <div  key={index} className="p-3">

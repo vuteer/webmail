@@ -1,9 +1,9 @@
-import dayjs from 'dayjs';
-
 import { create } from 'zustand';
 import { EventType } from "@/types";  
 
 type CalendarStateType = {
+    selectedTime: string; 
+    setSelectedTime: (time: string) => void; 
     day: number;
     setDay: (day: number) => void;
     week: number; 
@@ -14,8 +14,8 @@ type CalendarStateType = {
     setMonthIndex: (index: number) => void; 
     smallCalendarMonth: number; 
     setSmallCalendarMonth: (index: number) => void; 
-    daySelected: number | null; 
-    setDaySelected: (day: number) => void; 
+    daySelected: Date | undefined; 
+    setDaySelected: (day: Date | undefined) => void; 
     showEventModal: boolean; 
     setShowEventModal: () => void; 
     events: EventType[]; 
@@ -26,14 +26,18 @@ type CalendarStateType = {
 
 
 export const calendarStateStore = create<CalendarStateType>((set, get) => ({
+    selectedTime: "8:00 AM",
     week: 0,
     day: 1, 
     year: new Date().getFullYear(),
     monthIndex: new Date().getMonth(),
     smallCalendarMonth: new Date().getMonth(), 
-    daySelected: 0, 
+    daySelected: undefined, 
     showEventModal: false, 
     events: [],
+    setSelectedTime: (time: string) => {
+        set({selectedTime: time})
+    },
     setDay: (day: number) => {
         set({day})
     },
@@ -49,8 +53,8 @@ export const calendarStateStore = create<CalendarStateType>((set, get) => ({
     setSmallCalendarMonth: (index: number) => {
         set({smallCalendarMonth: index})
     },
-    setDaySelected: (day: number) => {
-
+    setDaySelected: (day: Date | undefined) => {
+        set({daySelected: day})
     },
     setShowEventModal: () => {
         let {showEventModal} = get(); 

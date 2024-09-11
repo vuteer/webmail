@@ -8,9 +8,13 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
   const {
     setDaySelected,
     setShowEventModal,
+    monthIndex, 
+    year
 //     filteredEvents,
 //     setSelectedEvent,
   } = calendarStateStore();
+
+  
 
 //   useEffect(() => {
 //     const events = filteredEvents.filter(
@@ -42,7 +46,8 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
       <div
         className="flex-1 cursor-pointer"
         onClick={() => {
-          setDaySelected(day);
+          setDaySelected(undefined);
+          setDaySelected(new Date(year, monthIndex, day.date()));
           setShowEventModal();
         }}
       >

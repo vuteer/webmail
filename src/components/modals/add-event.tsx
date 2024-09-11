@@ -1,15 +1,19 @@
 // add event modal 
 
 import React from "react";
+import { Calendar, Clock } from "lucide-react";
+import dayjs from "dayjs";
+
 import { Modal } from "./modal";
 import AppInput from "../common/app-input";
 import { Button } from "../ui/button";
 import FormTitle from "../forms/components/form-title";
-import SmallCalendar from "../calendar/small-calendar";
 import { Separator } from "../ui/separator";
 import { Paragraph } from "../ui/typography";
-import { ChevronDown } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+
+import { calendarStateStore } from "@/stores/calendar";
+import CalendarPopover from "../popovers/calendar-popover";
 
 
 interface AddEventProps {
@@ -27,11 +31,21 @@ const AddEvent: React.FC<AddEventProps> = ({
     const [list, setList] = React.useState<string>("");
     const [loading, setLoading] = React.useState<boolean>(false);
 
+    const {
+        daySelected,
+        setDaySelected,
+        selectedTime, 
+        setSelectedTime
+    } = calendarStateStore(); 
 
     return (
         <Modal
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={() => {
+                onClose(); 
+                setDaySelected(undefined); 
+                setSelectedTime("8:00 AM"); 
+            }}
             title="Add to schedule"
             description="Add an event to your schedule. You can add a group event such as an organization level event and add the people to be notified or group"
         >
@@ -43,16 +57,39 @@ const AddEvent: React.FC<AddEventProps> = ({
             />
              
             <FormTitle title="Day of event"/>
-            <div className="px-1 py-2 rounded-lg flex justify-between items-center cursor-pointer hover:bg-secondary">
-                <Paragraph>Select date</Paragraph>
-                <ChevronDown size={19}/>
-            </div>
+                <CalendarPopover 
+                    trigger={
+                        <div className="px-1 py-2 rounded-lg flex w-full justify-between items-center cursor-pointer hover:bg-secondary">
+                            <Paragraph>{daySelected ? dayjs(daySelected).format("DD MMM, YYYY"): "Select date"}</Paragraph>
+                            <Calendar size={19}/>
+                        </div>
+                    }
+                    triggerClassName="w-full"
+                    date={daySelected}
+                    setDate={setDaySelected}
+                />
             <Separator />
             <FormTitle title="Actual time of event"/>
-            <div className="px-1 py-2 rounded-lg flex justify-between items-center cursor-pointer hover:bg-secondary">
-                <Paragraph className="text-xs lg:text-xs">Select time</Paragraph>
-                <ChevronDown size={19}/>
+            <div className="flex justify-between items-center">
+                <AppInput 
+                    value={selectedTime}
+                    setValue={setSelectedTime}
+                    placeholder={"8:00 AM"}
+                    icon={<Clock size={19}/>}
+                    containerClassName="w-full"
+                />
             </div>
+            {/* <TimePopover 
+                trigger={
+                    <div className="px-1 py-2 rounded-lg flex justify-between items-center cursor-pointer hover:bg-secondary">
+                        <Paragraph className="text-xs lg:text-xs">{selectedTime ? selectedTime: "Select time"}</Paragraph>
+                        <Clock size={19}/>
+                    </div>
+                }
+                time={selectedTime}
+                setTime={setSelectedTime}
+                triggerClassName="w-full"
+            /> */}
             <Separator />
 
             <div 
