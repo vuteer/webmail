@@ -5,10 +5,10 @@ import { Paragraph } from "../ui/typography";
 import {cn} from "@/lib/utils"; 
 import { calendarStateStore } from "@/stores/calendar";
 
-import {isToday} from "./week"; 
+import {generateHour, isToday, selectCubeTime} from "./week"; 
 
 const DayContainer = () => {
-    const {day, setDay, monthIndex, year} = calendarStateStore(); 
+    const {day, setDay, monthIndex, year, setSelectedTime, setDaySelected, setShowEventModal} = calendarStateStore(); 
     const [currentDay, setCurrentDay] = React.useState<Date>(new Date())
 
     const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -27,7 +27,7 @@ const DayContainer = () => {
     return (
         <div className="w-full p-4">
             <div className="flex">
-                <div className="w-[70px]"/>
+                <div className="w-[89px]"/>
                 
                 <div className={cn(
                     "text-center flex flex-col items-center border-l pb-2 px-5",
@@ -50,12 +50,24 @@ const DayContainer = () => {
             <div className="border-t overflow-auto h-[80vh]">
                 {hours.map((hour) => (
                     <div key={hour} className="flex border-b h-[100px]">
-                        <div className="border-r px-4 p-7 text-xs text-gray-500 w-[70px] h-full flex flex-col justify-center">
-                            {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+                        <div className="border-r px-4 p-7 text-xs text-gray-500 w-[90px] h-full flex flex-col justify-center">
+                            {generateHour(hour)}
                         </div>
-                        <div className="flex-1 grid grid-cols-7 -mr-1">
-                            {Array.from({ length: 6 }).map((_, index) => (
-                                <div key={index} className="px-4 p-7"></div>
+                        <div className="flex-1 grid grid-cols-1 -mr-1">
+                            {Array.from({ length: 7 }).map((_, index) => (
+                                <div 
+                                    key={index} 
+                                    className="px-4 p-7 cursor-pointer" 
+                                    onClick={() => {
+                                        
+                                        selectCubeTime(
+                                            new Date(year, monthIndex, day),
+                                            generateHour(hour),
+                                            setSelectedTime, setDaySelected
+                                        );
+                                        setShowEventModal()
+                                    }}
+                                />
                             ))}
                         </div>
                     </div>

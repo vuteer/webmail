@@ -10,9 +10,15 @@ import { calendarStateStore } from "@/stores/calendar";
 
 dayjs.extend(weekOfYear);
 
-export const isToday = (date) => dayjs(new Date()).format("DD MMM, YYYY") === date; 
+export const isToday = (date: any) => dayjs(new Date()).format("DD MMM, YYYY") === date; 
 
-
+export const selectCubeTime = (
+    day: Date | undefined, time: string,
+    setSelectedTime: any, setDaySelected: any
+) => {
+    setSelectedTime(time); 
+    setDaySelected(day); 
+}
 const Week = () => {
     const [currentWeek, setCurrentWeek] = React.useState<any>(getWeek())
     const [mounted, setMounted] = React.useState<boolean>(false); 
@@ -23,7 +29,7 @@ const Week = () => {
     const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
     const hours = Array.from({ length: 24 }, (_, i) => i)
 
-    const { week, setWeek } = calendarStateStore(); 
+    const { week, setWeek, setShowEventModal, selectedTime, setSelectedTime, setDaySelected, daySelected } = calendarStateStore(); 
 
     React.useEffect(() => setMounted(true), []);
     React.useEffect(() => {
@@ -41,12 +47,11 @@ const Week = () => {
     return (
         <div className="w-full p-4">
             <div className="flex">
-                <div className="w-[70px]"/>
+                <div className="w-[89px]"/>
                 <div className="flex-1 grid grid-cols-7 ">
                     {days.map((day, index) => (
                         <div key={day} className={cn(
                             "text-center flex flex-col items-center border-l pb-2",
-                            // index === 5 ? "pr/-3": ""
                         )}>
                             <div className=" text-gray-500 mb-1">
                                 <Paragraph>{day}</Paragraph>
@@ -71,12 +76,28 @@ const Week = () => {
             <div className="border-t overflow-auto h-[80vh]">
                 {hours.map((hour) => (
                     <div key={hour} className="flex border-b h-[100px]">
-                        <div className="border-r px-4 p-7 text-xs text-gray-500 w-[70px] h-full flex flex-col justify-center">
-                            {hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}
+                        <div className="border-r px-4 p-7 text-xs text-gray-500 w-[90px] h-full flex flex-col justify-center">
+                            {generateHour(hour)}
                         </div>
                         <div className="flex-1 grid grid-cols-7 -mr-1">
-                            {Array.from({ length: 6 }).map((_, index) => (
-                                <div key={index} className="border-r px-4 p-7"></div>
+                            {Array.from({ length: 7 }).map((_, index) => (
+                                <div 
+                                    key={index} className="border-r px-4 p-7 cursor-pointer" 
+                                    onClick={() => {
+                                         
+                                        let time = generateHour(hour);
+                                        let date = currentWeek[index].format("D");
+                                        let month = currentWeek[index].format("M"); 
+                                        let year = currentWeek[index].format("YYYY"); 
+
+                                        selectCubeTime(
+                                            new Date(year, month, date),
+                                            time,
+                                            setSelectedTime, setDaySelected
+                                        );
+                                        setShowEventModal()
+                                    }}
+                                />
                             ))}
                         </div>
                     </div>
@@ -87,3 +108,6 @@ const Week = () => {
 };
 
 export default Week; 
+
+
+export const generateHour = (hour: number) => hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`;
