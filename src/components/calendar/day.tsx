@@ -10,8 +10,6 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
     setShowEventModal,
     monthIndex, 
     year
-//     filteredEvents,
-//     setSelectedEvent,
   } = calendarStateStore();
 
   

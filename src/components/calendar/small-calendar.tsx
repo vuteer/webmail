@@ -6,6 +6,7 @@ import { Card } from "../ui/card";
  
 import { getMonth } from "@/utils/month";
 import { calendarStateStore } from "@/stores/calendar";
+import { handleSelectEvent } from "./year";
 
 import {cn} from "@/lib/utils"
 
@@ -16,6 +17,8 @@ export default function SmallCalendar() {
     setSmallCalendarMonth,
     setDaySelected,
     daySelected,
+    setShowEventModal,
+    year
   } = calendarStateStore();
 
   useEffect(() => {
@@ -43,9 +46,9 @@ export default function SmallCalendar() {
     const slcDay = ""; 
     // daySelected && daySelected.format(format);
     if (nowDay === currDay) {
-      return "bg-blue-500 rounded-full text-white";
+      return "bg-blue-500 text-white";
     } else if (currDay === slcDay) {
-      return "bg-blue-100 rounded-full text-blue-600 font-bold";
+      return "bg-blue-100 text-blue-600 font-bold";
     } else {
       return "";
     }
@@ -79,6 +82,7 @@ export default function SmallCalendar() {
             {row.map((day: any, idx: any) => (
               <span
                 key={idx}
+                onClick={() => handleSelectEvent(day.format("D"), smallCalendarMonth, year, setDaySelected, setShowEventModal)}
                 // onClick={() => {
                 //   setSmallCalendarMonth(currentMonthIdx);
                 //   setDaySelected(day);

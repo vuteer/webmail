@@ -7,11 +7,20 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { calendarStateStore } from "@/stores/calendar";
 
-
+export const handleSelectEvent = (
+    day: number, 
+    month: number, 
+    year: number,
+    setDaySelected: any,
+    setShowEventModal: any
+) => {
+    setDaySelected(new Date(year, month, day))
+    setShowEventModal(); 
+  }
 const Year = () => {
     const [currentYear, setCurrentYear] = React.useState<any>(getYear()); 
 
-    const {year} = calendarStateStore();
+    const {year, setDaySelected, setShowEventModal} = calendarStateStore();
 
     React.useEffect(() => {setCurrentYear(getYear(year))}, [year])
 
@@ -24,13 +33,15 @@ const Year = () => {
         const slcDay = ""; 
         // daySelected && daySelected.format(format);
         if (nowDay === currDay) {
-          return "bg-blue-500 rounded-full text-white";
+          return "bg-blue-500 text-white";
         } else if (currDay === slcDay) {
-          return "bg-blue-100 rounded-full text-blue-600 font-bold";
+          return "bg-blue-100 text-blue-600 font-bold";
         } else {
           return "";
         }
       }
+
+      
     return (
         <div className="px-2 py-3 w-full grid grid-cols-5 gap-5 h-[80vh] overflow-auto">
             {
@@ -52,12 +63,7 @@ const Year = () => {
                                     {row.map((day: any, idx: any) => (
                                     <span
                                         key={idx}
-                                        // onClick={() => {
-                                        //   setSmallCalendarMonth(currentMonthIdx);
-                                        //   setDaySelected(day);
-                                        // }}
-                                        // variant={"ghost"}
-                                        // size="icon"
+                                        onClick={() => handleSelectEvent(day.format("D"), index, year, setDaySelected, setShowEventModal)}
                                         className={cn("cursor-pointer duration-700  flex items-center justify-center", `${getDayClass(day)}`, "hover:bg-secondary rounded-full")}
                                     >
                                         <span className="text-xs font-normal">{day.format("D")}</span>
