@@ -30,6 +30,9 @@ const AddEvent: React.FC<AddEventProps> = ({
     const [group, setGroup] = React.useState<boolean>(false);
     const [list, setList] = React.useState<string>("");
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [zoom, setZoom] = React.useState<boolean>(false); 
+    const [googleMeet, setGoogleMeet] = React.useState<boolean>(false); 
+     
 
     const {
         daySelected,
@@ -79,17 +82,7 @@ const AddEvent: React.FC<AddEventProps> = ({
                     containerClassName="w-full"
                 />
             </div>
-            {/* <TimePopover 
-                trigger={
-                    <div className="px-1 py-2 rounded-lg flex justify-between items-center cursor-pointer hover:bg-secondary">
-                        <Paragraph className="text-xs lg:text-xs">{selectedTime ? selectedTime: "Select time"}</Paragraph>
-                        <Clock size={19}/>
-                    </div>
-                }
-                time={selectedTime}
-                setTime={setSelectedTime}
-                triggerClassName="w-full"
-            /> */}
+            
             <Separator />
 
             <div 
@@ -113,6 +106,33 @@ const AddEvent: React.FC<AddEventProps> = ({
                     />
                 )
             }
+
+            <div className="flex items-center gap-2">
+                <Checkbox 
+                    checked={zoom}
+                    onCheckedChange={() => {
+                        let zoom_meet = !zoom; 
+
+                        if (zoom_meet) setGoogleMeet(false);
+                        setZoom(zoom_meet)
+                    }}
+                />
+                <FormTitle title="Create Zoom Meeting"/>
+
+            </div>
+            <div className="flex items-center gap-2">
+                <Checkbox 
+                    checked={googleMeet}
+                    onCheckedChange={() => {
+                        let google_meet = !googleMeet; 
+
+                        if (google_meet) setZoom(false);
+                        setGoogleMeet(!googleMeet)
+                    }}
+                />
+                <FormTitle title="Create Google Meet"/>
+
+            </div>
 
             <div className="flex justify-end my-2">
                 <Button>
