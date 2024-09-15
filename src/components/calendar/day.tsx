@@ -1,26 +1,29 @@
 import dayjs from "dayjs";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { calendarStateStore } from "@/stores/calendar";
+import { EventType } from "@/types";
+import { Paragraph } from "../ui/typography";
+import Events from "./events";
 
 
 export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
-  const [dayEvents, setDayEvents] = useState([]);
+  const [dayEvents, setDayEvents] = useState<EventType[]>([]);
   const {
     setDaySelected,
     setShowEventModal,
     monthIndex, 
-    year
+    year,
+    events
   } = calendarStateStore();
 
-  
 
-//   useEffect(() => {
-//     const events = filteredEvents.filter(
-//       (evt) =>
-//         dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
-//     );
-//     setDayEvents(events);
-//   }, [filteredEvents, day]);
+  useEffect(() => {
+    const evnts: EventType[] = events.filter(
+      (evt) =>
+        dayjs(evt.date).format("DD-MM-YY") === day.format("DD-MM-YY")
+    );
+    setDayEvents(evnts);
+  }, [events]);
 
   function getCurrentDayClass() {
     return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
@@ -28,8 +31,15 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
       : "";
   }
   return (
-    <div className="border-[0.05rem]  flex flex-col">
-      <header className="flex flex-col items-center">
+    <div 
+      className="border-[0.05rem] flex flex-col items-center"
+      onClick={() => {
+        setDaySelected(undefined);
+        setDaySelected(new Date(year, monthIndex, day.date()));
+        setShowEventModal();
+      }}
+    >
+      <div className="flex flex-col items-center">
         {rowIdx === 0 && (
           <p className="text-sm mt-1">
             {day.format("ddd").toUpperCase()}
@@ -40,25 +50,8 @@ export default function Day({ day, rowIdx }: {day: any, rowIdx: any}) {
         >
           {day.format("DD")}
         </p>
-      </header>
-      <div
-        className="flex-1 cursor-pointer"
-        onClick={() => {
-          setDaySelected(undefined);
-          setDaySelected(new Date(year, monthIndex, day.date()));
-          setShowEventModal();
-        }}
-      >
-        {dayEvents.map((evt: any, idx) => (
-          <div
-            key={idx}
-            // onClick={() => setSelectedEvent(evt)}
-            className={`bg-${evt.label}-200 p-1 mr-3 text-gray-600 text-sm rounded mb-1 truncate`}
-          >
-            {evt.title}
-          </div>
-        ))}
       </div>
+      <Events events={dayEvents}/>
     </div>
   );
 }

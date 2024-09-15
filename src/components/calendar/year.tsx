@@ -2,51 +2,51 @@
 import dayjs from "dayjs";
 
 import { getYear } from "@/utils/month";
-import React from "react"; 
- 
+import React from "react";
+
 import { cn } from "@/lib/utils";
 import { calendarStateStore } from "@/stores/calendar";
 
 export const handleSelectEvent = (
-    day: number, 
-    month: number, 
+    day: number,
+    month: number,
     year: number,
     setDaySelected: any,
     setShowEventModal: any
 ) => {
     setDaySelected(new Date(year, month, day))
-    setShowEventModal(); 
-  }
+    setShowEventModal();
+}
+function getDayClass(day: any) {
+
+    const format = "DD-MM-YY";
+    const nowDay = dayjs().format(format);
+    const currDay = day.format(format);
+    const slcDay = "";
+    // daySelected && daySelected.format(format);
+    if (nowDay === currDay) {
+        return "bg-blue-500 text-white";
+    } else if (currDay === slcDay) {
+        return "bg-blue-100 text-blue-600 font-bold";
+    } else {
+        return "";
+    }
+}
 const Year = () => {
-    const [currentYear, setCurrentYear] = React.useState<any>(getYear()); 
+    const [currentYear, setCurrentYear] = React.useState<any>(getYear());
 
-    const {year, setDaySelected, setShowEventModal} = calendarStateStore();
+    const { year, setDaySelected, setShowEventModal } = calendarStateStore();
 
-    React.useEffect(() => {setCurrentYear(getYear(year))}, [year])
+    React.useEffect(() => { setCurrentYear(getYear(year)) }, [year])
 
 
-    function getDayClass(day: any) {
-  
-        const format = "DD-MM-YY";
-        const nowDay = dayjs().format(format);
-        const currDay = day.format(format);
-        const slcDay = ""; 
-        // daySelected && daySelected.format(format);
-        if (nowDay === currDay) {
-          return "bg-blue-500 text-white";
-        } else if (currDay === slcDay) {
-          return "bg-blue-100 text-blue-600 font-bold";
-        } else {
-          return "";
-        }
-      }
 
-      
+
     return (
         <div className="px-2 py-3 w-full grid grid-cols-5 gap-5 h-[80vh] overflow-auto">
             {
                 currentYear.map((month: any, index: number) => (
-                    <div  key={index} className="p-3">
+                    <div key={index} className="p-3">
                         <p className="px-3 text-gray-500 font-bold my-2">
                             {dayjs(new Date(year, index)).format(
                                 "MMMM"
@@ -61,14 +61,13 @@ const Year = () => {
                             {month.map((row: any, i: number) => (
                                 <React.Fragment key={i}>
                                     {row.map((day: any, idx: any) => (
-                                    <span
-                                        key={idx}
-                                        onClick={() => handleSelectEvent(day.format("D"), index, year, setDaySelected, setShowEventModal)}
-                                        className={cn("cursor-pointer duration-700  flex items-center justify-center", `${getDayClass(day)}`, "hover:bg-secondary rounded-full")}
-                                    >
-                                        <span className="text-xs font-normal">{day.format("D")}</span>
-                                    </span>
-                                ))}
+                                        <Day 
+                                            day={day}
+                                            index={idx}
+                                            key={idx}
+                                        />
+                                        
+                                    ))}
                                 </React.Fragment>
                             ))}
 
@@ -80,4 +79,32 @@ const Year = () => {
     )
 };
 
-export default Year; 
+export default Year;
+
+const Day = (
+    {day, index}:
+    {
+        day: any; index: number; 
+    }
+) => {
+    const { events, year, setDaySelected, setShowEventModal } = calendarStateStore();
+    const [hasEvents, setHasEvents] = React.useState<boolean>(false); 
+
+    React.useEffect(() => {
+        setHasEvents(false)
+        let has = events.filter(event => dayjs(new Date(event.date)).format("DD MMM YYYY") === day.format("DD MMM YYYY")); 
+        
+        if (has.length > 0) setHasEvents(true); 
+
+    }, [events, year])
+
+    return (
+        <span
+
+            onClick={() => handleSelectEvent(day.format("D"), index, year, setDaySelected, setShowEventModal)}
+            className={cn("cursor-pointer duration-700  flex items-center justify-center",  "hover:bg-secondary rounded-full", hasEvents ? "bg-green-500": "", `${getDayClass(day)}`,)}
+        >
+            <span className="text-xs font-normal">{day.format("D")}</span>
+        </span>
+    )
+}

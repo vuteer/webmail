@@ -10,7 +10,7 @@ import { useSearch } from "@/hooks";
 
 const CalendarPopover = () => {
     const searchParams = useSearch(); 
-    const cal = searchParams?.get("cal") || "month"; 
+    const cal = searchParams?.get("cal") || "week"; 
 
     return (
         <>

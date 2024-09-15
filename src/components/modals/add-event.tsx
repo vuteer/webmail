@@ -14,6 +14,8 @@ import { Checkbox } from "../ui/checkbox";
 
 import { calendarStateStore } from "@/stores/calendar";
 import CalendarPopover from "../popovers/calendar-popover";
+import { createToast } from "@/utils/toast";
+import { createEvent } from "@/lib/api-calls/events";
 
 
 interface AddEventProps {
@@ -26,12 +28,9 @@ const AddEvent: React.FC<AddEventProps> = ({
     isOpen, onClose
 }) => {
     const [title, setTitle] = React.useState<string>("");
-    const [date, setDate] = React.useState<Date>();
     const [group, setGroup] = React.useState<boolean>(false);
     const [list, setList] = React.useState<string>("");
     const [loading, setLoading] = React.useState<boolean>(false);
-    const [zoom, setZoom] = React.useState<boolean>(false); 
-    const [googleMeet, setGoogleMeet] = React.useState<boolean>(false); 
      
 
     const {
@@ -40,6 +39,55 @@ const AddEvent: React.FC<AddEventProps> = ({
         selectedTime, 
         setSelectedTime
     } = calendarStateStore(); 
+
+    const handleCreateEvent = async () => {
+        if (!title) {
+            createToast("error", "Provide a title for the event!");
+            return; 
+        }
+
+        if (!daySelected || !selectedTime) {
+            createToast("error", "Provide a date and a time for the event!");
+            return; 
+        };
+
+        // validate list here
+        if (group) {
+            let listArr = list.trim().split(",");
+            listArr = listArr.filter(lst => lst);
+            if (listArr.length === 0) {
+                createToast("error", "Unselect the group!");
+                return 
+            }
+        }
+
+        // validate time here
+
+        setLoading(true); 
+
+        let event: any = {
+            title,
+            date: daySelected,
+            time: selectedTime, 
+        };
+
+
+        if (group) event.list = list; 
+
+        let res = await createEvent(event); 
+
+        if (res) {
+            createToast("success", "Event was created successfully!");
+            // add event to state
+
+            setTitle("")
+            setGroup(false);
+            setList("")
+            onClose(); 
+        };
+
+        setLoading(false); 
+    }
 
     return (
         <Modal
@@ -107,7 +155,7 @@ const AddEvent: React.FC<AddEventProps> = ({
                 )
             }
 
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
                 <Checkbox 
                     checked={zoom}
                     onCheckedChange={() => {
@@ -132,11 +180,15 @@ const AddEvent: React.FC<AddEventProps> = ({
                 />
                 <FormTitle title="Create Google Meet"/>
 
-            </div>
+            </div> */}
 
             <div className="flex justify-end my-2">
-                <Button>
-                    Create Event
+                <Button
+                    disabled={loading}
+                    onClick={handleCreateEvent}
+                    className="min-w-[150px]"
+                >
+                    Creat{loading ? "ing...": "e"}
                 </Button>
             </div>
 

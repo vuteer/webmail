@@ -5,17 +5,24 @@ import { Paragraph } from "../ui/typography";
 import {cn} from "@/lib/utils"; 
 import { calendarStateStore } from "@/stores/calendar";
 
-import {generateHour, isToday, selectCubeTime} from "./week"; 
+import {checkEvent, generateHour, isToday, selectCubeTime} from "./week"; 
+import Events from "./events";
+import { EventType } from "@/types";
 
 const DayContainer = () => {
+    const [mounted, setMounted] = React.useState<boolean>(false); 
+
     const {day, setDay, monthIndex, year, setSelectedTime, setDaySelected, setShowEventModal} = calendarStateStore(); 
     const [currentDay, setCurrentDay] = React.useState<Date>(new Date())
 
     const hours = Array.from({ length: 24 }, (_, i) => i);
+    React.useEffect(() => setMounted(true), []); 
+
 
     React.useEffect(() => {
+        if (!mounted) return; 
         setDay(dayjs().date())
-    }, []);
+    }, [mounted]);
 
     React.useEffect(() => {
         setCurrentDay(new Date(year, monthIndex, day))
@@ -53,22 +60,19 @@ const DayContainer = () => {
                         <div className="border-r px-4 p-7 text-xs text-gray-500 w-[90px] h-full flex flex-col justify-center">
                             {generateHour(hour)}
                         </div>
-                        <div className="flex-1 grid grid-cols-1 -mr-1">
-                            {Array.from({ length: 7 }).map((_, index) => (
-                                <div 
-                                    key={index} 
-                                    className="px-4 p-7 cursor-pointer" 
-                                    onClick={() => {
+                        <div 
+                            className="flex-1 grid grid-cols-1 -mr-1 cursor-pointer"
+                            onClick={() => {
                                         
-                                        selectCubeTime(
-                                            new Date(year, monthIndex, day),
-                                            generateHour(hour),
-                                            setSelectedTime, setDaySelected
-                                        );
-                                        setShowEventModal()
-                                    }}
-                                />
-                            ))}
+                                selectCubeTime(
+                                    new Date(year, monthIndex, day),
+                                    generateHour(hour),
+                                    setSelectedTime, setDaySelected
+                                );
+                                setShowEventModal()
+                            }}
+                        >
+                            <HourEvents hour={hour} currentDay={currentDay}/>
                         </div>
                     </div>
                 ))}
@@ -78,3 +82,28 @@ const DayContainer = () => {
 };
 
 export default DayContainer; 
+
+const HourEvents = ({hour, currentDay}: {hour: number, currentDay: Date}) => {
+    const [hourEvents, setHourEvents] = React.useState<EventType[]>([]); 
+    const {events} = calendarStateStore(); 
+
+    React.useEffect(() => {
+        let currentEvents = [];
+        setHourEvents([])
+        for (let i = 0; i < events.length; i++) {
+            let event = events[i]; 
+            let date = event.date; 
+
+            if (dayjs(new Date(date)).format("DD MMM, YYYY") !== dayjs(new Date(currentDay)).format("DD MMM, YYYY")) return; 
+
+            let checkedEvent = checkEvent(event, hour); 
+            if (checkedEvent) currentEvents.push(checkedEvent);
+
+            setHourEvents(currentEvents)
+        }
+    }, [events, currentDay])
+
+    return (
+        <Events events={hourEvents}/>
+    )
+}

@@ -21,7 +21,8 @@ type CalendarStateType = {
     events: EventType[]; 
     updateEvent: (event: EventType) => Promise<void>; 
     deleteEvent: (event: EventType) => Promise<void>; 
-    addEvent: (event: EventType) => Promise<void>; 
+    addEvents: (events: EventType[]) => void; 
+    addEvent: (event: EventType) => void; 
 };
 
 
@@ -61,7 +62,22 @@ export const calendarStateStore = create<CalendarStateType>((set, get) => ({
 
         set({showEventModal: !showEventModal}); 
     },
+    addEvents: (events: EventType[]) => {
+        set({events});
+    },
     updateEvent: async (event: EventType) => {},
-    deleteEvent: async (event: EventType) => {},
-    addEvent: async (event: EventType) => {}
+    deleteEvent: async (event: EventType) => {
+        let events = get().events; 
+
+        // handle delete here
+
+        let filtered = events.filter(evnt => evnt.id !== event.id);
+        set({events: filtered}); 
+    },
+    addEvent: (event: EventType) => {
+        let events = get().events; 
+
+        let updated = [event, ...events.filter(evnt => evnt.id !== event.id)]; 
+        set({events: updated});
+    }
 }))

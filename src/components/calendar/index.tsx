@@ -13,8 +13,9 @@ import DayContainer from "./day-container";
 import { calendarStateStore } from "@/stores/calendar";
 import AddEvent from "../modals/add-event";
 import { useSearch } from "@/hooks"; 
+import FetchEvents from "./fetch-events";
 
-type CalendarType = "day" | "week" | "month" | "year"; 
+// type CalendarType = "day" | "week" | "month" | "year"; 
 
 const Calendar = () => {
   const [currenMonth, setCurrentMonth] = useState(getMonth());
@@ -30,7 +31,7 @@ const Calendar = () => {
   
   return (
     <>
-       
+      <FetchEvents />
       <AddEvent 
         isOpen={showEventModal}
         onClose={() => setShowEventModal()}
