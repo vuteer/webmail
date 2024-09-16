@@ -4,7 +4,7 @@ import {getDoc, postDoc, deleteDoc, patchDoc} from "@/utils/api-calls";
 
 export const createEvent = async (data: any) => {
     let res = await postDoc(`/events`, data, true); 
-    return res?.status === "success"; 
+    return res?.data?.doc; 
 };
 
 export const getEvents = async (query: string) => {

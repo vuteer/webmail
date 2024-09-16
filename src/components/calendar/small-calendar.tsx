@@ -70,7 +70,7 @@ export default function SmallCalendar() {
           </Button>
         </div>
       </header>
-      <Card className="grid grid-cols-7 grid-rows-6 gap-1 p-2">
+      <div className="grid grid-cols-7 grid-rows-6 gap-1 p-2">
         {currentMonth[0].map((day: any, i: number) => (
           <span key={i} className="text-sm py-1 text-center font-bold">
             {day.format("dd").charAt(0)}
@@ -96,7 +96,7 @@ export default function SmallCalendar() {
             ))}
           </React.Fragment>
         ))}
-      </Card>
+      </div>
     </div>
   );
 }

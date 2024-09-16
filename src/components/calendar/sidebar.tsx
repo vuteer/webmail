@@ -2,6 +2,7 @@ import React from "react";
  
 import SmallCalendar from "./small-calendar";
 import Labels from "./labels";
+import Upcoming from "./upcoming"; 
 
 export default function Sidebar() {
   return (
@@ -9,6 +10,7 @@ export default function Sidebar() {
        
       <SmallCalendar />
       <Labels />
+      <Upcoming />
     </aside>
   );
 }

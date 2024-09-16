@@ -21,12 +21,7 @@ const FetchEvents = () => {
     React.useEffect(() => setMounted(true), []); 
 
     const fetchEvents = async () => {
-        if (
-            !mounted || 
-            (!day && cal === "day") ||
-            (!week && cal === "week") || 
-            !cal
-        ) return; 
+        if (!mounted) return; 
         addEvents([])
         let query = ''; 
         if (cal === "day") query = `cal=${cal}&d=${day}&m=${monthIndex}&y=${year}`;

@@ -43,8 +43,6 @@ const List: React.FC<ListProps> = ({
 
     let src: string = icons[file.type as FileType];
 
-    console.log(file)
-
     const handleOpenFolder = () => {
         file.type === "folder" ?
             push(`/files?folder=${file.id}`) :

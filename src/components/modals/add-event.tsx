@@ -37,7 +37,8 @@ const AddEvent: React.FC<AddEventProps> = ({
         daySelected,
         setDaySelected,
         selectedTime, 
-        setSelectedTime
+        setSelectedTime,
+        addEvent
     } = calendarStateStore(); 
 
     const handleCreateEvent = async () => {
@@ -74,12 +75,13 @@ const AddEvent: React.FC<AddEventProps> = ({
 
         if (group) event.list = list; 
 
+
         let res = await createEvent(event); 
 
         if (res) {
             createToast("success", "Event was created successfully!");
             // add event to state
-
+            addEvent({...event, id: res})
             setTitle("")
             setGroup(false);
             setList("")

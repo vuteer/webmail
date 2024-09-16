@@ -14,6 +14,7 @@ export const handleSelectEvent = (
     setDaySelected: any,
     setShowEventModal: any
 ) => {
+     
     setDaySelected(new Date(year, month, day))
     setShowEventModal();
 }
@@ -87,7 +88,7 @@ const Day = (
         day: any; index: number; 
     }
 ) => {
-    const { events, year, setDaySelected, setShowEventModal } = calendarStateStore();
+    const { monthIndex, events, year, setDaySelected, setShowEventModal } = calendarStateStore();
     const [hasEvents, setHasEvents] = React.useState<boolean>(false); 
 
     React.useEffect(() => {
@@ -96,12 +97,12 @@ const Day = (
         
         if (has.length > 0) setHasEvents(true); 
 
-    }, [events, year])
+    }, [events, year]);
 
     return (
         <span
 
-            onClick={() => handleSelectEvent(day.format("D"), index, year, setDaySelected, setShowEventModal)}
+            onClick={() => handleSelectEvent(day.format("D"), day.format("M") - 1, year, setDaySelected, setShowEventModal)}
             className={cn("cursor-pointer duration-700  flex items-center justify-center",  "hover:bg-secondary rounded-full", hasEvents ? "bg-green-500": "", `${getDayClass(day)}`,)}
         >
             <span className="text-xs font-normal">{day.format("D")}</span>

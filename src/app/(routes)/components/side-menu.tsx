@@ -8,6 +8,7 @@ import {
     CalendarDays, 
     CircleAlert, 
     CircleUser, 
+    Clock,
     File,
     Files, 
     Inbox, 
@@ -144,6 +145,7 @@ const menu: MenuItemType[] = [
     ];
     
     const more: MenuItemType[] = [
+    {text: "Appointments", icon: <Clock size={18}/>, href: "/appointments"},
     {text: "Calendar", icon: <CalendarDays size={18}/>, href: "/calendar"},
     { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
     { text: "Files", icon: <Files size={18} />, href: "/files" },
