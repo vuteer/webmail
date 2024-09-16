@@ -4,9 +4,10 @@ import {AttachmentType, ContactType, MailType, FileType, ThreadType, ThreadInfoT
 import FormType from "./form-type"; 
 import NotificationType from "./notification"; 
 import {EventType} from "./calendar"; 
+import {WithType, AppointmentType} from "./appointment"; 
 
 export type {
     AttachmentType, ContactType, FileType, MailType, ThreadType, ThreadInfoType, VisibilityType,
     FormType, NotificationType,
-    EventType
+    EventType, WithType, AppointmentType
 }

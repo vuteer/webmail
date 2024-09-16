@@ -47,7 +47,7 @@ const AppInput: React.FC<InputProps> = ({
 
     return (
         <>
-            {label && <FormTitle title={label}/>}
+            {label && <FormTitle title={label} />}
         
             <div className={cn(active ? "border-main-color": "border-transparent", "bg-secondary flex items-center gap-1 px-2 py-[.02rem] pr-[.02rem] border-[.01rem] rounded-lg overflow-hidden", containerClassName)}>
                 {icon && icon}

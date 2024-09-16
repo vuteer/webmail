@@ -110,28 +110,28 @@ const AddEvent: React.FC<AddEventProps> = ({
             />
              
             <FormTitle title="Day of event"/>
-                <CalendarPopover 
-                    trigger={
-                        <div className="px-1 py-2 rounded-lg flex w-full justify-between items-center cursor-pointer hover:bg-secondary">
-                            <Paragraph>{daySelected ? dayjs(daySelected).format("DD MMM, YYYY"): "Select date"}</Paragraph>
-                            <Calendar size={19}/>
-                        </div>
-                    }
-                    triggerClassName="w-full"
-                    date={daySelected}
-                    setDate={setDaySelected}
-                />
+            <CalendarPopover 
+                trigger={
+                    <div className="px-1 py-2 rounded-lg flex w-full justify-between items-center cursor-pointer hover:bg-secondary">
+                        <Paragraph>{daySelected ? dayjs(daySelected).format("DD MMM, YYYY"): "Select date"}</Paragraph>
+                        <Calendar size={19}/>
+                    </div>
+                }
+                triggerClassName="w-full"
+                date={daySelected}
+                setDate={setDaySelected}
+            />
             <Separator />
             <FormTitle title="Actual time of event"/>
-            <div className="flex justify-between items-center">
-                <AppInput 
-                    value={selectedTime}
-                    setValue={setSelectedTime}
-                    placeholder={"8:00 AM"}
-                    icon={<Clock size={19}/>}
-                    containerClassName="w-full"
-                />
-            </div>
+            <AppInput 
+                value={selectedTime}
+                setValue={setSelectedTime}
+                placeholder={"8:00 AM"}
+                icon={<Clock size={19}/>}
+                containerClassName="w-full"
+                cls="py-0 px-1"
+
+            />
             
             <Separator />
 
@@ -156,33 +156,6 @@ const AddEvent: React.FC<AddEventProps> = ({
                     />
                 )
             }
-
-            {/* <div className="flex items-center gap-2">
-                <Checkbox 
-                    checked={zoom}
-                    onCheckedChange={() => {
-                        let zoom_meet = !zoom; 
-
-                        if (zoom_meet) setGoogleMeet(false);
-                        setZoom(zoom_meet)
-                    }}
-                />
-                <FormTitle title="Create Zoom Meeting"/>
-
-            </div>
-            <div className="flex items-center gap-2">
-                <Checkbox 
-                    checked={googleMeet}
-                    onCheckedChange={() => {
-                        let google_meet = !googleMeet; 
-
-                        if (google_meet) setZoom(false);
-                        setGoogleMeet(!googleMeet)
-                    }}
-                />
-                <FormTitle title="Create Google Meet"/>
-
-            </div> */}
 
             <div className="flex justify-end my-2">
                 <Button

@@ -1,3 +1,5 @@
+"use client"; 
+
 import React, { useContext, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
@@ -26,12 +28,6 @@ export default function SmallCalendar() {
   }, [smallCalendarMonth]);
 
 
- 
-
-  // useEffect(() => {
-  //   setSmallCalendarMonth(smallCalendarMonth);
-  // }, [smallCalendarMonth]);
-
   function handlePrevMonth() {
     setSmallCalendarMonth(smallCalendarMonth - 1);
   }
@@ -55,7 +51,7 @@ export default function SmallCalendar() {
   }
   return (
     <div className="mt-1">
-      <header className="flex items-center justify-between my-1">
+      <header className="flex items-center justify-between my-1 pl-2">
         <p className="text-gray-500 font-bold my-2">
           {dayjs(new Date(dayjs().year(), smallCalendarMonth)).format(
             "MMM YYYY"
@@ -70,7 +66,7 @@ export default function SmallCalendar() {
           </Button>
         </div>
       </header>
-      <div className="grid grid-cols-7 grid-rows-6 gap-1 p-2">
+      <div className="grid grid-cols-7 grid-rows-6 gap-1 py-2">
         {currentMonth[0].map((day: any, i: number) => (
           <span key={i} className="text-sm py-1 text-center font-bold">
             {day.format("dd").charAt(0)}
@@ -83,12 +79,6 @@ export default function SmallCalendar() {
               <span
                 key={idx}
                 onClick={() => handleSelectEvent(day.format("D"), smallCalendarMonth, year, setDaySelected, setShowEventModal)}
-                // onClick={() => {
-                //   setSmallCalendarMonth(currentMonthIdx);
-                //   setDaySelected(day);
-                // }}
-                // variant={"ghost"}
-                // size="icon"
                 className={cn("cursor-pointer duration-700  flex items-center justify-center", `${getDayClass(day)}`, "hover:bg-secondary rounded-full")}
               >
                 <span className="text-xs font-normal">{day.format("D")}</span>

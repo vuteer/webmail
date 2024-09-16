@@ -54,7 +54,7 @@ const DayContainer = () => {
                 </div>
                  
             </div>
-            <div className="border-t overflow-auto h-[80vh]">
+            <div className="border-t overflow-auto h-[80vh] pb-8">
                 {hours.map((hour) => (
                     <div key={hour} className="flex border-b h-[100px]">
                         <div className="border-r px-4 p-7 text-xs text-gray-500 w-[90px] h-full flex flex-col justify-center">

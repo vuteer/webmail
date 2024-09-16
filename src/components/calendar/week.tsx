@@ -59,7 +59,7 @@ const Week = () => {
 
                 </div>
             </div>
-            <div className="border-t overflow-auto h-[80vh]">
+            <div className="border-t overflow-auto h-[80vh] pb-8">
                 {hours.map((hour) => (
                     <Hour
                         key={hour}
@@ -76,17 +76,18 @@ export default Week;
 
 export const generateHour = (hour: number) => hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`;
 
-const Day = (
-    { day, current }:
+export const Day = (
+    { day, current, noBorder }:
         {
             day: string;
             current: any;
+            noBorder?: boolean; 
         }
 ) => {
 
     return (
         <div className={cn(
-            "text-center flex flex-col items-center border-l pb-2",
+            "text-center flex flex-col items-center  pb-2", noBorder ? "": "border-l",
         )}>
             <div className=" text-gray-500 mb-1">
                 <Paragraph>{day}</Paragraph>
