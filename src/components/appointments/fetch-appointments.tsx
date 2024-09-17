@@ -7,18 +7,23 @@ import React from "react";
 
 
 const FetchAppointments = ({week, year}: {week: number, year: number}) => {
-    
+    const [mounted, setMounted] = React.useState<boolean>(false); 
+
     const {addAppointments} = appointmentStateStore(); 
 
+    React.useEffect(() => setMounted(true), []); 
+
     const fetchAppointments = async () => {
+        if (!mounted) return; 
         let res = await getWeekAppointments(week, year); 
 
         if (res) {
-            console.log(res)
+            // console.log(res)
+            addAppointments([]); 
             addAppointments(res.docs); 
         }
     }
-    useCustomEffect(fetchAppointments, [week, year]); 
+    useCustomEffect(fetchAppointments, [mounted, week, year]); 
 
     return (
         <>

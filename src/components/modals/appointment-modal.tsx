@@ -11,6 +11,9 @@ import { Calendar, Clock } from "lucide-react";
 import dayjs from "dayjs";
 import AppCheckbox from "../common/app-checkbox";
 import { Button } from "../ui/button";
+import { createToast } from "@/utils/toast";
+import { createAppointment } from "@/lib/api-calls/appointments";
+import { appointmentStateStore } from "@/stores/appointment";
 
 interface AppointmentModalProps {
     isOpen: boolean; 
@@ -23,7 +26,10 @@ interface AppointmentModalProps {
 const AppointmentModal: React.FC<AppointmentModalProps> = (
     {isOpen, onClose, appointment, date, time}
 ) => {
-    const [loading, setLoading] = React.useState<boolean>(false);
+    const { addAppointment } = appointmentStateStore(); 
+
+    const [cloading, setCLoading] = React.useState<boolean>(false);
+    const [dloading, setDLoading] = React.useState<boolean>(false);
     const [title, setTitle] = React.useState<string>(appointment?.title || "");
     const [selectedTime, setSelectedTime] = React.useState<string>(appointment?.time || time || "");
     const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(appointment?.date || date || undefined)
@@ -32,7 +38,57 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
     const [onlineURL, setOnlineURL] = React.useState<string>(appointment?.google_meet || appointment?.zoom_url || "");
     const [onlinePassword, setOnlinePassword] = React.useState<string>(appointment?.google_meet_password || appointment?.zoom_password || ""); 
 
+    React.useEffect(() => {
+        if (!appointment) return; 
+        setTitle(appointment.title);
+        setGoogleOrZoom(appointment.zoom_url ? "zoom": appointment.google_meet ? "google": undefined); 
+        setOnlineURL(appointment.zoom_url || appointment.google_meet || "")
+        setOnlinePassword(appointment.google_meet_password || appointment.zoom_password || ""); 
+        setSelectedWith(appointment.with || [])
+        
+    }, [appointment])
+    const handleCreateAppointment = async () => {
+        if (!title || !selectedDate || !selectedDate) {
+            createToast("error", "Provide a date, time and title");
+            return; 
+        };
 
+        if (googleOrZoom) {
+            if (!onlineURL || !onlinePassword) {
+                createToast("error", "Disable online meeting feature if not URL or password provided!");
+                return; 
+            }
+        };
+
+        // if (selectedWith.length === 0) {
+        //     createToast("error", "Provide at least one participant!");
+        //     return; 
+        // }
+
+        let doc: any = {
+            title, time: selectedTime, 
+            date: selectedDate,
+            with: selectedWith, 
+        };
+        if (googleOrZoom) {
+            if (googleOrZoom === "google") {
+                doc.google_meet = onlineURL;
+                doc.google_meet_password = onlinePassword;
+            } else {
+                doc.zoom = onlineURL; 
+                doc.zoom_password = onlinePassword; 
+            }
+        }
+
+        setCLoading(true); 
+        let res = await createAppointment(doc); 
+        if (res) {
+            createToast("success", "Appointment has been created!");
+            addAppointment({id: res, ...doc}); 
+            onClose()
+        }
+        setCLoading(false); 
+    }
     return (
         <Modal
             isOpen={isOpen}
@@ -54,6 +110,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
                 value={title}
                 setValue={setTitle}
                 label="Appointment subject"
+                disabled={cloading || dloading}
             />
             <FormTitle title="Day of appointment"/>
             <CalendarPopover 
@@ -71,6 +128,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
              
             <AppInput 
                 value={selectedTime}
+                disabled={cloading || dloading}
                 setValue={setSelectedTime}
                 placeholder={"8:00AM"}
                 icon={<Clock size={18}/>}
@@ -106,6 +164,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
                         <div className="w-full flex gap-2">
                             <div className="flex-1">
                                 <AppInput 
+                                    disabled={cloading || dloading}
                                     value={onlineURL}
                                     setValue={setOnlineURL}
                                     label={`${capitalize(googleOrZoom)} URL`}
@@ -115,6 +174,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
                             </div>
                             <div className="flex-1">
                                 <AppInput 
+                                    disabled={cloading || dloading}
                                     placeholder={"Paste password"}
                                     value={onlinePassword}
                                     setValue={setOnlinePassword}
@@ -129,13 +189,21 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
             </div>
 
             <div className="flex justify-end gap-2 my-3">
-                <Button className="min-w-[130px]">
-                    {appointment ? "Updat": "Creat"}{loading ? "ing...": "e"}
+                <Button 
+                    className="min-w-[130px]"
+                    disabled={cloading || dloading}
+                    onClick={handleCreateAppointment}
+                >
+                    {appointment ? "Updat": "Creat"}{cloading ? "ing...": "e"}
                 </Button>
                 {
                     appointment && (
-                        <Button variant="destructive" className="min-w-[130px]">
-                            Cancel{loading ? "ing...": ""}
+                        <Button 
+                            variant="destructive" 
+                            className="min-w-[130px]"
+                            disabled={cloading || dloading}
+                        >
+                            Cancel{dloading ? "ing...": ""}
                         </Button>
                     )
                 }
