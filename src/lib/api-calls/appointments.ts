@@ -27,6 +27,6 @@ export const updateAppointment = async (appointmentId: string, data: any) => {
 
 // cancel and appointment 
 export const cancelAppointment = async (appointmentId: string) => {
-    let res = await patchDoc(`/appointments/${appointmentId}`, {}, true);
+    let res = await patchDoc(`/appointments/cancel/${appointmentId}`, {}, true);
     return res?.status === "success"; 
 }

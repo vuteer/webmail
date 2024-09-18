@@ -1,6 +1,8 @@
 // events container
+import React from "react";
 import { EventType } from "@/types";
 import { Paragraph } from "../ui/typography";
+import AddEvent from "../modals/add-event";
 
 const Events = ({
     events
@@ -15,13 +17,7 @@ const Events = ({
         >
             {
                 events.map((event: EventType, index: number) => (
-                    <div
-                        key={index}
-                        // onClick={() => setSelectedEvent(evt)}
-                        className={`cursor-pointer bg-main-color w-full p-1`}
-                    >
-                        <Paragraph className="text-xs lg:text-sm line-clamp-1 text-center text-white font-bold">{event.title}</Paragraph>
-                    </div>
+                    <Event event={event}/>
                 ))
             }
         </div>
@@ -29,3 +25,25 @@ const Events = ({
 };
 
 export default Events; 
+
+const Event = ({event}: {event: EventType}) => {
+    const [showEventModal, setShowEventModal] = React.useState<boolean>(false); 
+    return (
+        <>
+            <AddEvent 
+                isOpen={showEventModal}
+                onClose={() => setShowEventModal(false)}
+                event={event}
+            />
+            <div
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEventModal(true);
+                }}
+                className={`cursor-pointer bg-main-color w-full p-1`}
+            >
+                <Paragraph className="text-xs lg:text-sm line-clamp-1 text-center text-white font-bold">{event.title}</Paragraph>
+            </div>
+        </>
+    )
+}

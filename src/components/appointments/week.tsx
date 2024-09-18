@@ -45,7 +45,7 @@ const Week = () => {
             let app = apps[i];
             let appDate = dayjs(new Date(app.date)).format("DD MMM YYYY");
             let appTime = app.time;
-            console.log(appDate, appTime)
+            // console.log(appDate, appTime)
             if (appDate === current.format("DD MMM YYYY") && hour === appTime) {
                 filtered.push(app);
                 break;
@@ -162,7 +162,7 @@ const hours = [
 const Hour = ({ hour, current, appointment }: { hour: string, current: any, appointment?: AppointmentType }) => {
     const [openAppointmentModal, setOpenAppointmentModal] = React.useState<boolean>(false);
 
-    console.log(appointment)
+    
 
     return (
         <>
@@ -174,10 +174,9 @@ const Hour = ({ hour, current, appointment }: { hour: string, current: any, appo
                 appointment={appointment}
             />
             <Card
-                className={cn("cursor-pointer hover:border-main-color duration-700 p-2 pl-4 w-[90%] flex items-center justify-center", appointment ? "bg-main-color text-white border-none" : "")}
+                className={cn("cursor-pointer hover:border-main-color duration-700 p-2 pl-4 w-[90%] flex items-center justify-center", appointment ? "bg-main-color text-white border-none" : "", appointment?.status === "cancelled" ? "bg-destructive": "")}
                 onClick={() => {
                     setOpenAppointmentModal(true)
-                    console.log(current.format("DD MMM YYYY"), hour);
                 }}
             >
                 <Paragraph>{hour}</Paragraph>

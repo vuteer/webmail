@@ -16,20 +16,22 @@ import { calendarStateStore } from "@/stores/calendar";
 import CalendarPopover from "../popovers/calendar-popover";
 import { createToast } from "@/utils/toast";
 import { createEvent } from "@/lib/api-calls/events";
+import { EventType } from "@/types";
 
 
 interface AddEventProps {
     isOpen: boolean; 
     onClose: () => void; 
+    event?: EventType; 
 };
 
 
 const AddEvent: React.FC<AddEventProps> = ({
-    isOpen, onClose
+    isOpen, onClose, event
 }) => {
-    const [title, setTitle] = React.useState<string>("");
-    const [group, setGroup] = React.useState<boolean>(false);
-    const [list, setList] = React.useState<string>("");
+    const [title, setTitle] = React.useState<string>(event?.title || "");
+    const [group, setGroup] = React.useState<boolean>(event?.group || false);
+    const [list, setList] = React.useState<string>(event?.list?.join(", ") || "");
     const [loading, setLoading] = React.useState<boolean>(false);
      
 
@@ -66,22 +68,22 @@ const AddEvent: React.FC<AddEventProps> = ({
 
         setLoading(true); 
 
-        let event: any = {
+        let doc: any = {
             title,
             date: daySelected,
             time: selectedTime, 
         };
 
 
-        if (group) event.list = list; 
+        if (group) doc.list = list; 
 
 
-        let res = await createEvent(event); 
+        let res = await createEvent(doc); 
 
         if (res) {
             createToast("success", "Event was created successfully!");
             // add event to state
-            addEvent({...event, id: res})
+            addEvent({...doc, id: res})
             setTitle("")
             setGroup(false);
             setList("")
@@ -113,18 +115,18 @@ const AddEvent: React.FC<AddEventProps> = ({
             <CalendarPopover 
                 trigger={
                     <div className="px-1 py-2 rounded-lg flex w-full justify-between items-center cursor-pointer hover:bg-secondary">
-                        <Paragraph>{daySelected ? dayjs(daySelected).format("DD MMM, YYYY"): "Select date"}</Paragraph>
+                        <Paragraph>{(daySelected || event?.date) ? dayjs(event?.date || daySelected).format("DD MMM, YYYY"): "Select date"}</Paragraph>
                         <Calendar size={19}/>
                     </div>
                 }
                 triggerClassName="w-full"
-                date={daySelected}
+                date={event?.date || daySelected}
                 setDate={setDaySelected}
             />
             <Separator />
             <FormTitle title="Actual time of event"/>
             <AppInput 
-                value={selectedTime}
+                value={event?.time || selectedTime}
                 setValue={setSelectedTime}
                 placeholder={"8:00 AM"}
                 icon={<Clock size={19}/>}

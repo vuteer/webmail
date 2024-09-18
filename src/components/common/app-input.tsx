@@ -49,14 +49,14 @@ const AppInput: React.FC<InputProps> = ({
         <>
             {label && <FormTitle title={label} />}
         
-            <div className={cn(active ? "border-main-color": "border-transparent", "bg-secondary flex items-center gap-1 px-2 py-[.02rem] pr-[.02rem] border-[.01rem] rounded-lg overflow-hidden", containerClassName)}>
+            <div className={cn("bg-secondary flex items-center gap-1 px-2 py-[.02rem] pr-[.02rem] border-[.01rem] rounded-lg overflow-hidden", containerClassName, active ? "border-main-color": "border-transparent")}>
                 {icon && icon}
                 {textarea ? (
                     <Textarea
                         value={value as string}
                         disabled={disabled}
                         onChange={handleChange}
-                        className={cn(`${reset && resetClass} ${cls || ""}`)}
+                        className={cn(`${reset && resetClass}`, cls)}
                         placeholder={String(placeholder || "Enter text...")}
                         onBlur={() => setActive(false)}
                         onFocus={() => setActive(true)}
@@ -68,7 +68,7 @@ const AppInput: React.FC<InputProps> = ({
                         disabled={disabled}
                         onChange={handleChange}
                         type={type || "text"}
-                        className={cn(`${reset && resetClass} ${cls || ""}`)}
+                        className={cn(`${reset && resetClass}`, cls)}
                         placeholder={String(placeholder || "Enter text...")}
                         onBlur={() => setActive(false)}
                         onFocus={() => setActive(true)}
