@@ -49,6 +49,6 @@ const labels = [
   },
   {
     title: "Others",
-    bg: "#3C4142"
+    bg: "#808080"
   }
 ]
