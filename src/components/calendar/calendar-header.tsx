@@ -149,9 +149,9 @@ export default function CalendarHeader() {
 
         </div>
         <div className="flex items-center gap-2">
-          <Button variant={"ghost"}>
+          {/* <Button variant={"ghost"}>
             <Search size={18}/>
-          </Button>
+          </Button> */}
           <CalendarPopover />
         </div>
       </header>

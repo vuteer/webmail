@@ -15,7 +15,7 @@ const Badge: React.FC<BadgeProps> = ({text, type}) => (
             type === "primary" ? "bg-green-500": type === "secondary" ? "bg-yellow-500": type === "danger" ? "bg-destructive": "bg-gray-500",
             "block w-2 h-2 rounded-sm"
         )}/>
-        {text}
+        <span className="py-1">{text}</span>
     </span>
 ); 
 

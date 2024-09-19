@@ -3,6 +3,8 @@ import React from "react";
 import { EventType } from "@/types";
 import { Paragraph } from "../ui/typography";
 import AddEvent from "../modals/add-event";
+import { getBg } from "./labels";
+import { cn } from "@/lib/utils";
 
 const Events = ({
     events
@@ -13,11 +15,11 @@ const Events = ({
 ) => {
     return (
         <div
-            className="flex-1 cursor-pointer flex flex-col gap-2 justify-end w-full h-full p-1"
+            className="flex-1 cursor-pointer flex flex-col gap-2 justify-end w-full h-full"
         >
             {
                 events.map((event: EventType, index: number) => (
-                    <Event event={event}/>
+                    <Event event={event} key={index}/>
                 ))
             }
         </div>
@@ -28,6 +30,7 @@ export default Events;
 
 const Event = ({event}: {event: EventType}) => {
     const [showEventModal, setShowEventModal] = React.useState<boolean>(false); 
+     
     return (
         <>
             <AddEvent 
@@ -40,9 +43,14 @@ const Event = ({event}: {event: EventType}) => {
                     e.stopPropagation();
                     setShowEventModal(true);
                 }}
-                className={`cursor-pointer bg-main-color w-full p-1`}
+                className={`cursor-pointer w-full py-1`}
+                style={{
+                    backgroundColor: event.status === "cancelled" ? "tomato": getBg(event.label || "")
+                }}
             >
-                <Paragraph className="text-xs lg:text-sm line-clamp-1 text-center text-white font-bold">{event.title}</Paragraph>
+                <Paragraph className={
+                    cn( "text-xs lg:text-sm line-clamp-1 text-center font-bold", event?.status === "cancelled" ? "text-white": (event.label === "work" || !event.label) ? "!text-black": "text-white" )
+                }>{event.title}</Paragraph>
             </div>
         </>
     )

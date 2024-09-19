@@ -18,7 +18,7 @@ const SearchContact = () => {
             setValue={setSearch}
             placeholder="Search contact..."
             cls="w-[250px]"
-            onKeyDown={val => handleSearch(val)}
+            onKeyUp={val => handleSearch(val)}
             containerClassName="rounded-full"
         />
     )

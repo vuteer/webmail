@@ -26,7 +26,7 @@ export default function Labels() {
   );
 }
 
-const labels = [
+export const labels = [
   {
       title: "Personal",
       bg: "#FFA500"
@@ -44,11 +44,13 @@ const labels = [
     bg: "#10282C"
   },
   {
-    title: "Holidays",
+    title: "Holiday",
     bg: "#ff0000"
   },
   {
-    title: "Others",
+    title: "Other",
     bg: "#808080"
   }
-]
+];
+
+export const getBg = (label: string) => labels.filter((lbl) => lbl.title.toLowerCase() === label.toLowerCase())[0]?.bg || "#FFFF00";

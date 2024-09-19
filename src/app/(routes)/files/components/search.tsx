@@ -23,7 +23,7 @@ const SearchFile = () => {
         <AppInput 
             value={search}
             setValue={setSearch}
-            onKeyDown={(val: string) => handleKeyDown(val)}
+            onKeyUp={(val: string) => handleKeyDown(val)}
             placeholder={"Search for file..."}
             cls="w-[200px] lg:w-[300px]"
             containerClassName="rounded-full"

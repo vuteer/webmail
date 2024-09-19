@@ -14,7 +14,7 @@ interface InputProps {
     reset?: boolean;
     cls?: string;
     disabled?: boolean;
-    onKeyDown?: (str: string) => void;
+    onKeyUp?: (str: string) => void;
     textarea?: boolean;
     icon?: React.ReactNode; 
     button?: React.ReactNode;
@@ -32,7 +32,7 @@ const AppInput: React.FC<InputProps> = ({
     reset = true,
     cls,
     disabled,
-    onKeyDown,
+    onKeyUp,
     textarea = false,
     icon,
     button,
@@ -60,7 +60,7 @@ const AppInput: React.FC<InputProps> = ({
                         placeholder={String(placeholder || "Enter text...")}
                         onBlur={() => setActive(false)}
                         onFocus={() => setActive(true)}
-                        onKeyDown={onKeyDown ? (e: any) => onKeyDown(e.target.value): () => {}}
+                        onKeyUp={onKeyUp ? (e: any) => onKeyUp(e.target.value): () => {}}
                     />
                 ) : (
                     <Input
@@ -72,7 +72,7 @@ const AppInput: React.FC<InputProps> = ({
                         placeholder={String(placeholder || "Enter text...")}
                         onBlur={() => setActive(false)}
                         onFocus={() => setActive(true)}
-                        onKeyDown={onKeyDown ? (e: any) => onKeyDown(e.target.value): () => {}}
+                        onKeyUp={onKeyUp ? (e: any) => onKeyUp(e.target.value): () => {}}
                     />
                 )}
                 {button && button}

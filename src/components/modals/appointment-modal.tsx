@@ -130,15 +130,15 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
     }
 
     const handleCancelAppointment = async () => {
-        if (!appointment || appointment.status === "cancelled") return;
+        if (!appointment) return;
         
         setDLoading(true); 
 
         let res = await cancelAppointment(appointment.id); 
 
         if (res) {
-            createToast("success", "Appointment has been cancelled!");
-            let update: AppointmentType[] = [...appointments.filter(app => app.id !== appointment.id), {...appointment, status: "cancelled"}];
+            createToast("success", `Appointment has been ${appointment.status === "active" ? "":"Un"}cancelled!`);
+            let update: AppointmentType[] = [...appointments.filter(app => app.id !== appointment.id), {...appointment, status: appointment.status === "active" ? "cancelled": "active"}];
             addAppointments([]);
             addAppointments(update); 
             onClose()
@@ -254,6 +254,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
                         <Button
                             className="my-2 rounded-full"
                             variant="outline"
+                            size="icon"
                             onClick={() => setStep(1)}
                         >
                             <ChevronLeft size={19} />
@@ -274,18 +275,19 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
                     className="min-w-[130px]"
                     disabled={cLoading || dLoading}
                     onClick={handleCreateOrEditAppointment}
+                    variant={"outline"}
                 >
                     {appointment ? "Updat" : "Creat"}{cLoading ? "ing..." : "e"}
                 </Button>
                 {
                     appointment && (
                         <Button
-                            variant="destructive"
+                            variant={appointment.status === "active" ? "destructive": "secondary"}
                             className="min-w-[130px]"
                             disabled={cLoading || dLoading}
                             onClick={handleCancelAppointment}
                         >
-                            Cancel{dLoading ? "ing..." : ""}
+                            {appointment.status === "cancelled" ? "Unc": "C"}ancel{dLoading ? "ing..." : ""}
                         </Button>
                     )
                 }

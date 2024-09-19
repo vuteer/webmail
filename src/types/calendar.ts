@@ -1,4 +1,4 @@
-
+export type EventLabelType = "personal" | "work" | "family" | "special" | "holiday" | "other"; 
 
 export type EventType = {
     id: string; 
@@ -7,7 +7,8 @@ export type EventType = {
     time: string; 
     status: "active" | "cancelled"; 
     group: boolean; 
-    list?: string[]; 
+    list: string[]; 
+    label: EventLabelType; 
     updatedAt?: Date;
     createdBy: string; 
 }

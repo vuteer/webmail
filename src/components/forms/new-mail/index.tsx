@@ -172,7 +172,7 @@ const NewMailForm = () => {
             placeholder="user@domain.com"
             label="To: "
             error={errors.includes("to")}
-            onKeyDown={handleMailPrediction}
+            onKeyUp={handleMailPrediction}
             prefixes={
               <>
                 {
@@ -274,7 +274,7 @@ const NewMailForm = () => {
 export default NewMailForm;
 
 export const InputPair = (
-  { label, value, placeholder, setValue, error, type, onKeyDown, prefixes }: 
+  { label, value, placeholder, setValue, error, type, onKeyUp, prefixes }: 
   { 
     label?: string, 
     placeholder: string, 
@@ -282,7 +282,7 @@ export const InputPair = (
     setValue: React.Dispatch<string>, 
     error?: boolean, 
     type?: string,
-    onKeyDown?: (str: string) => Promise<void>; 
+    onKeyUp?: (str: string) => Promise<void>; 
     prefixes?: React.ReactNode; 
   }
 ) => {
@@ -302,7 +302,7 @@ export const InputPair = (
         className={`${!label ? "pl-0": ""} border-none focus:border-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0`}
         onFocus={() => { setActive(true) }}
         onBlur={() => { setActive(false) }}
-        onKeyDown={onKeyDown ? (e: any) => onKeyDown(e.target.value): () => {}}
+        onKeyUp={onKeyUp ? (e: any) => onKeyUp(e.target.value): () => {}}
         type={type || "string"}
       />
     </div>
