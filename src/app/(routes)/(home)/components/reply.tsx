@@ -193,10 +193,10 @@ export const ReplyButtons = ({
         <Send size={18} /> Send
       </Button>
     </div>
-    <Card className="shadow-none border-destructive w-fit p-2 flex items-center gap-2">
+    {/* <Card className="shadow-none border-destructive w-fit p-2 flex items-center gap-2">
       <Info size={18}/>
       <span className="text-sm lg:text-md">When sending a file, use the Attach file button. Do not drag into editor to save on space.</span>
-    </Card>
+    </Card> */}
   </>
 );
 
