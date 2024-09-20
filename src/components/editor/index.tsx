@@ -21,6 +21,7 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 import plugins from "./plugins";
 
 import {styling, formatText, serializeToHtml} from "./utils"; 
+import { cn } from "@/lib/utils";
 
 // import { slateToHtml } from '@slate-serializers/html'
 // import { htmlToSlateConfig, slateToHtmlConfig, payloadSlateToHtmlConfig } from "@slate-serializers/html"
@@ -45,10 +46,12 @@ export default function EditorContainer({
   clear, 
   setClear,
   setContent,
+  height 
 }: {
   clear: boolean; 
   setClear: React.Dispatch<boolean>; 
   setContent: React.Dispatch<string>;
+  height?: string; 
 }) {
   
   const onChange = (slate: any) => {
@@ -75,7 +78,7 @@ export default function EditorContainer({
           </FixedToolbar>
           <div className="my-1" />
           <Editor 
-            className="h-[30vh] outline-none border-none focus:border-none bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+            className={cn("duration-700 outline-none border-none focus:border-none bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 h-[30vh]", height)} 
             // placeholder="Type here..."
             
           />

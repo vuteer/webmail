@@ -35,9 +35,22 @@ export const handleDownload = async (id: string, setLoading: React.Dispatch<bool
 
     setLoading(false)
 }
+
+export const ActualGenerateIcon = ({type}: {type: FileType}) => (
+    <div className="relative w-[20px] h-[30px] overflow-hidden">
+        <AppImage 
+            src={icons[type as FileType]}
+            fill
+            title={"icon"}
+            alt={"icon"}
+            objectFit="contain"
+            nonBlur={true}
+        />
+    </div>
+)
 const GenerateIcon = (
-    {id, type, title, size}: 
-    {id: string, type: FileType, title: string, size: number}
+    {id, type, title, size, onRemove}: 
+    {id: string, type: FileType, title: string, size: number, onRemove?: (fileId: string) => void}
 ) => {
     const [loading, setLoading] = React.useState<boolean>(false); 
     let src: string = icons[type as FileType]; 
@@ -55,9 +68,17 @@ const GenerateIcon = (
                     nonBlur={true}
                 />
             </div>
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-col flex-1 max-w-[50%]">
                 <Heading3 className={"text-sm lg:text-md line-clamp-1"}>{title}</Heading3>
                 <Paragraph className="text-xs lg:text-xs uppercase">{formatBytes(size)}</Paragraph>
+                {
+                    onRemove && (
+                        <span 
+                            className="text-[.8rem] lg:text-xs cursor-pointer hover:text-destructive duration-700"
+                            onClick={() => onRemove(id)}
+                        >Remove</span>
+                    )
+                }
             </div>
             <Button 
                 variant="ghost" 
@@ -72,3 +93,45 @@ const GenerateIcon = (
 };
 
 export default GenerateIcon; 
+
+// Function to get the file extension
+const getFileExtension = (filename: string) => {
+    const parts: string[] = filename.split('.');
+    return parts.length > 1 ? parts.pop()?.toLowerCase() : '';
+};
+
+// Function to categorize the file type
+export const categorizeFileType = (filename: string) => {
+    const extension: any = getFileExtension(filename);
+
+    if (extension === '') {
+        return 'other'; // If no extension, categorize as "other"
+    }
+
+    if (['mp3', 'wav', 'aac', 'ogg'].includes(extension)) {
+        return 'audio';
+    }
+    if (['doc', 'docx', 'txt', 'ppt', 'pptx'].includes(extension)) {
+        return 'document';
+    }
+    if (['pdf'].includes(extension)) {
+        return 'PDF';
+    }
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension)) {
+        return 'image';
+    }
+    if (['mp4', 'avi', 'mkv', 'mov'].includes(extension)) {
+        return 'video';
+    }
+    if (['xls', 'xlsx'].includes(extension)) {
+        return 'excel';
+    }
+    if (['csv'].includes(extension)) {
+        return 'CSV';
+    }
+    if (['zip', 'rar', 'tar', 'gz'].includes(extension)) {
+        return 'zip';
+    }
+
+    return 'other'; // Default category for unrecognized extensions
+};
