@@ -1,5 +1,5 @@
 import React from "react";
-import {Download} from "lucide-react"; 
+import {Download, Trash2} from "lucide-react"; 
 
 import {AppImage} from "@/components"
 import { Button } from "../ui/button";
@@ -11,6 +11,7 @@ import { formatBytes } from "@/utils/size";
 import {FileType} from "@/types"; 
 import { getFile } from "@/lib/api-calls/files";
 import { createToast } from "@/utils/toast";
+import { cn } from "@/lib/utils";
 
 export const handleDownload = async (id: string, setLoading: React.Dispatch<boolean>) => {
     setLoading(true); 
@@ -71,22 +72,15 @@ const GenerateIcon = (
             <div className="flex flex-col flex-1 max-w-[50%]">
                 <Heading3 className={"text-sm lg:text-md line-clamp-1"}>{title}</Heading3>
                 <Paragraph className="text-xs lg:text-xs uppercase">{formatBytes(size)}</Paragraph>
-                {
-                    onRemove && (
-                        <span 
-                            className="text-[.8rem] lg:text-xs cursor-pointer hover:text-destructive duration-700"
-                            onClick={() => onRemove(id)}
-                        >Remove</span>
-                    )
-                }
             </div>
             <Button 
                 variant="ghost" 
                 size="sm" 
                 disabled={loading}
-                onClick={() => handleDownload(id, setLoading)}
+                className={cn(onRemove ? "hover:text-destructive duration-700": "")}
+                onClick={() => onRemove ? onRemove(id): handleDownload(id, setLoading)}
             >
-                <Download size={18}/>
+                {onRemove ? <Trash2 size={18}/>: <Download size={18}/>}
             </Button>
         </Card>
     )
