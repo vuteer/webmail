@@ -111,7 +111,7 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
 
   return (
     <div
-      className={cn("absolute z-10 bottom-3 translate-y-full bg-background w-full  duration-700 left-0 flex flex-col gap-2 p-3 pb-5 my-2 overflow-hidden")}
+      className={cn("absolute z-10 bottom-3 translate-y-full bg-background w-full  duration-700 left-0 flex flex-col gap-2 p-3 my-2 overflow-hidden")}
       ref={replyRef}
     >
       <ImageUploadModal
