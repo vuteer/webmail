@@ -208,7 +208,7 @@ export const Header = (
     const [from, setFrom] = React.useState<ContactType>(thread.from); 
     const [openSaveModal, setOpenSaveModal] = React.useState<boolean>(false); 
 
-    console.log("PUSH SAVED CONTACT TO ZUSTAND STATE - LINE 211 MAIL-ITEMS.TS")
+    
     const handleSaveContact = async () => {
         setLoading(true); 
         let res = await saveContact({email: from.email, name: from.name}); 
@@ -236,7 +236,7 @@ export const Header = (
                 </div>
             </Confirm>
             <div className="py-4 flex justify-between items-end">
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center max-w-[80%]">
                     <AppAvatar 
                         src={from.avatar}
                         name={from.name}

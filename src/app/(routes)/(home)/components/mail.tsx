@@ -132,7 +132,18 @@ const Mail = ({}) => {
                                         <>
                                             {
                                                 mails.map((mail, index) => (
-                                                    <Message {...mail} key={index}/>
+                                                    <Message 
+                                                        key={index}
+                                                        messageId={mail.messageId}
+                                                        id={mail.id}
+                                                        text={mail.text}
+                                                        html={mail.html}
+                                                        info={mail.info}
+                                                        createdAt={mail.createdAt}
+                                                        attachments={mail.attachments}
+                                                        mails={mails}
+                                                        setMails={setMails}
+                                                    />
                                                 ))
                                             }
                                         </>

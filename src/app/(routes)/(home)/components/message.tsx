@@ -1,7 +1,7 @@
 // message component 
 import React from "react";
 import parse from "html-react-parser";
-import { Copy, Forward, MoreHorizontal, Send, Trash2 } from "lucide-react";
+import { CheckCheck, Copy, FilePenLine, Forward, ForwardIcon, MoreHorizontal, Send, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -12,18 +12,27 @@ import { formatDateToString } from "@/utils/dates";
 import { AttachmentType, MailType } from "@/types";
 import DeleteMessageModal from "@/components/modals/delete-message";
 import ForwardMailModal from "@/components/modals/forward-mail";
+import { sendDraft } from "@/lib/api-calls/mails";
+import { createToast } from "@/utils/toast";
 
 
-interface MessageProps extends MailType { };
+interface MessageProps extends MailType {
+    mails: MailType[];
+    setMails: React.Dispatch<MailType[]>; 
+ };
 
 const Message: React.FC<MessageProps> = ({
     messageId, id, text, html, info,
-    createdAt, attachments
+    createdAt, attachments, mails, setMails
 }) => { 
 
     const [mounted, setMounted] = React.useState<boolean>(false);
     const [closed, setClosed] = React.useState<boolean>(true);
     const [iframeHeight, setIframeHeight] = React.useState<number>(0);
+
+    const [draft, setDraft] = React.useState<boolean>(info.draft || false); 
+    const [forwarded, setForwarded] = React.useState<boolean>(info.forwarded || false); 
+    const [loading, setLoading] = React.useState<boolean>(false); 
 
     const [openDeleteModal, setOpenDeleteModal] = React.useState<boolean>(false); 
     const [openForwardModal, setOpenForwardModal] = React.useState<boolean>(false); 
@@ -44,8 +53,17 @@ const Message: React.FC<MessageProps> = ({
         setIframeHeight(height + 100);
     }, [mounted, closed])
 
-    console.log(messageId, id, "HANDLE MAIL FORWARDING FROM HERE - LINE 24 message.tsx")
-     
+    
+    const handleSendingDraft = async () => {
+        setLoading(true); 
+
+        let res = await sendDraft(id); 
+        if (res) {
+            createToast("success", "Draft has been sent!"); 
+            setDraft(false); 
+        };
+        setLoading(false)
+    }
     return (
         <>
             <DeleteMessageModal 
@@ -53,18 +71,27 @@ const Message: React.FC<MessageProps> = ({
                 onClose={() => setOpenDeleteModal(false)}
                 id={id}
                 draft={info.draft}
+                mails={mails}
+                setMails={setMails}
             />
             <ForwardMailModal 
                 isOpen={openForwardModal}
                 onClose={() => setOpenForwardModal(false)}
                 id={id}
+                setForwarded={setForwarded}
             />
             <div className="w-full flex flex-col gap-2 py-3 my-2">
 
                 <div className="w-full flex justify-end gap-2 items-center py-1">
                     {
-                        info.draft && (
-                            <Button variant="ghost" size="sm" className="flex items-center gap-2 text-xs lg:text-sm">
+                        draft && (
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="flex items-center gap-2 text-xs lg:text-sm"
+                                disabled={loading}
+                                onClick={handleSendingDraft}
+                            >
                                 <Send size={18} /><span>Send</span>
                             </Button>
                         )
@@ -74,16 +101,18 @@ const Message: React.FC<MessageProps> = ({
                         size="sm" 
                         className="flex items-center gap-2 text-xs lg:text-sm"
                         onClick={() => setOpenDeleteModal(true)}
+                        disabled={loading}
                     >
                         <Trash2 size={18} /><span>{info.draft ? "Discard" : "Delete"}</span>
                     </Button>
                     {
-                        !info.draft && (
+                        !draft && (
                             <Button 
                                 variant="ghost" 
                                 size="sm" 
                                 className="flex items-center gap-2 text-xs lg:text-sm"
                                 onClick={() => setOpenForwardModal(true)}
+                                disabled={loading}
                             >
                                 <Forward size={18} /><span>Forward</span>
                             </Button>
@@ -126,6 +155,7 @@ const Message: React.FC<MessageProps> = ({
                     variant={!closed ? "secondary" : "outline"}
                     size={"icon"}
                     onClick={() => setClosed(!closed)}
+                    disabled={loading}
                     className="my-2 rounded-2xl px-0 py-0 p-0 h-5 flex gap-2 items-center"
                 >
                     <MoreHorizontal />
@@ -134,8 +164,23 @@ const Message: React.FC<MessageProps> = ({
                 <div className="my-3 flex items-center justify-between gap-2">
                     <Paragraph className="text-xs lg:text-xs capitalize font-bold flex gap-2">
                         <span>{info.sent ? "outgoing" : "incoming"} </span>
-                        {info.forwarded && <span> | forwarded </span>}
-                        {info.draft && <span>| draft </span>}
+                        {forwarded && (
+                            <span className="flex gap-2 items-center"> 
+                                <span>|</span>  
+                                <ForwardIcon size={15}/>
+                                <span>Forwarded</span>
+                            </span>
+                        )}
+                        {
+                            info.sent && (
+                                <span className="flex gap-2 items-center">
+                                    <span>|</span> 
+                                    {draft ? <FilePenLine size={15}/>: <CheckCheck size={15} className="text-green-500"/>}
+                                    {draft ? " draft": "delivered"} 
+                                </span>
+
+                            )
+                        }
                     </Paragraph>
                     <Paragraph className="text-xs lg:text-xs">{formatDateToString(createdAt)}</Paragraph>
                 </div>

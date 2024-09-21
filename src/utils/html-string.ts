@@ -18,7 +18,7 @@ export const generateHTMLStr = (subject: string, reply: string) =>
                   width: 100% !important;
                   font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
   
-                  font-size: 13px;
+                  font-size: 10px;
               }
               * {
                   -ms-text-size-adjust: 100%;

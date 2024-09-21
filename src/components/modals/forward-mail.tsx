@@ -4,24 +4,39 @@ import { Modal } from "./modal";
 import AppInput from "../common/app-input";
 import { Button } from "../ui/button";
 import { Paragraph } from "../ui/typography";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { validateEmail } from "@/utils/validation";
 import { createToast } from "@/utils/toast";
+import { forwardMail } from "@/lib/api-calls/mails";
 
 
 interface ForwardMailModalProps {
     id: string; 
     isOpen: boolean; 
     onClose: () => void; 
+    setForwarded: React.Dispatch<boolean>; 
 }
 
 const ForwardMailModal: React.FC<ForwardMailModalProps> = ({
-    id, isOpen, onClose
+    id, isOpen, onClose, setForwarded
 }) => {
     const [emails, setEmails] = React.useState<string[]>([]); 
     const [current, setCurrent] = React.useState<string>(""); 
     const [loading, setLoading] = React.useState<boolean>(false); 
 
+    const handleForwardingMail = async () => {
+        setLoading(true); 
+        let res = await forwardMail(id, emails); 
+
+        if (res) {
+            createToast("success", "Mail has been forwarded.");
+            setForwarded(true)
+            setEmails([]);
+            setCurrent("")
+            onClose(); 
+        };
+        setLoading(false); 
+    }
     return (
         <Modal
             title="Forward mail"
@@ -51,9 +66,11 @@ const ForwardMailModal: React.FC<ForwardMailModalProps> = ({
                         setValue={setCurrent}
                         placeholder={"user@gmail.com"}
                         label="Enter email"
+                        disabled={loading}
                     />
                 </div>
                 <Button
+                    disabled={loading}
                     onClick={() => {
                         if (validateEmail(current)) {
                             if (emails.includes(current)) {
@@ -68,13 +85,18 @@ const ForwardMailModal: React.FC<ForwardMailModalProps> = ({
                         }
                     }}
                     variant="outline"
+                    size="icon"
                 >
-                    Add
+                    <Plus size={18}/>
                 </Button>
             </div>
-            <div className="my-3 flex justify-end">
-                <Button className="w-[150px]">
-                    Forward
+            <div className="my-3 flex justify-end my-2">
+                <Button 
+                    className="w-[150px]"
+                    disabled={loading}
+                    onClick={handleForwardingMail}
+                >
+                    Forward{loading ? "ing...":""}
                 </Button>
             </div>
         </Modal>

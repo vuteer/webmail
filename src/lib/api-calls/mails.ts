@@ -1,6 +1,13 @@
 
 import { deleteDoc, getDoc, patchDoc, postDoc } from '@/utils/api-calls';
 
+
+// get mail numbers
+export const getNumbers = async () => {
+  let res = await getDoc(`/mails/numbers/state`, true); 
+  return res?.data?.state; 
+}
+
 // get mails
 export const getThreads = async (section: string, page: string, queryStr?: string) => {
   let res = await getDoc(`/mails?type=${section}&page=${page || 0}&${queryStr ? queryStr : ""}`, true);
@@ -33,11 +40,22 @@ export const deleteThread = async (threadId: string) => {
 }
 
 
-// send mail & draft 
+// send mail & save draft 
 export const sendMail = async (data: any) => {
   let res = await postDoc(`/mails`, data, true); 
-  
   return res?.data?.doc || false; 
+}
+
+// send draft
+export const sendDraft = async (mailId: string) => {
+  let res = await postDoc(`/mails/draft/${mailId}`, {}, true); 
+  return res?.status === "success"; 
+}
+
+// forward mails 
+export const forwardMail = async (mailId: string, emails: string[]) => {
+  let res = await postDoc(`/mails/forward/${mailId}`, {emails}, true); 
+  return res?.status === "success"; 
 }
 
 // search and sort by unread/recent
@@ -49,56 +67,17 @@ export const searchThroughMail = async (q: string, sortBy: string, section: stri
 // delete selected 
 export const deleteSelected = async (selected: string[]) => {
   let res = await postDoc(`/mails/delete`, {selected}, true);
-  return res?.status === "success" || false; 
+  return res?.status === "success"; 
+}
+
+//delete a single mail in a thread
+export const deleteOne = async (mailId: string) => {
+  let res = await deleteDoc(`/mails/delete/${mailId}`, true);
+  return res?.status === "success";
 }
 
 // mark as read
 export const markAsRead = async (all?: boolean, selected?: string[]) => {
   let res = await patchDoc(`/mails/read/update${all ? "?all=1": ""}`, {selected: selected || null}, true);
-  return res?.status === "success" || false; 
+  return res?.status === "success"; 
 }
-
-
-
-
-
-
-// send new mail
-// export const sendNewMail = async (data, draft = false) => {
-//   let res = await postDoc(`/mail/${draft ? "draft": "new"}`, data, true);
-//   return res.data?.mailId || false;
-// }
-
-
-// send reply mail
-// export const sendMail = async (data, draft = false) => {
-//   let res = await postDoc(`/mail${draft ? "/draft": ""}`, data, true);
-//   return res?.status === "success" || false;
-// }
-
-// forward mail
-// export const forwardMail = async (id, data) => {
-//   let res = await postDoc(`/mail/forward/${id}`, data, true);
-
-//   return res?.status === "success" || false;
-// }
-
-
-// mark all as read
-// export const markAllAsRead = async () => {
-//   let res = await patchDoc('/mail/read/all', {}, true); 
-//   return res?.status === "success" || false; 
-// }
-
-// clearing drafts, archived, junk, important, trashed
-// export const updateThreadsClearing = async (type) => {
-//   let res = await patchDoc(`/mail/update/${type}`, {}, true); 
-//   return res?.status === "success" || false; 
-// }
-
-
-// search for mail 
-// export const searchThroughMail = async (q) => {
-//   let res = await postDoc(`/mail/search/items`, {q}, true); 
-//   return res?.data || false; 
-// }

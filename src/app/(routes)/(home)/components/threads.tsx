@@ -20,6 +20,7 @@ import { ThreadType } from "@/types";
 import { deleteSelected, getThreads, markAsRead, searchThroughMail } from '@/lib/api-calls/mails';
 import { cn } from '@/lib/utils';
 import { useMailNumbersStore } from "@/stores/mail-numbers";
+import FetchNumbers from "./fetch-numbers";
 
 const Threads = ({title}: {title: string}) => {
     const [mounted, setMounted] = React.useState<boolean>(false); 
@@ -39,7 +40,7 @@ const Threads = ({title}: {title: string}) => {
     const sort = searchParams?.get("sort") || ""; 
 
     // global state items
-    const {inbox, setInitialNumbers} = useMailNumbersStore(); 
+    const {inbox} = useMailNumbersStore(); 
 
     React.useEffect(() => setMounted(true), []);
 
@@ -53,13 +54,11 @@ const Threads = ({title}: {title: string}) => {
 
         if (res) {
             setThreads(res.docs); 
-            setCount(res.count); 
             
-            setInitialNumbers(res.state.inbox, res.state.junk, res.state.drafts);
-
+            setCount(res.count); 
         }
 
-        setTimeout(() => {setLoading(false)}, 1500) 
+        setLoading(false);
     }
 
     useCustomEffect(() => setSelected([]), [mounted, sec])
@@ -96,6 +95,7 @@ const Threads = ({title}: {title: string}) => {
                 </div>
             
             </Confirm>
+            <FetchNumbers />
             <div className="h-full flex flex-col max-w-[450px] w-full lg:min-w-[450px] border-r-[0.01rem] px-2 pt-2">
                 <div className="flex justify-between items-end mb-4">
                     <div className="flex flex-col gap-1">
