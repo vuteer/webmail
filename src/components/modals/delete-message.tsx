@@ -4,6 +4,9 @@ import Confirm from "./confirm";
 import { deleteOne } from "@/lib/api-calls/mails";
 import { createToast } from "@/utils/toast";
 import { MailType } from "@/types";
+import { useSearch } from "@/hooks";
+import { useRouter } from "next/navigation";
+import { useMailStoreState } from "@/stores/mail-store";
 
 interface DeleteMessageModalProps {
     id: string; 
@@ -18,13 +21,25 @@ const DeleteMessageModal: React.FC<DeleteMessageModalProps> = (
     {id, isOpen, onClose, draft, mails, setMails}
 ) => {
     const [loading, setLoading] = React.useState<boolean>(false);
+
+    const {push} = useRouter(); 
+    const searchParams = useSearch(); 
+    const sec = searchParams?.get("get") || "inbox";
+    const threadId = searchParams?.get("threadId") || "";
+
+    const {addDeletedThreads} = useMailStoreState(); 
     
     const handleDelete = async () => {
         setLoading(true); 
         let res = await deleteOne(id); 
         if (res) {
             createToast("success", `Mail ${draft ? "discarded": "deleted"}!`); 
-            setMails([...mails.filter(ml => ml.id !== id)]); 
+            let updated = [...mails.filter(ml => ml.id !== id)];
+
+            if (updated.length === 0) {
+                push(`/?sec=${sec}`);
+                addDeletedThreads(threadId);
+            } else setMails([...updated]); 
             onClose(); 
         };
         setLoading(false)

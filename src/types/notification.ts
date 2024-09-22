@@ -7,6 +7,7 @@ type NotificationType = {
     new: boolean; 
     messageId: string; 
     text: string; 
+    type: "mail" | "event" | "appointment"; 
 }
 
 export default NotificationType

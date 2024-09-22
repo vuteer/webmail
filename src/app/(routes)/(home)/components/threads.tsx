@@ -21,6 +21,8 @@ import { deleteSelected, getThreads, markAsRead, searchThroughMail } from '@/lib
 import { cn } from '@/lib/utils';
 import { useMailNumbersStore } from "@/stores/mail-numbers";
 import FetchNumbers from "./fetch-numbers";
+import { useMailStoreState } from "@/stores/mail-store";
+import { useNotificationStateStore } from "@/stores/notification-store";
 
 const Threads = ({title}: {title: string}) => {
     const [mounted, setMounted] = React.useState<boolean>(false); 
@@ -32,6 +34,7 @@ const Threads = ({title}: {title: string}) => {
     const [buttonLoading, setButtonLoading] = React.useState<boolean>(false); 
 
     const [selected, setSelected] = React.useState<string[]>([]);
+    const [newMail, setNewMail] = React.useState<boolean>(false); 
 
     const searchParams = useSearch(); 
     const page = searchParams?.get("page") || "0"; 
@@ -41,6 +44,8 @@ const Threads = ({title}: {title: string}) => {
 
     // global state items
     const {inbox} = useMailNumbersStore(); 
+    const {deletedMails, newMails} = useMailStoreState(); 
+    const {notifications, removeNotificationFromState} = useNotificationStateStore(); 
 
     React.useEffect(() => setMounted(true), []);
 
@@ -58,11 +63,42 @@ const Threads = ({title}: {title: string}) => {
             setCount(res.count); 
         }
 
+        setNewMail(false)
         setLoading(false);
+        let nots = notifications.filter((not) => not.type === "mail"); 
+        if (nots.length > 0) {
+            for (let i = 0; i < nots.length; i++) {
+                let curr = nots[i]; 
+                removeNotificationFromState(curr)
+            }
+        }
     }
 
     useCustomEffect(() => setSelected([]), [mounted, sec])
     useCustomEffect(fetchThreads, [mounted, title, page, q, sort]);
+
+    // update threads on new mail 
+    React.useEffect(() => {
+        if (newMails.length === 0 || newMail) return; 
+        setNewMail(true); 
+    }, [newMails.length])
+     
+
+    // update threads on delete 
+    React.useEffect(() => {
+        if (deletedMails.length === 0) return; 
+
+        let updates = [...threads]; 
+        let newCount = count; 
+        for (let i = 0; i < deletedMails.length; i++) {
+            let curr = deletedMails[i];
+            updates = [...updates.filter(thr => thr.id !== curr)];
+            newCount = newCount - 1; 
+        };
+        setThreads([]);
+        setCount(newCount); 
+        setThreads([...updates]);
+    }, [deletedMails.length]); 
 
     // delete selected
     const handleDeleteSelected = async () => {
@@ -80,6 +116,8 @@ const Threads = ({title}: {title: string}) => {
 
         setButtonLoading(false)
     }
+
+
     return (
         <>
             <Confirm
@@ -153,32 +191,44 @@ const Threads = ({title}: {title: string}) => {
                 }
 
                 <Separator className={cn(count ? "mt-4": "")}/>
-                <div className="overflow-scroll h-[90vh] w-full pb-[9rem]">
+                <div className="relative overflow-hidden">
                     {
-                        loading && <Loading />
-                    }
-                    {
-                        (!loading && count) ? (
-                            <>
-                                {threads.map((thread, index) => (
-                                    <Thread 
-                                        {...thread} 
-                                        key={index}
-                                        selected={selected}
-                                        setSelected={setSelected}
-                                    />
-                                
-                                ))}
-                            </>
-                        ): <></>
-                    }
-                    {
-                        !loading && !count && (
-                            <>
-                                <Paragraph className="my-4 text-center">You have no mail.</Paragraph>
-                            </>
+                        ((sec === "inbox" || !sec) && newMail) && (
+                            <LoadNewMails 
+                                fetchThreads={fetchThreads}
+                                newMail={newMail}
+                            />
                         )
                     }
+                    <div className={cn("overflow-scroll h-[90vh] w-full pb-[9rem]", newMail ? "pt-4":"")}>
+                        {
+                            loading && <Loading />
+                        }
+                        {
+                            (!loading && count) ? (
+                                <>
+                                    {threads.map((thread, index) => (
+                                        <Thread 
+                                            {...thread} 
+                                            key={index}
+                                            selected={selected}
+                                            setSelected={setSelected}
+                                        />
+                                    
+                                    ))}
+                                </>
+                            ): <></>
+                        }
+                        {
+                            !loading && !count && (
+                                <>
+                                    <Paragraph className="my-4 text-center">You have no mail.</Paragraph>
+                                </>
+                            )
+                        }
+                    </div>
+
+
                 </div>
             </div>
 
@@ -187,6 +237,20 @@ const Threads = ({title}: {title: string}) => {
 };
 
 export default Threads; 
+
+const LoadNewMails = (
+    {fetchThreads, newMail}: {fetchThreads: any, newMail: boolean}
+) => (
+    <div className={cn("w-full mx-auto my-2 absolute top-0 left-0 bg-background flex justify-center items-center py-1 border-b duration-700", newMail ? "translate-y-0": "translate-y-[100%]")}>
+        <span
+            className="cursor-pointer flex items-center gap-2 text-xs lg:text-sm hover:text-main-color font-bold"
+            onClick={fetchThreads}
+        >
+            <RefreshCcw size={15}/>
+            Load new mail
+        </span>
+    </div>
+)
 
 
 const Loading = () => (

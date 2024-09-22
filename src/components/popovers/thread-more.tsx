@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useSearch } from "@/hooks/useSearchParams";
 import { Button } from "../ui/button";
 import Confirm from "../modals/confirm";
+import { useMailStoreState } from "@/stores/mail-store";
 
 type UpdateType = "important" | "archived" | "junk" | "starred" | "trashed" | "flag"; 
 const ThreadPopover = (
@@ -49,11 +50,12 @@ const ThreadPopover = (
 
     const sec = searchParams?.get("sec"); 
 
+    const { addDeletedThreads } = useMailStoreState(); 
+
     let list = ["flag", "starred"]; 
     list.push(threadInfo.trashed ? "Delete forever": "Delete")
     if (threadInfo.trashed) list.push("Recover from trash"); 
 
-    console.log("HANDLE PUSHING THREAD ID TO GLOBAL STATE LINE 48 THREAD-MORE")
     const handleDelete = async () => {
         setLoading(true); 
 
@@ -61,6 +63,7 @@ const ThreadPopover = (
         if (res) {
             createToast("success", "Thread was delete successfully!");
             // push deleted thread to zustand state so as to filter
+            if (threadInfo.trashed) addDeletedThreads(thread)
             push(`/?sec=${sec}`); 
         };
 

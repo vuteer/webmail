@@ -12,6 +12,7 @@ class Socket {
     this.listeners = [];
 
     this.addOrdersToState = null; 
+    this.addNewThread = null; 
   }
 
   destroy () {
@@ -23,7 +24,7 @@ class Socket {
     }
   }
 
-  initialize (user, addNotificationToState, notificationSoundRef, addToNumber) {
+  initialize (user, addNotificationToState, notificationSoundRef, addToNumber, addNewThread) {
     this.user = user;
     this.socket = io (envs.base_api_url, {autoConnect: true, transports: ['websocket'], query: {user: user.id}});
     
@@ -31,6 +32,7 @@ class Socket {
     this.notificationSoundRef = notificationSoundRef;  
     
     this.addToNumber = addToNumber; 
+    this.addNewThread = addNewThread; 
 
     this.socket.on ('connect', () => {
       console.log (
@@ -46,7 +48,8 @@ class Socket {
 
   newMail(data) {
     this.addToNumber("inbox");
-    this.addNotificationToState(data, this.notificationSoundRef)
+    this.addNewThread(data)
+    this.addNotificationToState({...data, type: "mail"}, this.notificationSoundRef)
  
   }
 

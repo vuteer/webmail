@@ -16,6 +16,7 @@ import { useNotificationStateStore } from "@/stores/notification-store";
 import { useAuthUser, useSignOut } from "@/auth/authHooks";
 import { useCustomEffect } from "@/hooks/useEffect";
 import useNetworkStatus from "@/hooks/useNetwork"; 
+import { useMailStoreState } from "@/stores/mail-store";
 
 const SetupSocket = () => {
   const notificationSoundRef = React.useRef<HTMLAudioElement>(null);
@@ -37,6 +38,7 @@ const SetupSocket = () => {
   const { setInitialNumbers, addToNumber } = useMailNumbersStore();
   const { updateFieldsInitially, socketConnected } = userStateStore();
   const { addNotificationToState } = useNotificationStateStore();
+  const {addNewThread} = useMailStoreState(); 
 
   const getCurrentUser = async () => {
     if (!user || socketConnected) return;
@@ -55,7 +57,7 @@ const SetupSocket = () => {
         "_auth_state",
         JSON.stringify({ id, avatar, name, email, phone })
       );
-      socket.initialize(user, addNotificationToState, playButtonRef, addToNumber);
+      socket.initialize(user, addNotificationToState, playButtonRef, addToNumber, addNewThread);
 
       // setup states here
       // AI field to be set for later 
