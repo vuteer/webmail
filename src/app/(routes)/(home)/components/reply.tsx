@@ -84,7 +84,6 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
       createdAt: new Date(),
     };
 
-    console.log(threadItem, reply_to)
     setThreads([...threads, threadItem]);
     return threadItem;
   };
@@ -95,10 +94,10 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
 
 
     let res = await sendMail({ ...threadItem, reply_to });
-
+     
     if (res) {
       createToast("success", draft ? "Mail saved to drafts" :"Reply has been sent.");
-      let updatedThreads = [...threads.filter((itm: any) => itm.messageId !== threadItem.messageId), { ...threadItem, info: { ...threadItem.info, read: true } }]
+      let updatedThreads = [...threads.filter((itm: any) => itm.messageId !== threadItem.messageId), { ...threadItem, id: res, info: { ...threadItem.info, read: true } }]
       setClearEditor(true);
 
       setThreads(updatedThreads);

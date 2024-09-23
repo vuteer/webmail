@@ -18,6 +18,7 @@ import { MailType, ThreadType } from "@/types";
 
 import { Buttons, Header, MessageButtons } from "./mail-items";
 import {ThreadInfoType} from "@/types"; 
+import { ScrollArea } from "@/components/ui/scroll-area";
  
 
 const Mail = ({}) => {
@@ -33,16 +34,19 @@ const Mail = ({}) => {
         flag: false, 
         trashed: false, 
     }); 
+    const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
     const [mailsLoading, setMailsLoading] = React.useState<boolean>(true); 
     const [mails, setMails] = React.useState<MailType[]>([]); 
+
     const [count, setCount] = React.useState<number>(0); 
+    const [page, setPage] = React.useState<number>(0); 
+    const [moreLoading, setMoreLoading] = React.useState<boolean>(false); 
 
     const replyRef = React.useRef<HTMLDivElement>(null);
 
     const threadID = queryParams?.get("threadId") || ""; 
-    const page = queryParams?.get("thread_p") || "0";
-    
+    // const page = queryParams?.get("thread_p") || "0";
 
     const fetchThread = async () => {
         if (!threadID) {
@@ -78,19 +82,36 @@ const Mail = ({}) => {
             let docs = res.docs.map((doc: any) => ({
                 ...doc, html: doc.html ? parse(`${doc.html}`): null
             }));
-
             setMails(docs); 
-
         }
-
         setMailsLoading(false); 
-        
+    }
+
+    const fetchNextPageMails = async () => {
+        if (!page || !threadID) return; 
+        setMoreLoading(true)
+        let res = await getMails(threadID, page); 
+        if (res) {
+            let docs = res.docs.map((doc: any) => ({
+                ...doc, html: doc.html ? parse(`${doc.html}`): null
+            }));
+            setMails([...docs, ...mails])
+        }
+        setMoreLoading(false)
     }
 
     useCustomEffect(fetchThread, [threadID])
     useCustomEffect(fetchMails, [threadID]);
+    useCustomEffect(fetchNextPageMails, [threadID, page]);
 
-
+    React.useEffect(() => {
+        if (loading) return; 
+         
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      }, [loading]); // Scroll to bottom when content changes
+     
     // functions 
     const openReplyComponent = () => {
         replyRef.current?.classList.remove("translate-y-full");
@@ -126,7 +147,27 @@ const Mail = ({}) => {
                             />
                             <Separator />
 
-                            <div className="h-[70vh] pb-[5rem] overflow-scroll">
+                            <div 
+                                ref={scrollRef}
+                                className="h-[70vh] pb-[5rem] overflow-scroll"
+                            >
+                                {
+                                    count > (Number(page + 1) * 10) && (
+                                        <>
+                                            <div className="w-full flex items-center justify-center py-2">
+                                                <span
+                                                    className="cursor-pointer hover:text-main-color text-xs lg:text-sm"
+                                                    onClick={() => {
+                                                        let curr = page; 
+                                                        setPage(curr + 1)
+                                                    }}
+                                                >Load{moreLoading ? "ing": " more"}...</span>
+                                            </div>
+                                            <Separator />
+
+                                        </>
+                                    )
+                                }
                                 {
                                     !mailsLoading && (
                                         <>

@@ -203,7 +203,7 @@ const NewMailForm = () => {
             <Button className="self-end" size={"sm"} variant={"ghost"} onClick={() => setOpenSuggestions(false)}>
               <X size={18} />
             </Button>
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 flex flex-col gap-2 overflow-auto">
               {
                 suggestionsLoading && createArray(6).map(itm => <Skeleton className="w-full h-[20px] rounded-full" key={itm} />)
               }

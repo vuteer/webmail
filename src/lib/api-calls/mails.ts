@@ -9,7 +9,7 @@ export const getNumbers = async () => {
 }
 
 // get mails
-export const getThreads = async (section: string, page: string, queryStr?: string) => {
+export const getThreads = async (section: string, page: number, queryStr?: string) => {
   let res = await getDoc(`/mails?type=${section}&page=${page || 0}&${queryStr ? queryStr : ""}`, true);
   return res?.data || false;
 }
@@ -21,7 +21,7 @@ export const getThread = async (id: string) => {
 }
 
 // get thread mails
-export const getMails = async (threadId: string, page: string) => {
+export const getMails = async (threadId: string, page: number) => {
   let res = await getDoc(`/mails/list/${threadId}?page=${page}`, true);
  
   return res?.data || false; 
@@ -59,7 +59,7 @@ export const forwardMail = async (mailId: string, emails: string[]) => {
 }
 
 // search and sort by unread/recent
-export const searchThroughMail = async (q: string, sortBy: string, section: string, page?: string) => {
+export const searchThroughMail = async (q: string, sortBy: string, section: string, page?: number) => {
   let res = await postDoc(`/mails/search?page=${page}&type=${section}`, {q, sortBy}, true);
   return res?.data || false; 
 }

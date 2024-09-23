@@ -23,6 +23,7 @@ import { useMailNumbersStore } from "@/stores/mail-numbers";
 import FetchNumbers from "./fetch-numbers";
 import { useMailStoreState } from "@/stores/mail-store";
 import { useNotificationStateStore } from "@/stores/notification-store";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Threads = ({title}: {title: string}) => {
     const [mounted, setMounted] = React.useState<boolean>(false); 
@@ -36,8 +37,11 @@ const Threads = ({title}: {title: string}) => {
     const [selected, setSelected] = React.useState<string[]>([]);
     const [newMail, setNewMail] = React.useState<boolean>(false); 
 
+    const [page, setPage] = React.useState<number>(0); 
+    const [moreLoading, setMoreLoading] = React.useState<boolean>(false); 
+
     const searchParams = useSearch(); 
-    const page = searchParams?.get("page") || "0"; 
+    // const page = searchParams?.get("page") || "0"; 
     const sec = searchParams?.get("sec"); 
     const q = searchParams?.get("q") || "";
     const sort = searchParams?.get("sort") || ""; 
@@ -59,7 +63,6 @@ const Threads = ({title}: {title: string}) => {
 
         if (res) {
             setThreads(res.docs); 
-            
             setCount(res.count); 
         }
 
@@ -74,9 +77,17 @@ const Threads = ({title}: {title: string}) => {
         }
     }
 
-    useCustomEffect(() => setSelected([]), [mounted, sec])
-    useCustomEffect(fetchThreads, [mounted, title, page, q, sort]);
+    const fetchMoreThreads = async () => {
+        if (!page) return; 
+        setMoreLoading(true); 
+        let res = await getThreads(title, page); 
+        if (res)  setThreads([...threads, ...res.docs])
+        setMoreLoading(false);
+    }
 
+    useCustomEffect(() => setSelected([]), [mounted, sec])
+    useCustomEffect(fetchThreads, [mounted, title, q, sort]);
+    useCustomEffect(fetchMoreThreads, [page])
     // update threads on new mail 
     React.useEffect(() => {
         if (newMails.length === 0 || newMail) return; 
@@ -200,7 +211,7 @@ const Threads = ({title}: {title: string}) => {
                             />
                         )
                     }
-                    <div className={cn("overflow-scroll h-[90vh] w-full pb-[9rem]", newMail ? "pt-4":"")}>
+                    <ScrollArea className={cn("overflow-scroll h-[90vh] w-full pb-[8.4rem]", newMail ? "pt-4":"")}>
                         {
                             loading && <Loading />
                         }
@@ -226,7 +237,24 @@ const Threads = ({title}: {title: string}) => {
                                 </>
                             )
                         }
-                    </div>
+                        {
+                                    count > (Number(page + 1) * 30) && (
+                                        <>
+                                            <div className="w-full flex items-center justify-center py-2">
+                                                <span
+                                                    className="cursor-pointer hover:text-main-color font-bold text-xs lg:text-sm"
+                                                    onClick={() => {
+                                                        let curr = page; 
+                                                        setPage(curr + 1)
+                                                    }}
+                                                >Load{moreLoading ? "ing": " more"}...</span>
+                                            </div>
+                                            <Separator />
+
+                                        </>
+                                    )
+                                }
+                    </ScrollArea>
 
 
                 </div>
