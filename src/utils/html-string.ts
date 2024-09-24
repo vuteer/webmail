@@ -1,5 +1,5 @@
 // html mail template
-export const generateHTMLStr = (subject: string, reply: string) =>
+export const generateHTMLStr = (subject: string, reply: string, attachments?: boolean) =>
     `
         <!DOCTYPE html>
         <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -18,7 +18,7 @@ export const generateHTMLStr = (subject: string, reply: string) =>
                   width: 100% !important;
                   font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
   
-                  font-size: 10px;
+                  font-size: 12px;
               }
               * {
                   -ms-text-size-adjust: 100%;
@@ -103,6 +103,14 @@ export const generateHTMLStr = (subject: string, reply: string) =>
             <div style="width: 100%">
               ${reply}
             </div>
+            ${
+              attachments ? (
+                `
+                    <ATACHMENTS />
+                   
+                `
+              ): ""
+            }
         </main>
       </body>
       </html>

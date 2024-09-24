@@ -80,7 +80,7 @@ const NewMailForm = () => {
       return;
     }
 
-    let htmlStr = generateHTMLStr(subject, message);
+    let htmlStr = generateHTMLStr(subject, message, files.length > 0);
 
     let threadItem = {
       messageId: uuidv4(),
@@ -119,7 +119,8 @@ const NewMailForm = () => {
     if (res) {
       createToast("success", draft ? "Mail saved to drafts" : "Mail was sent successfully!");
       push(draft ? `/?sec=draft&threadId=${res}` : `/?sec=inbox&threadId=${res}`)
-      setClearEditor(true)
+      setClearEditor(true);
+      setFiles([])
     }
 
     if (draft) setDLoading(false);

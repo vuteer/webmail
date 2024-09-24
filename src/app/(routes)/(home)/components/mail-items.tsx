@@ -201,8 +201,8 @@ const ButtonIcon = (
 
 // header
 export const Header = (
-    {thread}: 
-    {thread: ThreadType}
+    {thread, count}: 
+    {thread: ThreadType, count: number}
 ) => {
     const [loading, setLoading] = React.useState<boolean>(false); 
     const [from, setFrom] = React.useState<ContactType>(thread.from); 
@@ -262,8 +262,10 @@ export const Header = (
                     <Paragraph>{formatDateToString(thread.createdAt)}</Paragraph>
                 </div>
             </div>
-            <Heading1 className="text-md lg:text-lg my-2">{thread.subject}</Heading1>
-
+            <div className="flex justify-between items-center my-2">
+                <Heading1 className="text-md lg:text-lg max-w-[80%]">{thread.subject}</Heading1>
+                <Paragraph className="text-sm lg:text-sm text-gray-500">Total mails: {count}</Paragraph>
+            </div>
         </>
 )};
 
@@ -324,10 +326,7 @@ export const MessageButtons = ({thread, reply, threadInfo, setThreadInfo}:
                         text="Reply"
                         onClick={reply}
                     />
-                    <ButtonIcon 
-                        icon={<Printer size={18}/>}
-                        text="Print"
-                    />
+                   
                 </div>
                 {
                     !threadInfo.trashed && (

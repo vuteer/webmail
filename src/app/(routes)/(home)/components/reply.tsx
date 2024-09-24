@@ -27,6 +27,7 @@ interface ThreadReplyProps {
   reply_to: string;
   subject: string;
   threadInfo?: ThreadInfoType;
+  scrollRef: any; 
 }
 
 const ThreadReply: React.FC<ThreadReplyProps> = ({
@@ -36,6 +37,7 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
   threads,
   setThreads,
   reply_to,
+  scrollRef 
 
 }) => {
   const [reply, setReply] = React.useState<string>("");
@@ -61,7 +63,7 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
     if (draft) setDLoading(true);
     else setSLoading(true);
 
-    let htmlStr = generateHTMLStr(subject, reply);
+    let htmlStr = generateHTMLStr(subject, reply, files.length > 0);
 
     let threadItem = {
       messageId: uuidv4(),
@@ -99,9 +101,11 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
       createToast("success", draft ? "Mail saved to drafts" :"Reply has been sent.");
       let updatedThreads = [...threads.filter((itm: any) => itm.messageId !== threadItem.messageId), { ...threadItem, id: res, info: { ...threadItem.info, read: true } }]
       setClearEditor(true);
+      setFiles([])
 
       setThreads(updatedThreads);
       replyRef.current?.classList.add("translate-y-full");
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
 
     if (draft) setDLoading(false);

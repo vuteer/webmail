@@ -18,7 +18,7 @@ import { MailType, ThreadType } from "@/types";
 
 import { Buttons, Header, MessageButtons } from "./mail-items";
 import {ThreadInfoType} from "@/types"; 
-import { ScrollArea } from "@/components/ui/scroll-area";
+ 
  
 
 const Mail = ({}) => {
@@ -144,6 +144,7 @@ const Mail = ({}) => {
                             <Separator />
                             <Header 
                                 thread={thread} 
+                                count={count + 1}
                             />
                             <Separator />
 
@@ -213,6 +214,7 @@ const Mail = ({}) => {
                         subject={thread.subject}
                         threads={mails}
                         setThreads={setMails}
+                        scrollRef={scrollRef}
                     />
 
                 )
