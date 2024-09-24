@@ -81,3 +81,25 @@ export const markAsRead = async (all?: boolean, selected?: string[]) => {
   let res = await patchDoc(`/mails/read/update${all ? "?all=1": ""}`, {selected: selected || null}, true);
   return res?.status === "success"; 
 }
+
+// sending 
+
+
+// Appointments - 
+// — notifications 
+// — notify others when near
+// — total number 
+ 
+// Events 
+// — notify others on creation and on near 
+// — total 
+
+// Files
+// — file sharing
+// — upon deleting, delete everywhere
+// — grid
+
+// Profile 
+// Settings - mail signatures
+
+// State numbers

@@ -56,7 +56,7 @@ const NewMailForm = () => {
 
   React.useEffect(() => {
     if (toFilled && validateEmail(toFilled)) setEmails([toFilled])
-  }, [toFilled])
+  }, [toFilled]);
 
   const validate = (draft?: boolean) => {
     if ((!to || !validateEmail(to)) && emails.length === 0) {
@@ -80,12 +80,15 @@ const NewMailForm = () => {
       return;
     }
 
-    let htmlStr = generateHTMLStr(subject, message, files.length > 0);
+    let htmlStr = generateHTMLStr(subject, message, files);
+
+    console.log(emails)
 
     let threadItem = {
       messageId: uuidv4(),
       html: htmlStr,
       text: removeHtmlTags(message),
+      cc: emails.length > 1 ? [...emails.slice(1)]: [],
       from_me: true,
       subject,
       info: {
@@ -114,7 +117,7 @@ const NewMailForm = () => {
     if (draft) setDLoading(true);
     else setSLoading(true);
 
-    let res = await sendMail({ ...threadItem, to: validateEmail(to) ? to : emails[0] });
+    let res = await sendMail({ ...threadItem, to: to || emails[0] });
 
     if (res) {
       createToast("success", draft ? "Mail saved to drafts" : "Mail was sent successfully!");
@@ -130,7 +133,22 @@ const NewMailForm = () => {
 
 
   // handles predicting email to send to using search contact
-  const handleMailPrediction = async (str: string) => {
+  const handleMailPrediction = async (str: string, keyValue?: string) => {
+    // look for user clicking the space button or comma or enter 
+    // if the email is valid, close the suggestion 
+    if (keyValue === "," || keyValue === " " || keyValue === "Enter") {
+      let updatedStr = str.replace(",", "");
+      if (validateEmail(updatedStr.trim())) {
+        setEmails([...emails, updatedStr]);
+        setTo("")
+      } else {
+        createToast("error", `${updatedStr} is not a valid email!`)
+      };
+
+      setSuggestionsLoading(false)
+      setOpenSuggestions(false);
+      return; 
+    }
     if (str.length > 1) {
       setSuggestionsLoading(true)
       setOpenSuggestions(true)
@@ -149,8 +167,6 @@ const NewMailForm = () => {
     setSuggestionsLoading(false);
 
   };
-
-  console.log("HANDLE CC IN INDEX - NEW MAIL FORM")
 
   const handleSelectEmail = (email: string) => {
     if (!emails.includes(email)) {
@@ -292,7 +308,7 @@ export const InputPair = (
       setValue: React.Dispatch<string>,
       error?: boolean,
       type?: string,
-      onKeyUp?: (str: string) => Promise<void>;
+      onKeyUp?: (str: string, keyValue?: string) => Promise<void>;
       prefixes?: React.ReactNode;
       disabled: boolean; 
     }
@@ -314,7 +330,7 @@ export const InputPair = (
         className={`${!label ? "pl-0" : ""} border-none focus:border-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0`}
         onFocus={() => { setActive(true) }}
         onBlur={() => { setActive(false) }}
-        onKeyUp={onKeyUp ? (e: any) => onKeyUp(e.target.value) : () => { }}
+        onKeyUp={onKeyUp ? (e: any) => onKeyUp(e.target.value, e.key) : () => { }}
         type={type || "string"}
       />
     </div>

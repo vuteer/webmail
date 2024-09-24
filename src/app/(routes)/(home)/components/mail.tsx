@@ -157,7 +157,7 @@ const Mail = ({}) => {
                                         <>
                                             <div className="w-full flex items-center justify-center py-2">
                                                 <span
-                                                    className="cursor-pointer hover:text-main-color text-xs lg:text-sm"
+                                                    className="font-bold cursor-pointer hover:text-main-color text-xs lg:text-sm"
                                                     onClick={() => {
                                                         let curr = page; 
                                                         setPage(curr + 1)

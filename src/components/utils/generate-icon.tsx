@@ -50,8 +50,12 @@ export const ActualGenerateIcon = ({type}: {type: FileType}) => (
     </div>
 )
 const GenerateIcon = (
-    {id, type, title, size, onRemove}: 
-    {id: string, type: FileType, title: string, size: number, onRemove?: (fileId: string) => void}
+    {id, type, title, size, onRemove, outerLoading}: 
+    {
+        id: string, type: FileType, title: string, 
+        size: number, onRemove?: (fileId: string) => void, 
+        outerLoading?: boolean
+    }
 ) => {
     const [loading, setLoading] = React.useState<boolean>(false); 
     let src: string = icons[type as FileType]; 
@@ -76,7 +80,7 @@ const GenerateIcon = (
             <Button 
                 variant="ghost" 
                 size="sm" 
-                disabled={loading}
+                disabled={outerLoading || loading}
                 className={cn(onRemove ? "hover:text-destructive duration-700": "")}
                 onClick={() => onRemove ? onRemove(id): handleDownload(id, setLoading)}
             >

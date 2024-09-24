@@ -1,6 +1,9 @@
+import { AttachmentType } from "@/types";
+import { formatBytes } from "./size";
+
 // html mail template
-export const generateHTMLStr = (subject: string, reply: string, attachments?: boolean) =>
-    `
+export const generateHTMLStr = (subject: string, reply: string, attachments: AttachmentType[]) =>
+  `
         <!DOCTYPE html>
         <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
         <head>
@@ -40,7 +43,27 @@ export const generateHTMLStr = (subject: string, reply: string, attachments?: bo
               .email-container {
                 padding: .4rem 0rem; 
               }
-  
+
+              
+              .attachment-container h2 {
+                font-size: 1.1rem; 
+              }
+              .attachment-container p a {
+                font-size: 1rem; 
+                color: blue;
+              }
+
+              .files {
+                display: flex; 
+                flex-direction: flex-col; 
+                gap: 2; 
+              }
+
+              .files li {
+                cursor: pointer; 
+                color: blue; 
+              }
+
               img {
                   -ms-interpolation-mode:bicubic;
               }
@@ -103,28 +126,52 @@ export const generateHTMLStr = (subject: string, reply: string, attachments?: bo
             <div style="width: 100%">
               ${reply}
             </div>
-            ${
-              attachments ? (
-                `
-                    <ATACHMENTS />
-                   
-                `
-              ): ""
-            }
+            ${attachments.length > 0 ? generateAttachments(attachments) : ""}
         </main>
       </body>
       </html>
     `;
-  
-  export const removeHtmlTags = (
-    htmlString: string,
-    addSpace: boolean = true
-  ) => {
-    // Replace block-level tags with a newline character followed by a space
-    htmlString = htmlString.replace(
-      /<(div|p|h[1-6]|blockquote|pre|ul|ol|li|table|tr|td)[^>]*>/g,
-      addSpace ? "\n" : ""
-    );
-    // Remove all other tags
-    return htmlString.replace(/<[^>]+>/g, "");
-  };
+
+export const removeHtmlTags = (
+  htmlString: string,
+  addSpace: boolean = true
+) => {
+  // Replace block-level tags with a newline character followed by a space
+  htmlString = htmlString.replace(
+    /<(div|p|h[1-6]|blockquote|pre|ul|ol|li|table|tr|td)[^>]*>/g,
+    addSpace ? "\n" : ""
+  );
+  // Remove all other tags
+  return htmlString.replace(/<[^>]+>/g, "");
+};
+
+
+
+const generateAttachments = (files: AttachmentType[]) => {
+  let tableRows = '';
+
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+   
+    tableRows += `
+      <tr>
+        <td>
+          <a href="https://web.vuteer.com/p/files?f=${file.id}" target="_blank">${file.title}</a>
+        </td>
+        <td>${formatBytes(file.size)}</td>
+      </tr>
+    `;
+  }
+
+  let content = `
+    <div class="attachment-container" style="border-top: 1px solid grey; margin: 3.5rem 0;">
+      <h2 style="font-size: .8rem; marging: 1rem 0;">Attachments:</h2>
+      <table style="width: 100%; border: none;">
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>
+  `
+  return content;
+}

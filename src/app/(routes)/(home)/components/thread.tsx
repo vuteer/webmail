@@ -15,6 +15,7 @@ import { ThreadType } from "@/types";
 import { useSearch } from "@/hooks/useSearchParams";
 import ThreadSelect from "@/components/popovers/thread-select";
 import { useMailNumbersStore } from "@/stores/mail-numbers";
+import dayjs from "dayjs";
 
 interface ThreadProps extends ThreadType {
     selected: string[];
@@ -90,7 +91,7 @@ const Thread: React.FC<ThreadProps> = ({
                         </div>
                         <div className="flex gap-2 items-center ">
                             {attachments && <Paperclip size={15}/>}
-                            <span className="text-xs">{formatDateToString(new Date(createdAt))}</span>
+                            <span className="text-xs">{dayjs(new Date(createdAt)).format("DD MMM, YYYY: HH:mm")}</span>
                             <ThreadSelect 
                                 id={id}
                                 selected={selected}

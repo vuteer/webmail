@@ -18,6 +18,7 @@ import { sendMail } from "@/lib/api-calls/mails";
 import { createToast } from "@/utils/toast";
 import GenerateIcon from "@/components/utils/generate-icon";
 import { Heading3 } from "@/components/ui/typography";
+import { deleteFile } from "@/lib/api-calls/files";
 
 interface ThreadReplyProps {
   replyRef: React.RefObject<HTMLDivElement>;
@@ -63,7 +64,7 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
     if (draft) setDLoading(true);
     else setSLoading(true);
 
-    let htmlStr = generateHTMLStr(subject, reply, files.length > 0);
+    let htmlStr = generateHTMLStr(subject, reply, files);
 
     let threadItem = {
       messageId: uuidv4(),
@@ -163,7 +164,7 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
         />
       </div>
 
-      <Attachments files={files} />
+      <Attachments files={files} setFiles={setFiles}/>
       <ReplyButtons
         setOpenFileUpload={setOpenFileUpload}
         handleSend={handleSendMail}
@@ -221,8 +222,19 @@ export const ReplyButtons = ({
 
 
 // attachments
-export const Attachments = ({ files }: { files: AttachmentType[] }) => {
+export const Attachments = ({ files, setFiles }: { files: AttachmentType[], setFiles?: React.Dispatch<AttachmentType[]> }) => {
+  const [loading, setLoading] = React.useState<boolean>(false); 
 
+  const handleRemove = async (fileId: string) => {
+    if (!setFiles) return; 
+    setLoading(true);
+    let res = await deleteFile(fileId); 
+    if (res) {
+      createToast("success", "File has been removed!");
+      setFiles([...files.filter(file => file.id !== fileId)])
+    };
+    setLoading(false)
+  }
   return (
     <>
       {
@@ -239,7 +251,8 @@ export const Attachments = ({ files }: { files: AttachmentType[] }) => {
                     type={file.type}
                     size={file.size}
                     title={file.title}
-                    onRemove={(fileId: string) => {}}
+                    onRemove={(fileId: string) => handleRemove(fileId)}
+                    outerLoading={loading}
                   />
                 ))
               }
