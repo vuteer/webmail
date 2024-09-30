@@ -155,10 +155,25 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
         >
             {
                 appointment && (
-                    <Badge
-                        type={appointment.status === "active" ? "primary" : "danger"}
-                        text={appointment.status}
-                    />
+                    <div className="flex gap-2 items-center">
+                        {
+                            step === 2 && (
+                                <Button
+                                    className="my-2 rounded-full"
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setStep(1)}
+                                >
+                                    <ChevronLeft size={19} />
+                                </Button>
+                            )
+                        }
+
+                        <Badge
+                            type={appointment.status === "active" ? "primary" : "danger"}
+                            text={appointment.status}
+                        />
+                    </div>
                 )
             }
             {
@@ -251,14 +266,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = (
                     </>
                 ) : (
                     <>
-                        <Button
-                            className="my-2 rounded-full"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setStep(1)}
-                        >
-                            <ChevronLeft size={19} />
-                        </Button>
+                        
                         <WithComponent 
                             cLoading={cLoading}
                             dLoading={dLoading}
