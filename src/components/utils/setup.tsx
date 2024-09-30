@@ -9,13 +9,16 @@ import { Heading2, Heading3, Paragraph } from "@/components/ui/typography";
 
 import { createToast } from "@/utils/toast";
 import { validateEmail } from "@/utils/validation";
-import { finalizeUserSetup } from "@/lib/api-calls/user";
+import { finalizeUserSetup, getUserSettings } from "@/lib/api-calls/user";
 
 import { useSignOut } from "@/auth/authHooks";
+import { useCustomEffect } from "@/hooks"; 
 import { userStateStore } from "@/stores/user-store";
+import { userPreferencesStore } from "@/stores/user-preferences";
 
 const FinalizeSetup = ({ }) => {
     const { contact_email, finalized_setup, loading } = userStateStore();
+    const { addInitial } = userPreferencesStore(); 
     const { push } = useRouter();
     const signOut = useSignOut();
 
@@ -27,8 +30,16 @@ const FinalizeSetup = ({ }) => {
     const [email, setEmail] = React.useState<string>("");
     const [errors, setErrors] = React.useState<string[]>([]);
 
-    React.useEffect(() => {setDontShow(!finalized_setup)}, [finalized_setup])
+    React.useEffect(() => {setDontShow(!finalized_setup)}, [finalized_setup]);
+
+    const fetchPreferences = async () => {
+        if (!finalized_setup) return;
+        let res = await getUserSettings(); 
+        if (res)  addInitial(res.signature, res.notifications, res.security);
+    }   
  
+    useCustomEffect(fetchPreferences, [finalized_setup]); 
+
     const handleSubmit = async () => {
         if (!password) {
             setErrors([...errors, "password"]);
@@ -129,6 +140,7 @@ const FinalizeSetup = ({ }) => {
                                 error={errors.includes("password")}
                                 placeholder="Enter a new password"
                                 type={"password"}
+                                disabled={cLoading}
                             />
                             <InputPair
                                 value={passwordConfirm}
@@ -136,6 +148,7 @@ const FinalizeSetup = ({ }) => {
                                 error={errors.includes("passwordConfirm")}
                                 placeholder="Confirm password"
                                 type={"password"}
+                                disabled={cLoading}
                             />
                             <div className="my-1" />
                             {
@@ -147,12 +160,13 @@ const FinalizeSetup = ({ }) => {
                                             setValue={setEmail}
                                             error={errors.includes("email")}
                                             placeholder="Enter email"
+                                            disabled={cLoading}
                                         />
                                     </>
                                 )
                             }
 
-                            <Button className="min-w-[150px] my-2" onClick={handleSubmit}>
+                            <Button disabled={cLoading} className="min-w-[150px] my-2" onClick={handleSubmit}>
                                 Submit{cLoading ? "ing..." : ""}
                             </Button>
                         </Card>

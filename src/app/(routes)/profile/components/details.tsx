@@ -10,25 +10,81 @@ import ImageUpload from "@/components/forms/components/image-upload";
 import FormTitle from "@/components/forms/components/form-title";
 
 import { useAuthUser } from "@/auth/authHooks";
-import { cn } from "@/lib/utils";
+import { useCustomEffect } from "@/hooks";
+import { getUser, updateUser } from "@/lib/api-calls/user";
+
+import { createToast } from "@/utils/toast";
 
 const PersonalDetails = () => {
-    const [avatar, setAvatar] = React.useState<string>(""); 
+    const [currentUser, setCurrentUser] = React.useState<string>(""); 
+    const [avatar, setAvatar] = React.useState<string>("https://res.cloudinary.com/dyo0ezwgs/image/upload/v1701015303/defaults/user-avatar_fjqn4g.png"); 
     const [name, setName] = React.useState<string>(""); 
     const [email, setEmail] = React.useState<string>(""); 
     const [phone, setPhone] = React.useState<string>(""); 
 
+    const [mounted, setMounted] = React.useState<boolean>(true); 
+    const [loading, setLoading] = React.useState<boolean>(false); 
+    const [edited, setEdited] = React.useState<boolean>(false); 
+
     const auth = useAuthUser(); 
     const user = auth(); 
 
-    React.useEffect(() => {
-        if (!user) return; 
+    React.useEffect(() => setMounted(true), []); 
 
-        setAvatar(user.avatar)
-        setName(user.name); 
-        setEmail(user.email)
-        setPhone(user.phone || "");
-    }, [user])
+     
+    const fetchUser = async () => {
+        if (!mounted) return; 
+        setLoading(true); 
+
+        let res = await getUser(); 
+        if (res) {
+            let user = res.user
+            setAvatar(user.avatar); 
+            setEmail(user.email);
+            setName(user.name); 
+            setPhone(user.phone);
+
+            setCurrentUser(JSON.stringify({
+                avatar: user.avatar, 
+                email: user.email, 
+                name: user.name, 
+                phone: user.phone
+            }))
+        };
+
+        setLoading(false)
+    }
+
+    useCustomEffect(fetchUser, [mounted])
+
+    React.useEffect(() => {
+        if (!mounted) return; 
+
+        let updated = JSON.stringify({
+            avatar, email, name, phone
+        });
+
+        if (updated !== currentUser) setEdited(true);
+        else setEdited(false)
+    }, [avatar, name, email, phone]);
+
+    const handleUpdate = async () => {
+        let updateStr = JSON.stringify({
+            avatar, email, name, phone
+        })
+        if (currentUser === updateStr) {
+            createToast("error", "Nothing to update!");
+            return; 
+        };
+        setLoading(true); 
+
+        let res = await updateUser({
+            avatar, name, phone
+        }); 
+
+        if (res) createToast("success", "Details have been updated!")
+        setLoading(false)
+    }
 
     return (
         <Card className="p-3 flex flex-col gap-2 flex-1">
@@ -36,7 +92,7 @@ const PersonalDetails = () => {
                 images={[avatar]}
                 avatar={true}
                 onChange={(str: string) => setAvatar(str)}
-                onRemove={(str: string) => setAvatar(user?.avatar)}
+                onRemove={(str: string) => setAvatar("https://res.cloudinary.com/dyo0ezwgs/image/upload/v1701015303/defaults/user-avatar_fjqn4g.png")}
                 text="Change avatar"
             />
 
@@ -44,6 +100,7 @@ const PersonalDetails = () => {
                 value={name}
                 setValue={setName}
                 title="Phone"
+                disabled={loading}
             />
             <PersonalDetailsInput 
                 value={email}
@@ -56,11 +113,19 @@ const PersonalDetails = () => {
                 setValue={setPhone}
                 title="Phone number"
                 placeholder="+254 711 000 222"
+                disabled={loading}
             />
-            
-            <Button className="self-end w-[200px]">
-                Update
-            </Button>
+            {
+                edited && (
+                    <Button 
+                        className="self-end w-[200px]"
+                        disabled={loading}
+                        onClick={handleUpdate}
+                    >
+                        Updat{loading ? "ing...": "e"}
+                    </Button>
+                )
+            }
         </Card>
     )
 };

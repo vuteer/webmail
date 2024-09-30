@@ -2,33 +2,36 @@
 "use client";
 import CheckboxItem from "./checkbox"
 import Container from "./container"
+import {userPreferencesStore, NotificationType} from "@/stores/user-preferences"; 
 
 const Notifications = () => {
-    const handleClick = async () => {
+    const { notifications, updateNotification } = userPreferencesStore(); 
 
+    const handleClick = async (val: keyof NotificationType) => {
+        await updateNotification(val)
     }
     return (
-        <Container title="Email Notifications">
+        <Container title="Notifications">
             <>
                 <CheckboxItem 
-                    checked={false}
+                    checked={notifications.system}
                     text="Receive System Updates"
-                    onClick={handleClick}
+                    onClick={() => handleClick("system")}
                 />
                 <CheckboxItem 
-                    checked={false}
-                    text="Receive Important Notifications"
-                    onClick={handleClick}
+                    checked={notifications.appointments}
+                    text="Receive Appointment Notifications"
+                    onClick={() => handleClick("appointments")}
                 />
                 <CheckboxItem 
-                    checked={false}
+                    checked={notifications.events}
                     text="Receive Event Reminders"
-                    onClick={handleClick}
+                    onClick={() => handleClick("events")}
                 />
                 <CheckboxItem 
-                    checked={false}
+                    checked={notifications.news}
                     text="Receive News Updates"
-                    onClick={handleClick}
+                    onClick={() => handleClick("news")}
                 />
             </>
         </Container>
