@@ -68,9 +68,11 @@ const Event = ({event}: {event: EventType}) => {
 
   return (
     <Card className="p-2 flex flex-col gap-2">
-      <div className="h-4 w-4 rounded-full" style={{backgroundColor: getBg(event.label || "")}}/>
-      <Heading4 className="text-sm lg:text-md font-bold line-clamp-1">{event.title}</Heading4>
-      <Paragraph className="text-xs lg:text-sm">{dayjs(new Date(event.date)).format("DD MMM, YYYY")} | {event.time}</Paragraph>
+      <div className="flex gap-2 items-center">
+        <div className="h-4 w-4 rounded-full" style={{backgroundColor: getBg(event.label || "")}}/>
+        <Heading4 className="text-xs lg:text-sm font-bold line-clamp-1">{event.title}</Heading4>
+      </div>
+      <Paragraph className="text-xs lg:text-xs">{dayjs(new Date(event.date)).format("DD MMM, YYYY")} | {event.time}</Paragraph>
     </Card>
   )
 }

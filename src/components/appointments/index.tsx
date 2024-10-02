@@ -31,7 +31,7 @@ const Appointments = () => {
                     <SmallCalendar />
                 </div>
                 <div className="w-[1px] h-full bg-secondary"/>
-                <div className="flex-1 h-full">
+                <div className="flex-1 h-full ">
                     <Week />
                 </div>
             </div>

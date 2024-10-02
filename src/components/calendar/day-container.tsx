@@ -8,6 +8,7 @@ import { calendarStateStore } from "@/stores/calendar";
 import {checkEvent, generateHour, isToday, selectCubeTime} from "./week"; 
 import Events from "./events";
 import { EventType } from "@/types";
+import { createToast } from "@/utils/toast";
 
 const DayContainer = () => {
     const [mounted, setMounted] = React.useState<boolean>(false); 
@@ -63,7 +64,11 @@ const DayContainer = () => {
                         <div 
                             className="flex-1 grid grid-cols-1 -mr-1 cursor-pointer"
                             onClick={() => {
-                                        
+                                let isPast = dayjs(new Date(year, monthIndex, day)).isBefore(dayjs());
+                                if (isPast) {
+                                    createToast("error", "Events can only be scheduled in the future!");
+                                    return; 
+                                }
                                 selectCubeTime(
                                     new Date(year, monthIndex, day),
                                     generateHour(hour),

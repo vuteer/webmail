@@ -6,6 +6,7 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 import { calendarStateStore } from "@/stores/calendar";
+import { createToast } from "@/utils/toast";
 
 export const handleSelectEvent = (
     day: number,
@@ -99,11 +100,25 @@ const Day = (
 
     }, [events, year]);
 
+    // Get the start of today
+    const startOfToday = dayjs().startOf('day');
+
+    // Check if the date is before the start of today
+    const isBeforeToday = day.isBefore(startOfToday);
     return (
         <span
 
-            onClick={() => handleSelectEvent(day.format("D"), day.format("M") - 1, year, setDaySelected, setShowEventModal)}
-            className={cn("cursor-pointer duration-700  flex items-center justify-center",  "hover:bg-secondary rounded-full", hasEvents ? "bg-green-500": "", `${getDayClass(day)}`,)}
+            onClick={() => {
+                handleSelectEvent(day.format("D"), day.format("M") - 1, year, setDaySelected, setShowEventModal)
+
+            }}
+            className={cn(
+                "cursor-pointer duration-700  flex items-center justify-center",  
+                "hover:bg-secondary rounded-full", 
+                hasEvents ? "bg-green-500": "", 
+                `${getDayClass(day)}`,
+                isBeforeToday ? "opacity-50 cursor-not-allowed": ""
+            )}
         >
             <span className="text-xs font-normal">{day.format("D")}</span>
         </span>

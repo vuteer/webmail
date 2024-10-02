@@ -24,10 +24,6 @@ export const useNotificationStateStore = create<NotificationStoreState>((set, ge
                 audioRef.current?.click(); 
             }
 
-            // setTimeout(() => {
-            //     let list = notifications.filter(doc => doc.id !== data.id); 
-            //     set({notifications: list}); 
-            // }, 10000)
         }
     },
     removeNotificationFromState: (data: NotificationType) => {

@@ -10,7 +10,7 @@ export const getWeekAppointments = async (week: number, year: number) => {
 // create appointment 
 export const createAppointment = async (data: any) => {
     let res = await postDoc(`/appointments`, data, true); 
-    return res?.data.doc || false; 
+    return res?.data?.doc || false; 
 };
 
 // get single appointment 

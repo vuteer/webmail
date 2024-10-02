@@ -43,7 +43,9 @@ class Socket {
       this.socket.emit ('register', {id: user.id, type: 'user'});
     });
 
-    this.socket.on("new-mail", data => this.newMail(data))
+    this.socket.on("new-mail", data => this.newMail(data));
+    this.socket.on("appointment-reminder", data => this.appointmentReminder(data))
+    this.socket.on("event-reminder", data => this.eventReminder(data))
   }
 
   newMail(data) {
@@ -51,6 +53,13 @@ class Socket {
     this.addNewThread(data)
     this.addNotificationToState({...data, type: "mail"}, this.notificationSoundRef)
  
+  }
+
+  appointmentReminder(data) {
+    this.addNotificationToState({...data, type: "appointment"}, this.notificationSoundRef)
+  }
+  eventReminder(data) {
+    this.addNotificationToState({...data, type: "event"}, this.notificationSoundRef)
   }
 
  

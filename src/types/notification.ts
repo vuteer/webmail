@@ -7,6 +7,10 @@ type NotificationType = {
     new: boolean; 
     messageId: string; 
     text: string; 
+    date: string; 
+    time: string;
+    with: number; 
+    title: string;
     type: "mail" | "event" | "appointment"; 
 }
 

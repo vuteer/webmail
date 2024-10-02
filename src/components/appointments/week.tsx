@@ -16,6 +16,7 @@ import FetchAppointments from "./fetch-appointments";
 import { AppointmentType } from "@/types";
 import { appointmentStateStore } from "@/stores/appointment";
 import { cn } from "@/lib/utils";
+import { createToast } from "@/utils/toast";
 
 dayjs.extend(weekOfYear);
 
@@ -81,7 +82,7 @@ const Week = () => {
                     >
                         <ChevronLeft size={18} />
                     </Button>
-                    <div className="flex-1 grid grid-cols-7">
+                    <div className="flex-1 grid grid-cols-7 ">
                         {
                             days.map((day, index) => (
                                 <Day
@@ -104,7 +105,7 @@ const Week = () => {
                     <div />
                 </div>
                 <Separator />
-                <div className="flex gap-2 py-3 overflow-auto h-[70vh] pb-5">
+                <div className="flex gap-2 py-3 overflow-auto h-[70vh] pb-[5rem]">
                     <Button variant={"ghost"} />
                     <div className="flex-1 grid grid-cols-7 gap-3">
                         {
@@ -127,6 +128,7 @@ const Week = () => {
                                             </React.Fragment>
                                         ))
                                     }
+                                    <div className="my-5"/>
                                 </div>
                             ))
                         }
@@ -140,29 +142,32 @@ const Week = () => {
 
 export default Week;
 
+
 const hours = [
-    "08:00AM",
-    "08:30AM",
-    "09:00AM",
-    "09:30AM",
-    "10:00AM",
-    "10:30AM",
-    "11:00AM",
-    "11:30AM",
-    "1:00PM",
-    "01:30PM",
-    "02:00PM",
-    "02:30PM",
-    "03:00PM",
-    "03:30PM",
-    "04:00PM",
-    "04:30PM",
+    "08:00 AM",
+    "08:30 AM",
+    "09:00 AM",
+    "09:30 AM",
+    "10:00 AM",
+    "10:30 AM",
+    "11:00 AM",
+    "11:30 AM",
+    "1:00 PM",
+    "01:30 PM",
+    "02:00 PM",
+    "02:30 PM",
+    "03:00 PM",
+    "03:30 PM",
+    "04:00 PM",
+    "04:30 PM",
 ];
 
 const Hour = ({ hour, current, appointment }: { hour: string, current: any, appointment?: AppointmentType }) => {
     const [openAppointmentModal, setOpenAppointmentModal] = React.useState<boolean>(false);
 
-    
+    const appointmentTime = dayjs(`${current.format("DD MMM YYYY")} ${hour}`, 'hh:mm A DD MMM YYYY');
+    // Check if the appointment time has passed
+    const isPast = appointmentTime.isBefore(dayjs());
 
     return (
         <>
@@ -174,12 +179,21 @@ const Hour = ({ hour, current, appointment }: { hour: string, current: any, appo
                 appointment={appointment}
             />
             <Card
-                className={cn("cursor-pointer hover:border-main-color duration-700 p-2 pl-4 w-[90%] flex items-center justify-center", appointment ? "bg-main-color text-white border-none" : "", appointment?.status === "cancelled" ? "bg-destructive": "")}
+                className={cn(
+                    "cursor-pointer hover:border-main-color duration-700 p-2 pl-4 w-[90%] flex items-center justify-center", 
+                    appointment ? "bg-main-color text-white border-none" : "", 
+                    appointment?.status === "cancelled" ? "bg-destructive": "",
+                    isPast ? "opacity-50 cursor-not-allowed": ""
+                )}
                 onClick={() => {
+                    if (isPast) {
+                        createToast("error", "Appointment cannot be booked in the past");
+                        return
+                    } 
                     setOpenAppointmentModal(true)
                 }}
             >
-                <Paragraph>{hour}</Paragraph>
+                <Paragraph className="text-xs lg:text-xs">{hour}</Paragraph>
             </Card>
         </>
     )

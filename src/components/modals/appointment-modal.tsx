@@ -359,7 +359,7 @@ const WithComponent = (
         <div className="w-full my-3">
             <Heading3 className="my-3 font-bold text-md lg:text-md">Participants ({selectedWith.length})</Heading3>
             <Separator className="my-2"/>
-            <div className="h-[30vh] overflow-auto">
+            <div className="h-[20vh] overflow-auto">
                 {
                     selectedWith.map((wth: WithType, index: number) => (
                         <div className="flex items-end my-2 border-b-2 py-2" key={index}>

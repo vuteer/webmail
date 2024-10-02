@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { calendarStateStore } from "@/stores/calendar";
 import { EventType } from "@/types";
 import Events from "./events";
+import { createToast } from "@/utils/toast";
 
 
 dayjs.extend(weekOfYear);
@@ -84,10 +85,12 @@ export const Day = (
             noBorder?: boolean; 
         }
 ) => {
-
+    // Check if the appointment time has passed
+    const isPast = current.isBefore(dayjs());
     return (
         <div className={cn(
             "text-center flex flex-col items-center  pb-2", noBorder ? "": "border-l",
+            isPast ? "opacity-50 cursor-not-allowed":""
         )}>
             <div className=" text-gray-500 mb-1">
                 <Paragraph>{day}</Paragraph>
@@ -192,6 +195,13 @@ const HourGrid = (
                 let month = currentWeek[currentIndex].format("M");
                 let year = currentWeek[currentIndex].format("YYYY");
 
+                let isPast = dayjs(new Date(year, month - 1, date)).isBefore(dayjs()); 
+                if (isPast) {
+                    createToast("error", "Event can only be set in the future!");
+                    return; 
+                }
+            
+
                 selectCubeTime(
                     new Date(year, month - 1, date),
                     time,
@@ -212,6 +222,7 @@ const getEventsOfBox = (events: EventType[], index: number) => {
     for (let i = 0; i < events.length; i++) {
         let event = events[i];
         let date = event.date; 
+         
         let day = dayjs(new Date(date)).day(); 
         if (day === index) items.push(event)
     }

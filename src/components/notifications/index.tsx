@@ -11,6 +11,7 @@ import { NotificationType } from "@/types";
 import { Button } from "../ui/button";
 import { updateThread } from "@/lib/api-calls/mails";
 import { createToast } from "@/utils/toast";
+import dayjs from "dayjs";
 
 const Notifications = () => {
   const { notifications, clearNotifications } = useNotificationStateStore();
@@ -49,11 +50,14 @@ export default Notifications;
 
 const Notification = ({ notification }: { notification: NotificationType }) => {
   const { removeNotificationFromState } = useNotificationStateStore();
-  const pathname = usePathname();
+  
   const { push } = useRouter();
 
-  const handleOpenMail = () => {
-    push(`/?sec=inbox&threadId=${notification.thread}`);
+  const handleOpenMail = (e: any) => {
+    e.stopPropagation();
+    e.preventDefault(); 
+
+    if (notification.type === "mail") push(`/?sec=inbox&threadId=${notification.thread}`);
     removeNotificationFromState(notification)
   };
 
@@ -66,22 +70,32 @@ const Notification = ({ notification }: { notification: NotificationType }) => {
   return (
     <Card
       className="relative flex flex-col gap-2 px-3 py-2 my-2 w-full hover:border-main"
-      onClick={handleOpenMail}
+      onClick={notification.type === "mail" ? handleOpenMail: () => {}}
     >
-      <Button
-        variant={"ghost"}
-        className="self-end absolute top-0 right-0 m-2 my-3 z-40"
-        size="sm"
+      <span
+        className="cursor-pointer hover:text-destructive duration-700 self-end absolute top-0 right-0 m-2 z-40"
         onClick={() => removeNotificationFromState(notification)}
       >
-        <X size={18} />
-      </Button>
-      <Heading4 className="text-sm lg:text-md">New Mail from {notification.from}</Heading4>
-      <Paragraph className="text-sm line-clamp-1">Subject: {notification.subject}</Paragraph>
-       
-      <span className="text-xs hover:text-main cursor-pointer transition-all block my-2" onClick={(e: React.MouseEvent<HTMLSpanElement>) => handleMailUpdate(e)}>
-        Mark as read
+        <X size={16} />
       </span>
+      <Heading4 className="text-[.7rem] lg:text-[.7rem] capitalize">
+        { notification.type === "mail" && `New Mail from ${notification.from}`}
+        {notification.type === "appointment" && `${notification.title} - Appointment reminder`}
+        {notification.type === "event" && `${notification.title} - Event reminder`}
+      </Heading4>
+      <Paragraph className="mt-3 text-[.7rem] lg:text-[.7rem] line-clamp-2 ">
+        {notification.type === "mail" && `Subject: ${notification.subject}`}
+        {notification.type === "appointment" && `Appointment reminder at ${notification.time} with ${notification.with} more ${notification.with === 1 ? `person`: `people`}`}
+        {notification.type === "event" && `Event reminder on ${dayjs(new Date(notification.date)).format("DD MMM, YYYY")} at ${notification.time}.`}
+      </Paragraph>
+      
+      {
+        notification.type === "mail" && (
+          <span className="text-[.7rem] lg:text-[.7rem] hover:text-main cursor-pointer transition-all block my-2" onClick={(e: React.MouseEvent<HTMLSpanElement>) => handleMailUpdate(e)}>
+            Mark as read
+          </span>
+        )
+      }
     </Card>
   );
 };
