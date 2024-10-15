@@ -130,7 +130,7 @@ export const generateHTMLStr = (subject: string, reply: string, attachments: Att
         </main>
       </body>
       </html>
-    `;
+`;
 
 export const removeHtmlTags = (
   htmlString: string,
@@ -144,8 +144,6 @@ export const removeHtmlTags = (
   // Remove all other tags
   return htmlString.replace(/<[^>]+>/g, "");
 };
-
-
 
 const generateAttachments = (files: AttachmentType[]) => {
   let tableRows = '';
