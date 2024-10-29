@@ -87,14 +87,14 @@ const Threads = ({title}: {title: string}) => {
 
     useCustomEffect(() => setSelected([]), [mounted, sec])
     useCustomEffect(fetchThreads, [mounted, title, q, sort]);
-    useCustomEffect(fetchMoreThreads, [page])
+    useCustomEffect(fetchMoreThreads, [page]);
+
     // update threads on new mail 
     React.useEffect(() => {
         if (newMails.length === 0 || newMail) return; 
         setNewMail(true); 
     }, [newMails.length])
      
-
     // update threads on delete 
     React.useEffect(() => {
         if (deletedMails.length === 0) return; 
@@ -127,7 +127,6 @@ const Threads = ({title}: {title: string}) => {
 
         setButtonLoading(false)
     }
-
 
     return (
         <>
