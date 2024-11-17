@@ -6,7 +6,7 @@ export const searchContact = async (q: string) => {
     return res?.data || false; 
 }
 // get user contacts
-export const getContacts = async (type: "internal" | "external", page?: string, limit?: string, q?: string) => {
+export const getContacts = async (type: string, page?: string, limit?: string, q?: string) => {
     let url = `/contacts?`; 
     if (page) url = url + `page=${page}&`;
     if (limit) url = url + `limit=${limit}&`; 
