@@ -22,18 +22,20 @@ const FetchEvents = () => {
 
     const fetchEvents = async () => {
         if (!mounted) return; 
-        addEvents([])
+        // addEvents([])
         let query = ''; 
-        if (cal === "day") query = `cal=${cal}&d=${day}&m=${monthIndex}&y=${year}`;
-        if (cal === "week") query = `cal=${cal}&w=${week}&m=${monthIndex}&y=${year}`; 
-        if (cal === "month") query = `cal=${cal}&m=${monthIndex}&y=${year}`; 
+        // if (cal === "day") query = `cal=${cal}&d=${day}&m=${monthIndex}&y=${year}`;
+        // if (cal === "week") query = `cal=${cal}&w=${week}&m=${monthIndex}&y=${year}`; 
+        // if (cal === "month") query = `cal=${cal}&m=${monthIndex}&y=${year}`; 
         if (cal === "year") query = `cal=${cal}&y=${year}`; 
+
+        if (cal === "day" || cal === "week" || cal === "month") query = `cal=month&m=${monthIndex}&y=${year}`
 
         let res = await getEvents(query);
         if (res) addEvents(res.docs)
     }
-
-    useCustomEffect(fetchEvents, [mounted, cal, day, week, year, monthIndex])
+    // cal, day, week, year,
+    useCustomEffect(fetchEvents, [mounted, monthIndex])
     return (
         <></>
     )
