@@ -23,7 +23,7 @@ const Auth = ({params}: {params: {type: string}}) => {
                 <Separator />
                 <AuthForm
                     screen="login"
-                    values={{email: "", password: "text"}}
+                    values={{email: "", password: ""}}
                     buttonText="Submit"
                 />
             </div>
