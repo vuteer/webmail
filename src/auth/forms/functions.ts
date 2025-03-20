@@ -1,4 +1,4 @@
-import {login, resetPassword, requestPasswordToken} from "../api-calls"; 
+import {login, forgotPassword} from "../api-calls"; 
 import {createToast} from "@/utils/toast";
 // import { validatePhone } from "@/utils/validation";
 import { signInFunctionParams } from "../authTypes";
@@ -29,20 +29,14 @@ const handleSubmit = async (
                      
                     refresh();
                 }
-            } else if (screen === 'reset') {
-                if (data.password !== data.passwordConfirm) {
-                    createToast("error", "Passwords do not match.");
-                    setLoading(false); 
-                    return; 
-                }
-                res = await resetPassword(data, token, admin); 
+            }   else if (screen === 'forgot') {
+                // hanndle forgot password from backend first
+                res = await forgotPassword({email: data.email});
                 if (res) {
-                    createToast("success", res); 
-                    push("/auth/login"); 
-                }; 
-            }  else if (screen === 'forgot') {
-                res = await requestPasswordToken(data, admin)
-                if (res) createToast('success', res);
+                    createToast("success", "Password sent to your phone!"); 
+                    push("/auth/login")
+                }
+                 
             }
     
             setLoading(false); 
@@ -50,6 +44,5 @@ const handleSubmit = async (
 }
 
 export {
-    // handleActivation,
     handleSubmit
 }

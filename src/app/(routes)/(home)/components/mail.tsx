@@ -78,7 +78,7 @@ const Mail = ({}) => {
         }; 
 
         setMailsLoading(true); 
-        let res = await getMails(threadID, page); 
+        let res = await getMails(threadID, page, sec); 
         if (res) {
             let docs = res.docs.map((doc: any) => ({
                 ...doc, html: doc.html ? parse(`${doc.html}`): null

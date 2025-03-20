@@ -1,5 +1,6 @@
 import React from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
 
 import { ChevronsUpDown, Info, Paperclip, Send, SquarePen, X } from "lucide-react";
 
@@ -50,6 +51,8 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
 
   const [sLoading, setSLoading] = React.useState<boolean>(false);
   const [dLoading, setDLoading] = React.useState<boolean>(false); 
+
+  const { push } = useRouter(); 
 
   React.useEffect(() => {
     if (replyRef) replyRef.current?.classList.add("translate-y-full")
@@ -107,6 +110,12 @@ const ThreadReply: React.FC<ThreadReplyProps> = ({
       setThreads(updatedThreads);
       replyRef.current?.classList.add("translate-y-full");
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    } else {
+      if (!draft) {
+        createToast("success", "Mail saved to drafts");
+        setClearEditor(true);
+        push("/?sec=draft")
+      }
     }
 
     if (draft) setDLoading(false);

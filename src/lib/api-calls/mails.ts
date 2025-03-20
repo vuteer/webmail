@@ -21,8 +21,8 @@ export const getThread = async (id: string) => {
 }
 
 // get thread mails
-export const getMails = async (threadId: string, page: number) => {
-  let res = await getDoc(`/mails/list/${threadId}?page=${page}`, true);
+export const getMails = async (threadId: string, page: number, section: string) => {
+  let res = await getDoc(`/mails/list/${threadId}?page=${page}&section=${section}`, true);
  
   return res?.data || false; 
 }
@@ -65,8 +65,8 @@ export const searchThroughMail = async (q: string, sortBy: string, section: stri
 }
 
 // delete selected 
-export const deleteSelected = async (selected: string[]) => {
-  let res = await postDoc(`/mails/delete`, {selected}, true);
+export const deleteSelected = async (selected: string[], section?: string) => {
+  let res = await postDoc(`/mails/delete${section ? `?section=${section}`: ""}`, {selected}, true);
   return res?.status === "success"; 
 }
 

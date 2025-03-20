@@ -1,4 +1,4 @@
-import {getDoc, postDoc, patchDoc} from '@/utils/api-calls';
+import { postDoc, patchDoc} from '@/utils/api-calls';
 
 export const login = async (data: {email: string, password: string}) => {
   const res = await postDoc (`/auth/login`, data, true);
@@ -11,14 +11,8 @@ export const login = async (data: {email: string, password: string}) => {
 };
  
 
-export const requestPasswordToken = async (data: {email: string}, admin?: boolean) => {
-  const res = await patchDoc(`/auth/password?type=forgot${admin ? "&role=admin": ""}`, data, true); 
-  if (res?.status === 'success')  return res.message; 
+ export const forgotPassword = async (data: {email: string}) => {
+  const res = await patchDoc(`/auth/password/forgot`, data, true);
+  if (res?.status === "success") return true; 
   return false; 
-}
-
-export const resetPassword = async (data: {password: string, passwordConfirm: string}, token: string, admin?: boolean) => {
-  const res = await patchDoc(`/auth/password?type=reset&token=${token}${admin ? "&role=admin": ""}`, data, true); 
-  if (res?.status === "success") return res.message; 
-  return false; 
-}
+ }

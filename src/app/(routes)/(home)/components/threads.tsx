@@ -42,7 +42,7 @@ const Threads = ({title}: {title: string}) => {
 
     const searchParams = useSearch(); 
     // const page = searchParams?.get("page") || "0"; 
-    const sec = searchParams?.get("sec"); 
+    const sec = searchParams?.get("sec") || ""; 
     const q = searchParams?.get("q") || "";
     const sort = searchParams?.get("sort") || ""; 
 
@@ -116,7 +116,7 @@ const Threads = ({title}: {title: string}) => {
         setButtonLoading(true);
 
         // selected 
-        let res = await deleteSelected(selected);
+        let res = await deleteSelected(selected, sec);
 
         if (res){
             createToast("success", "Mails deleted");

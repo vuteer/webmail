@@ -124,6 +124,8 @@ const NewMailForm = () => {
       push(draft ? `/?sec=draft&threadId=${res}` : `/?sec=inbox&threadId=${res}`)
       setClearEditor(true);
       setFiles([])
+    } else {
+      if (!draft) push("/?sec=draft"); 
     }
 
     if (draft) setDLoading(false);

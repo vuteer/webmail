@@ -17,15 +17,16 @@ import { useAuthUser, useSignOut } from "@/auth/authHooks";
 import { useCustomEffect } from "@/hooks/useEffect";
 import useNetworkStatus from "@/hooks/useNetwork"; 
 import { useMailStoreState } from "@/stores/mail-store";
+import useMounted from "@/hooks/useMounted";
 
 const SetupSocket = () => {
   const notificationSoundRef = React.useRef<HTMLAudioElement>(null);
   const playButtonRef = React.useRef<HTMLButtonElement>(null); 
   const network = useNetworkStatus(); 
 
-  const [mounted, setMounted] = React.useState<boolean>(false); 
   const [muted, setMuted] = React.useState<boolean>(true);
   const [soundModal, setSoundModal] = React.useState<boolean>(false); 
+  const mounted = useMounted(); 
 
   const { push } = useRouter();
 
@@ -33,7 +34,7 @@ const SetupSocket = () => {
   const signOut = useSignOut();
   let user = auth();
   
-  useCustomEffect(() => {setMounted(true)}, []); 
+  // useCustomEffect(() => {setMounted(true)}, []); 
 
   const { setInitialNumbers, addToNumber } = useMailNumbersStore();
   const { updateFieldsInitially, socketConnected } = userStateStore();
@@ -41,7 +42,7 @@ const SetupSocket = () => {
   const {addNewThread} = useMailStoreState(); 
 
   const getCurrentUser = async () => {
-    if (!user || socketConnected) return;
+    if (!user || socketConnected || !mounted) return;
 
     let res = await getUser(false);
 
@@ -69,7 +70,7 @@ const SetupSocket = () => {
     setSoundModal(true)
   };
 
-  useCustomEffect(getCurrentUser, [user, network]);
+  useCustomEffect(getCurrentUser, [user, network, mounted]);
 
   const handlePlay: () => void = () => {
     setMuted(false); 
