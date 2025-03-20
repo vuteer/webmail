@@ -47,6 +47,7 @@ const Mail = ({}) => {
 
     const threadID = queryParams?.get("threadId") || ""; 
     // const page = queryParams?.get("thread_p") || "0";
+    const sec = queryParams?.get("sec") || "";
 
     const fetchThread = async () => {
         if (!threadID) {
@@ -116,6 +117,8 @@ const Mail = ({}) => {
     const openReplyComponent = () => {
         replyRef.current?.classList.remove("translate-y-full");
     }
+
+    console.log(thread)
 
     return (
         <div className=" h-[100vh] relative overflow-hidden flex-1 flex flex-col gap-2 ">
@@ -192,13 +195,17 @@ const Mail = ({}) => {
                                     )
                                 }
                             </div>
-
-                            <MessageButtons 
-                                thread={threadID} 
-                                reply={openReplyComponent} 
-                                threadInfo={threadInfo}
-                                setThreadInfo={setThreadInfo}
-                            />
+                            
+                            {
+                                sec !== "trash" && (
+                                    <MessageButtons 
+                                        thread={threadID} 
+                                        reply={openReplyComponent} 
+                                        threadInfo={threadInfo}
+                                        setThreadInfo={setThreadInfo}
+                                    />
+                                )
+                            }
                         </div>
                     )
                 }
@@ -206,7 +213,7 @@ const Mail = ({}) => {
  
             {/* reply */}
             {
-                thread && (
+                thread && sec !== "trash" && (
                     <ThreadReply 
                        replyRef={replyRef}
                        mail_id={threadID}
