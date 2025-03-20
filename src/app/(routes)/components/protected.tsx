@@ -27,9 +27,6 @@ const Protected = ({title, children, backPage, className}: ProtectedProps) => {
     const auth = useAuthUser(); 
     const user = auth(); 
 
-
-    // React.useEffect(() => setMounted(true), []); 
-
     React.useEffect(() => {
         if (!mounted) return
 
