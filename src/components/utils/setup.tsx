@@ -15,6 +15,7 @@ import { useSignOut } from "@/auth/authHooks";
 import { useCustomEffect } from "@/hooks"; 
 import { userStateStore } from "@/stores/user-store";
 import { userPreferencesStore } from "@/stores/user-preferences";
+import useMounted from "@/hooks/useMounted";
 
 const FinalizeSetup = ({ }) => {
     const { contact_email, finalized_setup, loading } = userStateStore();
@@ -26,6 +27,7 @@ const FinalizeSetup = ({ }) => {
     const [password, setPassword] = React.useState<string>("")
     const [passwordConfirm, setPasswordConfirm] = React.useState<string>("");
     const [dontShow, setDontShow] = React.useState<boolean>(false); 
+    const mounted = useMounted(); 
 
     const [email, setEmail] = React.useState<string>("");
     const [errors, setErrors] = React.useState<string[]>([]);
@@ -33,12 +35,12 @@ const FinalizeSetup = ({ }) => {
     React.useEffect(() => {setDontShow(!finalized_setup)}, [finalized_setup]);
 
     const fetchPreferences = async () => {
-        if (!finalized_setup) return;
+        if (!finalized_setup || !mounted) return;
         let res = await getUserSettings(); 
         if (res)  addInitial(res.signature, res.notifications, res.security);
     }   
  
-    useCustomEffect(fetchPreferences, [finalized_setup]); 
+    useCustomEffect(fetchPreferences, [finalized_setup, mounted]); 
 
     const handleSubmit = async () => {
         if (!password) {

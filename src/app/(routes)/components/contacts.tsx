@@ -58,6 +58,8 @@ const Contacts = () => {
                         <AddContactModal
                             isOpen={openContactModal}
                             onClose={() => setOpenContactModal(false)}
+                            contacts={contacts}
+                            setContacts={setContacts}
                         />
                         <User />
                         <Separator />

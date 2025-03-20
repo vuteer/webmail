@@ -8,12 +8,10 @@ import { Heading1, Heading3, Paragraph } from '@/components/ui/typography';
 import { Separator } from '@/components/ui/separator';
  
 import { useAuthUser } from '@/auth/authHooks';
-// import SideMenu from './side-menu';
+import useMounted from "@/hooks/useMounted"; 
+
 import Menu from './menu';
 import { cn } from '@/lib/utils';
-
-// BN-79S58ML5
-
 
 type ProtectedProps = PropsWithChildren<{
     title: string; 
@@ -23,14 +21,14 @@ type ProtectedProps = PropsWithChildren<{
 
 const Protected = ({title, children, backPage, className}: ProtectedProps) => {
     const [loading, setLoading] = React.useState<boolean>(true);
-    const [mounted, setMounted] = React.useState<boolean>(false); 
     const [loggedIn, setLoggedIn] = React.useState<boolean>(false); 
+    const mounted = useMounted();  
 
     const auth = useAuthUser(); 
     const user = auth(); 
 
 
-    React.useEffect(() => setMounted(true), []); 
+    // React.useEffect(() => setMounted(true), []); 
 
     React.useEffect(() => {
         if (!mounted) return
