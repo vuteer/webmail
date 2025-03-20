@@ -63,7 +63,7 @@ const Welcome = () => (
         </div>
         <Paragraph className="text-white -mt-5 z-[40] text-center">
             <span>Register your business </span>
-            <Link href="app.vuteer.com" target="_blank" className="text-blue-500 hover:text-red-500">HERE</Link>
+            <Link href="https://app.vuteer.com" target="_blank" className="text-blue-500 hover:text-red-500">HERE</Link>
         </Paragraph>
     </div>
 )
