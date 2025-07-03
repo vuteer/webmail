@@ -1,12 +1,17 @@
 import Protected from "../components/protected";
 import Container from "./components/container";
 
-export default function Home({searchParams}: {searchParams: {sec: string}}) {
+const Home = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ sec: string }>;
+}) => {
+  const sec = (await searchParams).sec;
   return (
-    <Protected
-      title={""}
-    >
-      <Container sec={searchParams.sec || "inbox"}/>
+    <Protected title={""}>
+      <Container sec={sec || "inbox"} />
     </Protected>
   );
-}
+};
+
+export default Home;

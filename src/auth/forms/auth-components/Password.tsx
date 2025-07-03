@@ -17,9 +17,9 @@ const Password: React.FC<PasswordProps> = ({ loading, field }) => {
   return (
     <FormItem>
       <FormControl>
-        <>
+        <div>
           <PasswordInput loading={loading} field={field} />
-        </>
+        </div>
       </FormControl>
     </FormItem>
   );
@@ -56,9 +56,9 @@ export const PasswordInput = ({
           field
             ? ``
             : !focused
-            ? "border border-secondary pl-2"
-            : "border-secondary-color border pl-2",
-          "flex items-center relative rounded-lg"
+              ? "border border-secondary pl-2"
+              : "border-secondary-color border pl-2",
+          "flex items-center relative rounded-lg",
         )}
       >
         <Lock className={"absolute top-2.5 left-2 h-5 w-5"} />
