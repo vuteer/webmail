@@ -1,15 +1,10 @@
 import Protected from "../components/protected";
 import Container from "./components/container";
 
-const Home = async ({
-  searchParams,
-}: {
-  searchParams: Promise<{ sec: string }>;
-}) => {
-  const sec = (await searchParams).sec;
+const Home = async () => {
   return (
     <Protected title={""}>
-      <Container sec={sec || "inbox"} />
+      <Container />
     </Protected>
   );
 };

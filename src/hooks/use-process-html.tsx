@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+export const processHtml = (html: string): string => {
+  let processedHtml = html;
+  processedHtml = renderToStaticMarkup(<>{html}</>);
+  processedHtml = sanitizeHtml(processedHtml);
+  return processedHtml;
+};
+
 export const useProcessedHtml = ({
   reactNodes,
   isTrustedSender = false,
@@ -30,7 +37,7 @@ export const useProcessedHtml = ({
 };
 
 // Optional basic sanitizer
-const sanitizeHtml = (html: string): string => {
+export const sanitizeHtml = (html: string): string => {
   return html
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
     .replace(/on\w+="[^"]*"/gi, "");

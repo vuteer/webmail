@@ -10,8 +10,6 @@ const FetchNumbers = () => {
   const fetchNumbers = async () => {
     let res = await getNumbers();
 
-    console.log(res);
-    console.log(res.inbox);
     if (res)
       setInitialNumbers(
         res.inbox.total || 0,

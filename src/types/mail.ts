@@ -3,6 +3,7 @@
 export type ContactType = {
   name: string;
   address: string;
+  email?: string;
   image?: string;
   avatar?: string;
 };
@@ -22,6 +23,7 @@ export type VisibilityType = "public" | "organization" | "private" | "limited";
 export type AttachmentType = {
   id: string;
   title: string;
+  filename: string;
   size: number;
   type: FileType;
   visibility?: VisibilityType;
@@ -41,9 +43,9 @@ export type MailType = {
 export type ThreadType = {
   id: string;
   from: ContactType;
-  to: ContactType;
+  to: ContactType | ContactType[];
   subject: string;
-  attachments?: number;
+  attachments?: AttachmentType[];
   flags: string[];
   labels?: string[];
   text?: string;
@@ -57,6 +59,7 @@ export type ThreadType = {
   mailedBy?: string;
   signedBy?: string;
   security?: string;
+  tags?: string[];
 };
 
 export type ThreadInfoType = {

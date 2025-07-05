@@ -11,12 +11,12 @@ export const getPlaceHolder = (name: string) => {
   let arr = name?.split(" ");
 
   let placeholder = "";
-  if (arr.length >= 2)
+  if (arr?.length >= 2)
     placeholder = `${arr[0].charAt(0).toUpperCase()}${arr[0].charAt(1).toUpperCase()}`;
-  if (arr.length === 1)
+  if (arr?.length === 1)
     placeholder = `${arr[0].charAt(0).toUpperCase()}${arr[0].charAt(1).toUpperCase()}`;
 
-  return placeholder;
+  return placeholder || "NN";
 };
 
 const AppAvatar: React.FC<AvatarProps> = ({ name, src, dimension }) => (

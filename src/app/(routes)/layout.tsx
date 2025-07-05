@@ -23,7 +23,7 @@ export default function MainLayout({
       <main className="h-full w-full flex">
         <SideMenu />
         {children}
-        <Contacts />
+        {/* <Contacts /> */}
       </main>
     </AuthProvider>
   );

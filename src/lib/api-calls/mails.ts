@@ -3,8 +3,6 @@ import { deleteDoc, getDoc, patchDoc, postDoc } from "@/utils/api-calls";
 // get mail numbers
 export const getNumbers = async () => {
   let res = await getDoc(`/mails/numbers/state`, true);
-  console.log(res);
-
   return res?.data || false;
 };
 
@@ -41,6 +39,45 @@ export const getMails = async (
   return res?.data || false;
 };
 
+// update mail flags
+export const updateMailFlags = async (
+  messageId: string,
+  folder: string,
+  flag: string,
+  action: string,
+) => {
+  let res = await patchDoc(
+    `/mails/${messageId}/${folder}?flag=${flag}&action=${action}`,
+    {},
+    true,
+  );
+  return res?.success;
+};
+
+//toggle archive and trash
+export const toggleLocation = async (
+  messageId: string,
+  folder: string,
+  location: string,
+  action: string,
+) => {
+  let res = await patchDoc(
+    `/mails/${messageId}/${folder}/${location}?action=${action}`,
+    {},
+    true,
+  );
+
+  return res?.success;
+};
+
+export const sendMail = async (data: any) => {
+  const res = await postDoc("/mails", data, true);
+
+  console.log(res);
+  return res?.data?.doc || false;
+};
+
+// old
 // update mail
 export const updateThread = async (threadId: string, data: any) => {
   let res = await patchDoc(`/mails/${threadId}`, data, true);
@@ -54,7 +91,7 @@ export const deleteThread = async (threadId: string) => {
 };
 
 // send mail & save draft
-export const sendMail = async (data: any) => {
+export const sendMail2 = async (data: any) => {
   let res = await postDoc(`/mails`, data, true);
   console.log(res);
   return res?.data?.doc || false;

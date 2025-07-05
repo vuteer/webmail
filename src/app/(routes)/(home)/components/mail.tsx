@@ -1,123 +1,86 @@
 // actual mail container
 import React from "react";
 import parse from "html-react-parser";
+import { useQueryState } from "nuqs";
 
 import { Paragraph } from "@/components/ui/typography";
 import NoMailId from "./no-mail";
 import Menu from "../../components/menu";
-import Message from "./message";
 import { Separator } from "@/components/ui/separator";
-import ThreadReply from "./reply";
 
 import { useCustomEffect } from "@/hooks/useEffect";
 
-import { useSearch } from "@/hooks/useSearchParams";
-import { getThread, getMails } from "@/lib/api-calls/mails";
+import { ThreadType } from "@/types";
 
-import { MailType, ThreadType } from "@/types";
-
-// import { Buttons, Header, MessageButtons } from "./mail-items";
-import { ThreadInfoType } from "@/types";
 import { MailHeader } from "./thread-items/header";
 import { MailDisplay } from "./thread-items/mail-display";
+import { ReplyCompose } from "./thread-items/reply-compose";
+import { useThreadStore } from "@/stores/threads";
+import useMounted from "@/hooks/useMounted";
+import { useMailStoreState } from "@/stores/mail-store";
 
 const Mail = ({}) => {
-  const queryParams = useSearch();
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [thread, setThread] = React.useState<ThreadType>();
+  const { threads } = useThreadStore();
+  const { mails, mailsLoading, fetchThreads } = useMailStoreState();
+  const mounted = useMounted();
 
-  const [threadInfo, setThreadInfo] = React.useState<ThreadInfoType>({
-    archived: false,
-    important: false,
-    junk: false,
-    starred: false,
-    flag: false,
-    trashed: false,
-  });
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
-  const [mailsLoading, setMailsLoading] = React.useState<boolean>(true);
-  const [mails, setMails] = React.useState<ThreadType[]>([]);
-
-  const [count, setCount] = React.useState<number>(0);
+  const [thread, setThread] = React.useState<ThreadType | null>(null);
   const [page, setPage] = React.useState<number>(0);
-  const [moreLoading, setMoreLoading] = React.useState<boolean>(false);
 
-  const replyRef = React.useRef<HTMLDivElement>(null);
+  const [mode] = useQueryState("mode");
+  const [activeReplyId] = useQueryState("activeReplyId");
+  const [threadId] = useQueryState("threadId");
+  const [sec] = useQueryState("sec");
 
-  const threadID = queryParams?.get("threadId") || "";
-  // const page = queryParams?.get("thread_p") || "0";
-  const sec = queryParams?.get("sec") || "";
+  let thrd = threads.find((t) => t.messageId === threadId);
 
-  const fetchMails = async () => {
-    setMails([]);
-    if (!threadID) {
-      setMailsLoading(false);
-      return;
-    }
-
-    setMailsLoading(true);
-    let res = await getMails(threadID, page, sec);
-    if (res) {
-      let docs = res.docs.map((doc: any) => ({
-        ...doc,
-        html: doc.html ? parse(`${doc.html}`) : null,
-      }));
-      setThread(res.docs.filter((doc: any) => !doc.inReplyTo)[0]);
-      setMails(docs);
-    }
-    setMailsLoading(false);
-  };
-
-  const fetchNextPageMails = async () => {
-    if (!page || !threadID) return;
-    setMoreLoading(true);
-    let res = await getMails(threadID, page, sec);
-    if (res) {
-      let docs = res.docs.map((doc: any) => ({
-        ...doc,
-        html: doc.html ? parse(`${doc.html}`) : null,
-      }));
-      setMails([...docs, ...mails]);
-    }
-    setMoreLoading(false);
-  };
-
-  useCustomEffect(fetchMails, [threadID]);
-  useCustomEffect(fetchNextPageMails, [threadID, page]);
+  console.log(mails);
+  useCustomEffect(() => {
+    if (!mounted || !threadId || !thrd) return;
+    setThread(thrd);
+    fetchThreads(threadId, page, sec || "inbox");
+  }, [thrd, mounted]);
 
   React.useEffect(() => {
-    if (loading) return;
+    if (mailsLoading) return;
 
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [loading]); // Scroll to bottom when content changes
-
-  // functions
-  const openReplyComponent = () => {
-    replyRef.current?.classList.remove("translate-y-full");
-  };
-
-  console.log(thread, mails);
+  }, [mailsLoading]); // Scroll to bottom when content changes
 
   return (
-    <div className="bg-background rounded-xl h-[100vh] relative overflow-hidden flex-1 flex flex-col gap-2 px-4 pt-5">
+    <div className="bg-background rounded-xl h-screen relative overflow-hidden flex-1 flex flex-col gap-2 px-4 pt-5">
       <Menu />
       <Separator />
-      <div className="flex-1 flex flex-col">
-        {loading && (
+      <div className="flex-1 flex flex-col ">
+        {mailsLoading && (
           <div className="w-full h-full flex items-center justify-center">
             <Paragraph>Loading...</Paragraph>
           </div>
         )}
-        {!loading && !thread && <NoMailId />}
-        {!loading && thread && (
-          <div className="px-2 space-y-3">
-            <MailHeader />
-            <Separator />
-            <MailDisplay subject={thread.subject} mails={mails} />
-          </div>
+        {!mailsLoading && (
+          <>
+            {!threadId && <NoMailId />}
+            {threadId && thread && (
+              <div className="px-2 space-y-3 flex flex-col h-full">
+                <MailHeader threadId={threadId || ""} />
+                <Separator />
+                <MailDisplay subject={thread.subject} />
+                {/* Sticky Reply Compose at Bottom - Only for last message */}
+                {mode && (
+                  <div
+                    className="border-border bg-background sticky bottom-2 z-10  mb-4 py-2"
+                    id={`reply-composer-${activeReplyId}`}
+                  >
+                    <ReplyCompose />
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

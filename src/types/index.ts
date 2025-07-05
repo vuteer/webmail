@@ -87,6 +87,7 @@ export interface SidebarData {
 export interface Sender {
   name?: string;
   email: string;
+  address?: string;
   subject?: string;
 }
 

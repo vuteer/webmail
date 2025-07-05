@@ -1,6 +1,5 @@
+import { useCallback } from "react";
 import { AppAvatar } from "@/components";
-import { AvatarImage } from "@/components/plate-ui/avatar";
-import { Avatar } from "@/components/ui/avatar";
 import {
   Popover,
   PopoverContent,
@@ -13,16 +12,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Heading2 } from "@/components/ui/typography";
-import { ThreadType } from "@/types";
-import { useCallback } from "react";
 import { MailHeaderDetails } from "./mai-header-dets";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMailStoreState } from "@/stores/mail-store";
 
 interface MailDisplayProps {
-  mails: ThreadType[];
   subject: string;
 }
 
-export const MailDisplay = ({ mails, subject }: MailDisplayProps) => {
+export const MailDisplay = ({ subject }: MailDisplayProps) => {
   const renderPerson = useCallback(
     (person: any) => (
       <Popover key={person.email || person.address}>
@@ -50,12 +48,12 @@ export const MailDisplay = ({ mails, subject }: MailDisplayProps) => {
     ),
     [],
   );
-
-  const people = [mails[0].from];
+  const { mails } = useMailStoreState();
+  const people = mails[0] ? [mails[0]?.from] : [];
 
   return (
     <>
-      <div className="relative flex-1 overflow-hidden space-y-2">
+      <div className="relative overflow-hidden space-y-2">
         <Heading2 className="text-md lg:text-xl">{subject}</Heading2>
         <div className="text-muted-foreground flex items-center gap-2 text-sm dark:text-[#8C8C8C]">
           {(() => {
@@ -95,14 +93,18 @@ export const MailDisplay = ({ mails, subject }: MailDisplayProps) => {
       </div>
       <Separator />
       {/* threads */}
-      {mails.map((mail, index) => (
-        <MailHeaderDetails
-          emailData={mail}
-          key={index}
-          index={index}
-          totalEmails={mails.length}
-        />
-      ))}
+      <div className={"flex min-h-0 flex-1 flex-col"}>
+        <ScrollArea className={"flex-1 h-full"} type="auto">
+          {mails.map((mail, index) => (
+            <MailHeaderDetails
+              emailData={mail}
+              key={index}
+              index={index}
+              totalEmails={mails.length}
+            />
+          ))}
+        </ScrollArea>
+      </div>
     </>
   );
 };

@@ -1,7 +1,6 @@
 // thread item
-import React from "react";
-import { useRouter } from "next/navigation";
-import { Paperclip } from "lucide-react";
+import React, { use } from "react";
+import { useQueryState, useQueryStates } from "nuqs";
 
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,14 +12,11 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
-// import { formatDateToString } from "@/utils/dates";
 import { cn } from "@/lib/utils";
-import { ThreadInfoType, ThreadType } from "@/types";
+import { ThreadType } from "@/types";
 
-import { useSearch } from "@/hooks/useSearchParams";
-// import ThreadSelect from "@/components/popovers/thread-select";
 import { useMailNumbersStore } from "@/stores/mail-numbers";
-import dayjs from "dayjs";
+
 import { AppAvatar } from "@/components";
 import {
   Archive2,
@@ -29,14 +25,10 @@ import {
   Star2,
   Trash,
 } from "@/components/icons/icons";
-import {
-  // FOLDERS,
-  formatDate,
-  // getEmailLogo,
-  // getMainSearchTerm,
-  // parseNaturalLanguageSearch,
-} from "@/lib/utils";
-import useMounted from "@/hooks/useMounted";
+import { formatDate } from "@/lib/utils";
+import { useThreadStore } from "@/stores/threads";
+import { updateMailFlags } from "@/lib/api-calls/mails";
+import { handleToggleFlag, includesFlag } from "./thread-items/actions";
 
 interface ThreadProps {
   thread: ThreadType;
@@ -44,54 +36,50 @@ interface ThreadProps {
 }
 
 const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
-  const { push } = useRouter();
-  const queryParams = useSearch();
-  const mounted = useMounted();
+  const [threadId, setThreadId] = useQueryState("threadId");
+  const [sec] = useQueryState("sec");
+  const { updateThread } = useThreadStore();
 
   const { from, date, subject, flags, labels, cc, bcc, messageId } = thread;
-  const [read, setRead] = React.useState<boolean>(true);
-  const [starred, setStarred] = React.useState<boolean>(true);
-  const [important, setImportant] = React.useState<boolean>(true);
-  const [archived, setArchived] = React.useState<boolean>(true);
-  const threadID = queryParams?.get("threadId");
 
-  React.useEffect(() => {
-    if (!mounted) return;
-    if (flags?.includes("\\Seen")) setRead(true);
-    if (flags?.includes("\\Flagged")) setStarred(true);
-  }, [mounted, threadID]);
+  const [archived, setArchived] = React.useState<boolean>(true);
 
   // zustand state
   const { inbox, lessFromNumber } = useMailNumbersStore();
 
-  const handleOpenMail = () => {
-    const entries: any = queryParams?.entries();
+  const handleOpenMail = async () => {
+    if (!includesFlag("\\Seen", flags)) {
+      // 1. Optimistic update
+      const previousFlags = [...thread.flags];
+      const newFlags = [...previousFlags, "\\Seen"];
+      updateThread(messageId, { flags: newFlags });
 
-    let queryStr = "?";
-
-    for (const [key, value] of entries) {
-      if (key !== "threadId") queryStr = queryStr + `${key}=${value}&`;
+      let success = await updateMailFlags(
+        thread.messageId,
+        sec || "inbox",
+        "Seen",
+        "add",
+      );
+      if (!success) {
+        updateThread(messageId, { flags: previousFlags });
+      }
     }
-    queryStr = queryStr + `threadId=${messageId}`;
-    // setActualUnread(0);
+    setThreadId(messageId);
     if (inbox) lessFromNumber("unread", 1);
-    push(queryStr);
   };
 
   return (
     <div
       className={cn(
         "group relative duration-700 p-1 pb-0 rounded-lg my-1 w-full cursor-pointer overflow-hidden hover:bg-background  ",
-        threadID === messageId ? "bg-secondary" : "",
+        threadId === messageId ? "bg-secondary" : "",
       )}
       onClick={handleOpenMail}
     >
       <ThreadButtons
         index={index}
-        starred={starred}
-        setStarred={setStarred}
-        important={important}
-        setImportant={setImportant}
+        starred={includesFlag("\\Flagged", flags)}
+        important={includesFlag("$Important", flags)}
         archived={archived}
         setArchived={setArchived}
       />
@@ -115,13 +103,15 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
                 <div
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    !read ? "bg-transparent" : "bg-main-color",
+                    includesFlag("\\Seen", flags)
+                      ? "bg-transparent"
+                      : "bg-main-color",
                   )}
                 />
                 <Star2
                   className={cn(
                     "h-4 w-4",
-                    !starred
+                    includesFlag("\\Flagged", flags)
                       ? "fill-yellow-400 stroke-yellow-400"
                       : "fill-transparent ",
                   )}
@@ -168,20 +158,20 @@ export const ThreadPlaceholder = () => (
 const ThreadButtons = ({
   index,
   starred,
-  setStarred,
   important,
-  setImportant,
   archived,
   setArchived,
 }: {
   index: number;
   starred: boolean;
-  setStarred: (starred: boolean) => void;
   important: boolean;
-  setImportant: (important: boolean) => void;
   archived: boolean;
   setArchived: (archived: boolean) => void;
 }) => {
+  const { threads, updateThread } = useThreadStore();
+  const [threadId] = useQueryState("threadId");
+  const [sec] = useQueryState("sec");
+
   return (
     <div
       className={cn(
@@ -195,12 +185,20 @@ const ThreadButtons = ({
             variant="ghost"
             size="icon"
             className="h-6 w-6 overflow-visible [&_svg]:size-3.5"
-            // onClick={handleToggleStar}
+            onClick={() =>
+              handleToggleFlag(
+                threadId,
+                sec,
+                threads,
+                updateThread,
+                "\\Flagged",
+              )
+            }
           >
             <Star2
               className={cn(
                 "h-4 w-4",
-                true
+                starred
                   ? "fill-yellow-400 stroke-yellow-400"
                   : "fill-transparent stroke-[#9D9D9D] dark:stroke-[#9D9D9D]",
               )}
@@ -221,9 +219,19 @@ const ThreadButtons = ({
             size="icon"
             className={cn(
               "h-6 w-6 [&_svg]:size-3.5",
-              true ? "hover:bg-orange-200/70 dark:hover:bg-orange-800/40" : "",
+              important
+                ? "hover:bg-orange-200/70 dark:hover:bg-orange-800/40"
+                : "",
             )}
-            // onClick={handleToggleImportant}
+            onClick={() =>
+              handleToggleFlag(
+                threadId,
+                sec,
+                threads,
+                updateThread,
+                "$Important",
+              )
+            }
           >
             <ExclamationCircle
               className={cn(important ? "fill-orange-400" : "fill-[#9D9D9D]")}

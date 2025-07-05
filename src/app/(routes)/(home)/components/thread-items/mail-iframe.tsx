@@ -50,7 +50,6 @@ export const MailIframe = ({
     reactNodes: html,
     isTrustedSender: false,
   });
-  console.log(html, processedHtml);
 
   useEffect(() => {
     if (!iframeRef.current) return;

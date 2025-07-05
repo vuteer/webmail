@@ -1,30 +1,13 @@
 import { useState, useCallback, useRef } from "react";
+import { Lock, HardDriveDownload } from "lucide-react";
+import { useQueryState } from "nuqs";
+import { format } from "date-fns-tz";
+
 import {
-  Briefcase,
-  Star,
-  StickyNote,
-  Users,
-  Lock,
-  HardDriveDownload,
-  Loader2,
-  CopyIcon,
-  SearchIcon,
-  FileText,
-} from "lucide-react";
-import {
-  Bell,
-  Docx,
-  Figma,
   Forward,
-  ImageFile,
-  Lightning,
-  PDF,
   Reply,
   ReplyAll,
   ThreeDots,
-  Tag,
-  User,
-  ChevronDown,
   Printer,
 } from "@/components/icons/icons";
 import {
@@ -41,8 +24,18 @@ import {
 import { cn, formatDate } from "@/lib/utils";
 import { MailIframe } from "./mail-iframe";
 import { AppAvatar } from "@/components";
-import { format } from "date-fns-tz";
 import { Separator } from "@/components/ui/separator";
+
+import {
+  cleanEmailDisplay,
+  cleanNameDisplay,
+  openAttachment,
+  getFileIcon,
+  formatFileSize,
+  downloadAttachment,
+  printThread,
+  handleDownloadAllAttachments,
+} from "./actions";
 
 export const MailHeaderDetails = ({
   emailData,
@@ -58,6 +51,9 @@ export const MailHeaderDetails = ({
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [, setMode] = useQueryState("mode");
+  const [, setActiveReplyId] = useQueryState("activeReplyId");
 
   // Function to handle popover state changes
   const handlePopoverChange = useCallback((open: boolean) => {
@@ -274,6 +270,7 @@ export const MailHeaderDetails = ({
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            printThread([emailData]);
                             // printMail();
                           }}
                         >
@@ -281,15 +278,15 @@ export const MailHeaderDetails = ({
                           <span>Print</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                        // disabled={!emailData.attachments?.length}
-                        // onClick={(e) => {
-                        //   e.stopPropagation();
-                        //   e.preventDefault();
-                        //   handleDownloadAllAttachments(
-                        //     emailData.subject || 'email',
-                        //     emailData.attachments || [],
-                        //   )();
-                        // }}
+                          disabled={!emailData.attachments?.length}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleDownloadAllAttachments(
+                              emailData.subject || "email",
+                              emailData.attachments || [],
+                            )();
+                          }}
                         >
                           <HardDriveDownload className="fill-iconLight dark:text-iconDark dark:fill-iconLight mr-2 h-4 w-4" />
                           Download All Attachments
@@ -428,8 +425,8 @@ export const MailHeaderDetails = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsCollapsed(false);
-                  // setMode("reply");
-                  // setActiveReplyId(emailData.id);
+                  setMode("reply");
+                  setActiveReplyId(emailData.messageId);
                 }}
                 icon={
                   <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
@@ -437,11 +434,11 @@ export const MailHeaderDetails = ({
                 text={"Reply"}
                 shortcut={isLastEmail ? "r" : undefined}
               />
-              <ActionButton
+              {/* <ActionButton
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsCollapsed(false);
-                  // setMode("replyAll");
+                  setMode("replyAll");
                   // setActiveReplyId(emailData.id);
                 }}
                 icon={
@@ -449,13 +446,13 @@ export const MailHeaderDetails = ({
                 }
                 text={"Reply All"}
                 shortcut={isLastEmail ? "a" : undefined}
-              />
+              /> */}
               <ActionButton
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsCollapsed(false);
-                  // setMode("forward");
-                  // setActiveReplyId(emailData.id);
+                  setMode("forward");
+                  setActiveReplyId(emailData.messageId);
                 }}
                 icon={
                   <Forward className="fill-muted-foreground dark:fill-[#9B9B9B]" />
@@ -503,112 +500,4 @@ const ActionButton = ({ onClick, icon, text, shortcut }: ActionButtonProps) => {
       )}
     </button>
   );
-};
-
-// Helper function to clean email display
-const cleanEmailDisplay = (email?: string) => {
-  if (!email) return "";
-  const match = email.match(/^[^a-zA-Z]*(.*?)[^a-zA-Z]*$/);
-  return match ? match[1] : email;
-};
-
-// Helper function to clean name display
-const cleanNameDisplay = (name?: string) => {
-  if (!name) return "";
-  return name.trim();
-};
-
-const openAttachment = (attachment: {
-  body: string;
-  mimeType: string;
-  filename: string;
-}) => {
-  try {
-    const byteCharacters = atob(attachment.body);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: attachment.mimeType });
-    const url = window.URL.createObjectURL(blob);
-
-    const width = 800;
-    const height = 600;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
-
-    const popup = window.open(
-      url,
-      "attachment-viewer",
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,location=no,menubar=no`,
-    );
-
-    if (popup) {
-      popup.focus();
-      // Clean up the URL after a short delay to ensure the browser has time to load it
-      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    }
-  } catch (error) {
-    console.error("Error opening attachment:", error);
-  }
-};
-
-// Add getFileIcon utility function
-const getFileIcon = (filename: string) => {
-  const extension = filename.split(".").pop()?.toLowerCase();
-
-  switch (extension) {
-    case "pdf":
-      return <PDF className="fill-[#F43F5E]" />;
-    case "jpg":
-      return <ImageFile />;
-    case "jpeg":
-      return <ImageFile />;
-    case "png":
-      return <ImageFile />;
-    case "gif":
-      return <ImageFile />;
-    case "docx":
-      return <Docx />;
-    case "fig":
-      return <Figma />;
-    case "webp":
-      return <ImageFile />;
-    default:
-      return <FileText className="h-4 w-4 text-[#8B5CF6]" />;
-  }
-};
-
-// Add formatFileSize utility function
-const formatFileSize = (size: number) => {
-  const sizeInMB = (size / (1024 * 1024)).toFixed(2);
-  return sizeInMB === "0.00" ? "" : `${sizeInMB} MB`;
-};
-
-const downloadAttachment = (attachment: {
-  body: string;
-  mimeType: string;
-  filename: string;
-}) => {
-  try {
-    const byteCharacters = atob(attachment.body);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: attachment.mimeType });
-
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = attachment.filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Error downloading attachment:", error);
-  }
 };

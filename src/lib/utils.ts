@@ -11,6 +11,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { MAX_URL_LENGTH } from "./constants";
 import type { Sender } from "@/types";
 import LZString from "lz-string";
+import { convert } from "html-to-text";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -297,10 +298,14 @@ export const constructReplyBody = (
   quotedMessage?: string,
 ) => {
   const senderName =
-    originalSender?.name || originalSender?.email || "Unknown Sender";
+    originalSender?.name ||
+    originalSender?.email ||
+    originalSender?.address ||
+    "Unknown Sender";
   const recipientEmails = otherRecipients.map((r) => r.email).join(", ");
 
-  return `
+  return quotedMessage
+    ? `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
       <div style="">
         ${formattedMessage}
@@ -308,10 +313,14 @@ export const constructReplyBody = (
       <div style="padding-left: 16px; border-left: 3px solid #e2e8f0; color: #64748b;">
         <div style="font-size: 12px;">
           On ${originalDate}, ${senderName} ${recipientEmails ? `&lt;${recipientEmails}&gt;` : ""} wrote:
+          <p style="text-decoration: italic;">
+            ${quotedMessage.slice(0, 300)}
+          </p>
         </div>
       </div>
     </div>
-  `;
+  `
+    : "";
 };
 
 export const constructForwardBody = (
@@ -337,6 +346,9 @@ export const constructForwardBody = (
           Date: ${originalDate}<br/>
           Subject: ${originalSender?.subject || "No Subject"}<br/>
           To: ${recipientEmails || "No Recipients"}
+          <p style="text-decoration: italic;">
+            ${quotedMessage?.slice(0, 300)}
+          </p>
         </div>
       </div>
     </div>
@@ -572,3 +584,19 @@ export const withExponentialBackoff = async <T>(
     }
   }
 };
+
+// validate email
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+// decode html to text
+export function decodeHtmlToText(html: unknown): string {
+  if (typeof html !== "string") return "";
+
+  return convert(html, {
+    wordwrap: false,
+    selectors: [{ selector: "a", options: { ignoreHref: true } }],
+  });
+}
