@@ -127,10 +127,10 @@ export const MailIframe = ({
         </div>
       )}
       <iframe
-        height={height}
+        height={height + 2}
         ref={iframeRef}
         className={cn(
-          "!min-h-0 w-full flex-1 overflow-hidden my-4 transition-opacity duration-200",
+          "rounded-xl !min-h-0 w-full flex-1  overflow-hidden my-4 transition-opacity duration-200",
         )}
         title="Email Content"
         style={{

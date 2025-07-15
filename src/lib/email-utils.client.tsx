@@ -7,67 +7,8 @@ import {
   Column,
   Row,
 } from "@react-email/components";
-import { getListUnsubscribeAction } from "@/lib/email-utils";
-// import { trpcClient } from '@/providers/query-provider';
+
 import { renderToString } from "react-dom/server";
-import type { ParsedMessage } from "@/types";
-
-// export const handleUnsubscribe = async ({ emailData }: { emailData: ParsedMessage }) => {
-//   try {
-//     if (emailData.listUnsubscribe) {
-//       const listUnsubscribeAction = getListUnsubscribeAction({
-//         listUnsubscribe: emailData.listUnsubscribe,
-//         listUnsubscribePost: emailData.listUnsubscribePost,
-//       });
-//       if (listUnsubscribeAction) {
-//         switch (listUnsubscribeAction.type) {
-//           case 'get':
-//             window.open(listUnsubscribeAction.url, '_blank');
-//             break;
-//           case 'post':
-//             const controller = new AbortController();
-//             const timeoutId = setTimeout(
-//               () => controller.abort(),
-//               10000, // 10 seconds
-//             );
-
-//             await fetch(listUnsubscribeAction.url, {
-//               mode: 'no-cors',
-//               method: 'POST',
-//               headers: {
-//                 'content-type': 'application/x-www-form-urlencoded',
-//               },
-//               body: listUnsubscribeAction.body,
-//               signal: controller.signal,
-//             });
-
-//             clearTimeout(timeoutId);
-//             return true;
-//           case 'email':
-//             await trpcClient.mail.send.mutate({
-//               to: [
-//                 {
-//                   email: listUnsubscribeAction.emailAddress,
-//                   name: listUnsubscribeAction.emailAddress,
-//                 },
-//               ],
-//               subject: listUnsubscribeAction.subject.trim().length
-//                 ? listUnsubscribeAction.subject
-//                 : 'Unsubscribe Request',
-//               message: 'Zero sent this email to unsubscribe from this mailing list.',
-//             });
-//             return true;
-//         }
-//         // track('Unsubscribe', {
-//         //   domain: emailData.sender.email.split('@')?.[1] ?? 'unknown',
-//         // });
-//       }
-//     }
-//   } catch (error) {
-//     console.warn('Error unsubscribing', emailData);
-//     throw error;
-//   }
-// };
 
 export const highlightText = (text: string, highlight: string) => {
   if (!highlight?.trim()) return text;

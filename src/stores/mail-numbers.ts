@@ -1,18 +1,18 @@
+import { getNumbers } from "@/lib/api-calls/mails";
 import { create } from "zustand";
 
 type MailNumbers = {
   unread: number;
   inbox: number;
   drafts: number;
-  junk: number;
+  outbox: number;
+  sent: number;
+  archived: number;
+  spam: number;
+  trash: number;
   addToNumber: (category: MailCategory) => void;
   lessFromNumber: (category: MailCategory, value: number) => void;
-  setInitialNumbers: (
-    inbox: number,
-    junk: number,
-    drafts: number,
-    unread: number,
-  ) => void;
+  setInitialNumbers: () => Promise<void>;
 };
 
 export type MailCategory = "inbox" | "drafts" | "junk" | "unread";
@@ -21,17 +21,21 @@ export const useMailNumbersStore = create<MailNumbers>((set, get) => ({
   unread: 0,
   inbox: 0,
   drafts: 0,
-  junk: 0,
-  setInitialNumbers: (
-    inbox: number,
-    junk: number,
-    drafts: number,
-    unread: number,
-  ) => {
-    set({ inbox });
-    set({ unread });
-    set({ drafts });
-    set({ junk });
+  outbox: 0,
+  sent: 0,
+  archived: 0,
+  spam: 0,
+  trash: 0,
+  setInitialNumbers: async () => {
+    let res = await getNumbers();
+    set({ unread: res.inbox?.unread || 0 });
+    set({ inbox: res.inbox?.total });
+    set({ drafts: res.drafts?.total });
+    set({ outbox: res.outbox?.total });
+    set({ sent: res.sent?.total });
+    set({ archived: res.archived?.total });
+    set({ spam: res.spam?.total });
+    set({ trash: res.trash?.total });
   },
   addToNumber: (category: MailCategory) => {
     const state = get();
@@ -41,7 +45,7 @@ export const useMailNumbersStore = create<MailNumbers>((set, get) => ({
         ? state.inbox
         : category === "drafts"
           ? state.drafts
-          : state.junk;
+          : 1;
     let count = mail + 1;
     set({ [category]: count });
   },
@@ -53,7 +57,7 @@ export const useMailNumbersStore = create<MailNumbers>((set, get) => ({
         ? state.inbox
         : category === "drafts"
           ? state.drafts
-          : state.junk;
+          : 1;
     let count = mail - value;
     if (count < 0) count = 0;
     set({ [category]: count });

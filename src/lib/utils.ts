@@ -286,10 +286,19 @@ export const contentToHTML = (content: string) => `
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
-<body style="margin: 0; padding: 0;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 ${content}
 </body></html>`;
 
+export const constructMailBody = (formattedMessage: string) => {
+  return contentToHTML(`
+
+      <div style="padding: 7px">
+        ${formattedMessage}
+      </div>
+
+  `);
+};
 export const constructReplyBody = (
   formattedMessage: string,
   originalDate: string,
@@ -304,23 +313,21 @@ export const constructReplyBody = (
     "Unknown Sender";
   const recipientEmails = otherRecipients.map((r) => r.email).join(", ");
 
-  return quotedMessage
-    ? `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-      <div style="">
+  return contentToHTML(`
+    <div style="padding: 7px">
+      <div >
         ${formattedMessage}
       </div>
       <div style="padding-left: 16px; border-left: 3px solid #e2e8f0; color: #64748b;">
         <div style="font-size: 12px;">
           On ${originalDate}, ${senderName} ${recipientEmails ? `&lt;${recipientEmails}&gt;` : ""} wrote:
           <p style="text-decoration: italic;">
-            ${quotedMessage.slice(0, 300)}
+            ${quotedMessage || "Unavailable Text"}
           </p>
         </div>
       </div>
     </div>
-  `
-    : "";
+  `);
 };
 
 export const constructForwardBody = (
@@ -334,8 +341,8 @@ export const constructForwardBody = (
     originalSender?.name || originalSender?.email || "Unknown Sender";
   const recipientEmails = otherRecipients.map((r) => r.email).join(", ");
 
-  return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  return contentToHTML(`
+    <div style="padding: 7px">
       <div style="">
         ${formattedMessage}
       </div>
@@ -352,8 +359,12 @@ export const constructForwardBody = (
         </div>
       </div>
     </div>
-  `;
+  `);
 };
+
+export function stripHtmlTags(input: string): string {
+  return input.replace(/<[^>]*>/g, "").trim();
+}
 
 export const getMainSearchTerm = (searchQuery: string): string => {
   // Don't highlight terms if this is a date-based search

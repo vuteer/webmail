@@ -45,7 +45,7 @@ export type ThreadType = {
   from: ContactType;
   to: ContactType | ContactType[];
   subject: string;
-  attachments?: AttachmentType[];
+  attachments?: AttachmentType[] | number;
   flags: string[];
   labels?: string[];
   text?: string;

@@ -1,7 +1,7 @@
 // threads
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Search, RefreshCcw } from "lucide-react";
+import { Search, RefreshCcw } from "lucide-react";
 import { useQueryState } from "nuqs";
 
 import AppInput from "@/components/common/app-input";
@@ -19,8 +19,6 @@ import { createArray, numberWithCommas } from "@/utils/format-numbers";
 import { cn } from "@/lib/utils";
 import { useMailNumbersStore } from "@/stores/mail-numbers";
 import FetchNumbers from "./fetch-numbers";
-// import { useMailStoreState } from "@/stores/mail-store";
-// import { useNotificationStateStore } from "@/stores/notification-store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useThreadStore } from "@/stores/threads";
@@ -28,7 +26,8 @@ import useMounted from "@/hooks/useMounted";
 
 const Threads = () => {
   // global state items
-  const { inbox, unread } = useMailNumbersStore();
+  const { unread, inbox, drafts, outbox, sent, archived, spam, trash } =
+    useMailNumbersStore();
   const { threads, fetchThreads, threadsLoading } = useThreadStore();
   const mounted = useMounted();
   const [page, setPage] = useQueryState("page");
@@ -36,15 +35,8 @@ const Threads = () => {
   const [sec] = useQueryState("sec");
   const [sort] = useQueryState("sort");
 
-  const [count, setCount] = React.useState<number>(inbox);
+  const [count, setCount] = React.useState<number>(sec === "inbox" ? inbox : 0);
 
-  const [openDeleteModal, setOpenDeleteModal] = React.useState<boolean>(false);
-  const [buttonLoading, setButtonLoading] = React.useState<boolean>(false);
-
-  const [selected, setSelected] = React.useState<string[]>([]);
-  const [newMail, setNewMail] = React.useState<boolean>(false);
-
-  // const [page, setPage] = React.useState<number>(0);
   const [moreLoading, setMoreLoading] = React.useState<boolean>(false);
 
   useCustomEffect(() => {
@@ -55,8 +47,24 @@ const Threads = () => {
 
   React.useEffect(() => {
     if (!mounted) return;
-    setCount(inbox);
-  }, [mounted, inbox]);
+    setCount(0);
+    const cnt =
+      sec === "inbox"
+        ? inbox
+        : sec === "drafts"
+          ? drafts
+          : sec === "outbox"
+            ? outbox
+            : sec === "sent"
+              ? sent
+              : sec === "archived"
+                ? archived
+                : sec === "spam"
+                  ? spam
+                  : trash;
+
+    setCount(cnt);
+  }, [mounted, sec, inbox]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -88,7 +96,7 @@ const Threads = () => {
             {sec === "inbox" ? <SortPopover /> : null}
             <Button
               variant="outline"
-              disabled={threadsLoading || buttonLoading}
+              disabled={threadsLoading}
               onClick={() => fetchThreads(sec || "inbox", Number(page || 0))}
               size={"sm"}
               className="rounded-full border"
@@ -108,12 +116,7 @@ const Threads = () => {
 
         <Separator className={cn(count ? "mt-4" : "")} />
         <div className="relative overflow-hidden">
-          <ScrollArea
-            className={cn(
-              "overflow-scroll h-[90vh] w-full pb-[8.4rem]",
-              newMail ? "pt-4" : "",
-            )}
-          >
+          <ScrollArea className={cn("overflow-scroll h-[90vh] w-full")}>
             {threadsLoading && <Loading />}
             {!threadsLoading && count ? (
               <>
@@ -147,6 +150,7 @@ const Threads = () => {
                 <Separator />
               </>
             )}
+            <div className="h-[150px]" />
           </ScrollArea>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const serializedFileSchema = z.object({
   name: z.string(),
@@ -15,7 +15,7 @@ export const serializeFiles = async (files: File[]) => {
       const base64 = await new Promise<string>((resolve) => {
         reader.onloadend = () => {
           const base64String = reader.result as string;
-          resolve(base64String.split(',')[1]!); // Remove the data URL prefix
+          resolve(base64String.split(",")[1]!); // Remove the data URL prefix
         };
         reader.readAsDataURL(file);
       });
@@ -31,10 +31,12 @@ export const serializeFiles = async (files: File[]) => {
   );
 };
 
-export const deserializeFiles = async (serializedFiles: z.infer<typeof serializedFileSchema>[]) => {
+export const deserializeFiles = async (
+  serializedFiles: z.infer<typeof serializedFileSchema>[],
+) => {
   return await Promise.all(
     serializedFiles.map((data) => {
-      const file = Buffer.from(data.base64, 'base64');
+      const file = Buffer.from(data.base64, "base64");
       const blob = new Blob([file], { type: data.type });
       const newFile = new File([blob], data.name, {
         type: data.type,
@@ -45,13 +47,29 @@ export const deserializeFiles = async (serializedFiles: z.infer<typeof serialize
   );
 };
 
+export function decodeAttachmentToText(attachment: any): string {
+  if (
+    // (attachment?.type === "attachment" || attachment.type === "Buffer") &&
+    attachment?.content &&
+    attachment?.content.type === "Buffer" &&
+    Array.isArray(attachment.content.data)
+  ) {
+    const buffer = Buffer.from(attachment.content.data);
+    return buffer.toString("utf-8");
+  }
+  return "";
+}
+
 export const createDraftData = z.object({
   to: z.string(),
   cc: z.string().optional(),
   bcc: z.string().optional(),
   subject: z.string(),
   message: z.string(),
-  attachments: z.array(serializedFileSchema).transform(deserializeFiles).optional(),
+  attachments: z
+    .array(serializedFileSchema)
+    .transform(deserializeFiles)
+    .optional(),
   id: z.string().nullable(),
 });
 

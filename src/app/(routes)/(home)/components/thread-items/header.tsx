@@ -1,6 +1,6 @@
 // thread header
 import { use, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useQueryState } from "nuqs";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useThreadStore } from "@/stores/threads";
-import { useProcessedHtml } from "@/hooks/use-process-html";
 
 import {
   handleToggleFlag,
@@ -43,6 +42,7 @@ import { useMailStoreState } from "@/stores/mail-store";
 export const MailHeader = ({ threadId }: { threadId: string }) => {
   const [, setMode] = useQueryState("mode");
   const [, setThreadId] = useQueryState("threadId");
+  const [, setActiveReplyId] = useQueryState("activeReplyId");
 
   return (
     <>
@@ -56,18 +56,27 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
               onClick={() => {
                 setMode(null);
                 setThreadId(null);
+                setActiveReplyId(null);
               }}
             >
               <X size={20} />
             </Button>
             <div className="dark:bg-iconDark/20 relative h-5 w-0.5 rounded-full bg-[#E7E7E7]" />{" "}
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" className="p-0 px-2 py-1">
+                <ChevronLeft size={18} />
+              </Button>
+              <Button variant="ghost" size="sm" className="p-0 px-2 py-1">
+                <ChevronRight size={18} />
+              </Button>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setMode("replyAll");
-                // setActiveReplyId(emailData?.latest?.id ?? '');
+                setActiveReplyId(threadId);
               }}
               className="inline-flex h-7 items-center justify-center gap-1 overflow-hidden rounded-lg border bg-white px-1.5 dark:border-none dark:bg-[#313131]"
             >

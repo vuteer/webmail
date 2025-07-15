@@ -5,7 +5,7 @@
 import { redirect } from "next/navigation";
 import { useQueryState } from "nuqs";
 
-import Mail from "./mail";
+import Mail from "./mails-container";
 import Threads from "./threads";
 const Container = () => {
   const [sec] = useQueryState("sec");

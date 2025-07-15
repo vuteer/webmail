@@ -1,20 +1,23 @@
-import * as emailAddresses from 'email-addresses';
-import type { Sender } from '@/types';
-import Color from 'color';
+import * as emailAddresses from "email-addresses";
+import type { Sender } from "@/types";
+import Color from "color";
 
-export const fixNonReadableColors = (rootElement: HTMLElement, minContrast = 3.5) => {
-  const elements = Array.from<HTMLElement>(rootElement.querySelectorAll('*'));
+export const fixNonReadableColors = (
+  rootElement: HTMLElement,
+  minContrast = 3.5,
+) => {
+  const elements = Array.from<HTMLElement>(rootElement.querySelectorAll("*"));
   elements.unshift(rootElement);
 
   for (const el of elements) {
     const style = getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden') continue;
+    if (style.display === "none" || style.visibility === "hidden") continue;
 
     // Skip if the color is a CSS variable or special value
     if (
-      style.color.startsWith('var(') ||
-      style.color === 'transparent' ||
-      style.color === 'inherit'
+      style.color.startsWith("var(") ||
+      style.color === "transparent" ||
+      style.color === "inherit"
     ) {
       continue;
     }
@@ -24,16 +27,18 @@ export const fixNonReadableColors = (rootElement: HTMLElement, minContrast = 3.5
       const effectiveBg = getEffectiveBackgroundColor(el);
 
       const blendedText =
-        textColor.alpha() < 1 ? effectiveBg.mix(textColor, effectiveBg.alpha()) : textColor;
+        textColor.alpha() < 1
+          ? effectiveBg.mix(textColor, effectiveBg.alpha())
+          : textColor;
       const contrast = blendedText.contrast(effectiveBg);
 
       if (contrast < minContrast) {
-        const blackContrast = Color('#000000').contrast(effectiveBg);
-        const whiteContrast = Color('#ffffff').contrast(effectiveBg);
-        el.style.color = blackContrast >= whiteContrast ? '#000000' : '#ffffff';
+        const blackContrast = Color("#000000").contrast(effectiveBg);
+        const whiteContrast = Color("#ffffff").contrast(effectiveBg);
+        el.style.color = blackContrast >= whiteContrast ? "#000000" : "#ffffff";
       }
     } catch (error) {
-      console.error('Error fixing non-readable colors:', error);
+      console.error("Error fixing non-readable colors:", error);
     }
   }
 };
@@ -45,24 +50,24 @@ const getEffectiveBackgroundColor = (element: HTMLElement) => {
     if (bg.alpha() >= 1) return bg.rgb();
     current = current.parentElement;
   }
-  return Color('#ffffff');
+  return Color("#ffffff");
 };
 
 type ListUnsubscribeAction =
-  | { type: 'get'; url: string; host: string }
-  | { type: 'post'; url: string; body: string; host: string }
-  | { type: 'email'; emailAddress: string; subject: string; host: string };
+  | { type: "get"; url: string; host: string }
+  | { type: "post"; url: string; body: string; host: string }
+  | { type: "email"; emailAddress: string; subject: string; host: string };
 
 const processHttpUrl = (url: URL, listUnsubscribePost?: string) => {
   if (listUnsubscribePost) {
     return {
-      type: 'post' as const,
+      type: "post" as const,
       url: url.toString(),
       body: listUnsubscribePost,
       host: url.hostname,
     };
   }
-  return { type: 'get' as const, url: url.toString(), host: url.hostname };
+  return { type: "get" as const, url: url.toString(), host: url.hostname };
 };
 
 // Relevant specs:
@@ -82,7 +87,7 @@ export const getListUnsubscribeAction = ({
     // We can be a bit more lenient and try to parse the header as a URL, Gmail also does this.
     try {
       const url = new URL(listUnsubscribe);
-      if (url.protocol.startsWith('http')) {
+      if (url.protocol.startsWith("http")) {
         return processHttpUrl(url, listUnsubscribePost);
       }
       return null;
@@ -94,23 +99,23 @@ export const getListUnsubscribeAction = ({
   // NOTE: List-Unsubscribe can contain multiple URLs, but the spec says to process the first one we can.
   const url = new URL(match[1]);
 
-  if (url.protocol.startsWith('http')) {
+  if (url.protocol.startsWith("http")) {
     return processHttpUrl(url, listUnsubscribePost);
   }
 
-  if (url.protocol === 'mailto:') {
+  if (url.protocol === "mailto:") {
     const emailAddress = url.pathname;
-    const subject = new URLSearchParams(url.search).get('subject') || '';
+    const subject = new URLSearchParams(url.search).get("subject") || "";
 
-    return { type: 'email', emailAddress, subject, host: url.hostname };
+    return { type: "email", emailAddress, subject, host: url.hostname };
   }
 
   return null;
 };
 
 const FALLBACK_SENDER = {
-  name: '',
-  email: 'no-sender@unknown',
+  name: "",
+  email: "no-sender@unknown",
 };
 
 export const parseFrom = (fromHeader: string) => {
@@ -122,7 +127,7 @@ export const parseFrom = (fromHeader: string) => {
   const firstSender = parsedSender[0];
   if (!firstSender) return FALLBACK_SENDER;
 
-  if (firstSender.type === 'group') {
+  if (firstSender.type === "group") {
     const name = firstSender.name || FALLBACK_SENDER.name;
     const firstAddress = firstSender.addresses?.[0]?.address;
     const email = firstAddress || FALLBACK_SENDER.email;
@@ -141,7 +146,7 @@ export const parseAddressList = (header: string): Sender[] => {
   if (!parsedAddressList) return [FALLBACK_SENDER];
 
   return parsedAddressList?.flatMap((address) => {
-    if (address.type === 'group') {
+    if (address.type === "group") {
       return (address.addresses || []).flatMap((address) => ({
         name: address.name || FALLBACK_SENDER.name,
         email: address.address || FALLBACK_SENDER.email,
@@ -157,18 +162,18 @@ export const parseAddressList = (header: string): Sender[] => {
 
 // Helper function to clean email addresses by removing angle brackets
 export const cleanEmailAddresses = (emails: string | undefined) => {
-  if (!emails || emails.trim() === '') return undefined;
+  if (!emails || emails.trim() === "") return undefined;
   // Split by commas and clean each address individually
   return emails
-    .split(',')
-    .map((email) => email.trim().replace(/^<|>$/g, ''))
+    .split(",")
+    .map((email) => email.trim().replace(/^<|>$/g, ""))
     .filter(Boolean); // Remove any empty entries
 };
 
 // Format recipients for display or sending
 export const formatRecipients = (recipients: string[] | undefined) => {
   if (!recipients || recipients.length === 0) return undefined;
-  return recipients.join(', ');
+  return recipients.join(", ");
 };
 
 /**
@@ -178,8 +183,10 @@ export const formatRecipients = (recipients: string[] | undefined) => {
 export const formatMimeRecipients = (recipients: string | string[]) => {
   if (Array.isArray(recipients)) {
     return recipients.map((recipient) => ({ addr: recipient }));
-  } else if (typeof recipients === 'string' && recipients.trim() !== '') {
-    return recipients.split(',').map((recipient) => ({ addr: recipient.trim() }));
+  } else if (typeof recipients === "string" && recipients.trim() !== "") {
+    return recipients
+      .split(",")
+      .map((recipient) => ({ addr: recipient.trim() }));
   }
   return null;
 };

@@ -182,7 +182,7 @@ export const EmailCompose = ({
         attachments: values.attachments || [],
         fromEmail: values.fromEmail,
       });
-      setHasUnsavedChanges(false);
+      // setHasUnsavedChanges(false);
       // editor.commands.clearContent(true);
       // form.reset();
       // setIsComposeOpen(null);

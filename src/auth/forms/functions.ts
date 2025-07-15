@@ -1,6 +1,5 @@
 import { signIn, forgetPassword } from "@/lib/auth-client";
 import { createToast } from "@/utils/toast";
-import { signInFunctionParams } from "../authTypes";
 
 const handleSubmit = async (
   data: any,
@@ -16,7 +15,7 @@ const handleSubmit = async (
       res = await signIn.email({ email: data.email, password: data.password });
       if (res.error) throw new Error(res.error.message);
       if (res) {
-        createToast("success", "Login successful");
+        createToast("Success", "Login successful", "success");
         push("/?sec=inbox");
       }
     } else if (screen === "forgot") {
@@ -29,7 +28,7 @@ const handleSubmit = async (
     }
   } catch (error: any) {
     console.error(error);
-    createToast("error", error.message || "An error occurred");
+    createToast("Error", error.message || "An error occurred", "danger");
   } finally {
     setLoading(false);
   }

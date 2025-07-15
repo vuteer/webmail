@@ -21,18 +21,14 @@ export const cleanNameDisplay = (name?: string) => {
 };
 
 export const openAttachment = (attachment: {
-  body: string;
-  mimeType: string;
+  content: { type: string; data: number[] };
+  contentType: string;
   filename: string;
 }) => {
   try {
-    const byteCharacters = atob(attachment.body);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: attachment.mimeType });
+    console.log(attachment);
+    const byteArray = new Uint8Array(attachment.content.data);
+    const blob = new Blob([byteArray], { type: attachment.contentType });
     const url = window.URL.createObjectURL(blob);
 
     const width = 800;
@@ -48,7 +44,6 @@ export const openAttachment = (attachment: {
 
     if (popup) {
       popup.focus();
-      // Clean up the URL after a short delay to ensure the browser has time to load it
       setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     }
   } catch (error) {
@@ -89,18 +84,14 @@ export const formatFileSize = (size: number) => {
 };
 
 export const downloadAttachment = (attachment: {
-  body: string;
-  mimeType: string;
+  content: { type: string; data: number[] };
+  contentType: string;
   filename: string;
 }) => {
   try {
-    const byteCharacters = atob(attachment.body);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: attachment.mimeType });
+    console.log(attachment);
+    const byteArray = new Uint8Array(attachment.content.data);
+    const blob = new Blob([byteArray], { type: attachment.contentType });
 
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -114,6 +105,33 @@ export const downloadAttachment = (attachment: {
     console.error("Error downloading attachment:", error);
   }
 };
+
+// export const downloadAttachment = (attachment: {
+//   body: string;
+//   mimeType: string;
+//   filename: string;
+// }) => {
+//   try {
+//     const byteCharacters = atob(attachment.body);
+//     const byteNumbers = new Array(byteCharacters.length);
+//     for (let i = 0; i < byteCharacters.length; i++) {
+//       byteNumbers[i] = byteCharacters.charCodeAt(i);
+//     }
+//     const byteArray = new Uint8Array(byteNumbers);
+//     const blob = new Blob([byteArray], { type: attachment.mimeType });
+
+//     const url = window.URL.createObjectURL(blob);
+//     const link = document.createElement("a");
+//     link.href = url;
+//     link.download = attachment.filename;
+//     document.body.appendChild(link);
+//     link.click();
+//     document.body.removeChild(link);
+//     window.URL.revokeObjectURL(url);
+//   } catch (error) {
+//     console.error("Error downloading attachment:", error);
+//   }
+// };
 
 // handleToggleFlag
 export const handleToggleFlag = async (
@@ -422,7 +440,8 @@ export const printThread = (mails: any[]) => {
                       <div class="labels-section">
                         ${message.tags
                           .map(
-                            (tag) => `<span class="label-badge">${tag}</span>`,
+                            (tag: string) =>
+                              `<span class="label-badge">${tag}</span>`,
                           )
                           .join("")}
                       </div>

@@ -5,19 +5,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   AlignJustify,
-  CalendarDays,
+  // CalendarDays,
   CircleAlert,
-  CircleUser,
-  Clock,
+  // CircleUser,
+  // Clock,
   File,
-  Files,
+  // Files,
   Inbox,
-  PlusCircle,
   Send,
   Archive,
   Trash2,
-  Pencil,
+  // Pencil,
   SquarePen,
+  X,
+  ArrowUpFromLine,
+  FileText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,12 +37,14 @@ import { Paragraph } from "@/components/ui/typography";
 import {
   Dialog,
   DialogContent,
+  DialogClose,
   DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/useMobile";
-import { CreateEmail } from "@/components/editor2";
+import { EmailCompose } from "@/components/editor2/compose";
+import { sendingMail } from "@/components/editor2/compose/send";
 
 const SideMenu = () => {
   const params = useSearch();
@@ -165,9 +169,9 @@ const MenuItem = ({
 );
 
 const core: MenuItemType[] = [
-  // { text: "New Mail", icon: <PlusCircle size={18} />, href: "/write" },
   { text: "Inbox", icon: <Inbox size={18} />, href: "/?sec=inbox" },
-  { text: "Drafts", icon: <File size={18} />, href: "/?sec=draft" },
+  { text: "Drafts", icon: <FileText size={18} />, href: "/?sec=draft" },
+  // { text: "Outbox", icon: <ArrowUpFromLine size={18} />, href: "/?sec=outbox" },
   { text: "Sent", icon: <Send size={18} />, href: "/?sec=sent" },
 ];
 
@@ -181,23 +185,19 @@ const management: MenuItemType[] = [
   { text: "Trash", icon: <Trash2 size={18} />, href: "/?sec=trash" },
 ];
 
-const more: MenuItemType[] = [
-  { text: "Appointments", icon: <Clock size={18} />, href: "/appointments" },
-  { text: "Calendar", icon: <CalendarDays size={18} />, href: "/calendar" },
-  { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
-  { text: "Files", icon: <Files size={18} />, href: "/files" },
-];
+// const more: MenuItemType[] = [
+//   { text: "Appointments", icon: <Clock size={18} />, href: "/appointments" },
+//   { text: "Calendar", icon: <CalendarDays size={18} />, href: "/calendar" },
+//   { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
+//   { text: "Files", icon: <Files size={18} />, href: "/files" },
+// ];
 
-function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
-  // const { state } = useSidebar();
+export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
+  const { data: session } = useSession();
+  const user = session?.user;
   const isMobile = useIsMobile();
-  // const t = useTranslations();
 
   const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
-  // const [, setDraftId] = useQueryState('draftId');
-  // const [, setTo] = useQueryState('to');
-  // const [, setActiveReplyId] = useQueryState('activeReplyId');
-  // const [, setMode] = useQueryState('mode');
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -205,6 +205,19 @@ function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
     } else {
       setDialogOpen(true);
     }
+  };
+
+  const handleSend = async (data: any) => {
+    // Implement send logic here
+    console.log("Sending email:", data);
+    if (!user) return;
+    const sendingUser: { email: string; name: string; image: any } = {
+      email: user.email,
+      name: user.name,
+      image: user.image,
+    };
+    const res = await sendingMail(data, sendingUser, null, null, null);
+    console.log(res);
   };
   return (
     <Dialog open={!!dialogOpen} onOpenChange={handleOpenChange}>
@@ -235,8 +248,22 @@ function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="h-screen w-screen max-w-none border-none bg-[#FAFAFA] p-0 shadow-none dark:bg-[#141414]">
-        <CreateEmail />
+      <DialogContent className="h-screen w-screen flex flex-col items-center justify-center max-w-none border-none bg-[#FAFAFA] p-0 shadow-none dark:bg-[#141414]">
+        <div className="max-w-[750px] mx-auto  w-full">
+          <DialogClose asChild className="flex">
+            <Button size={"sm"} className="flex items-center gap-1 rounded-lg ">
+              <X size={18} />
+              <span className="text-sm font-medium">Esc</span>
+            </Button>
+          </DialogClose>
+        </div>
+        {/* <CreateEmail /> */}
+        <div className="border rounded-2xl max-w-[750px] mx-auto w-full">
+          <EmailCompose
+            editorClassName="min-h-[150px]"
+            onSendEmail={(data) => handleSend(data)}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

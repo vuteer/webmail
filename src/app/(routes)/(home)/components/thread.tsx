@@ -29,6 +29,8 @@ import { formatDate } from "@/lib/utils";
 import { useThreadStore } from "@/stores/threads";
 import { updateMailFlags } from "@/lib/api-calls/mails";
 import { handleToggleFlag, includesFlag } from "./thread-items/actions";
+import { Paperclip } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 
 interface ThreadProps {
   thread: ThreadType;
@@ -36,11 +38,25 @@ interface ThreadProps {
 }
 
 const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const [threadId, setThreadId] = useQueryState("threadId");
   const [sec] = useQueryState("sec");
   const { updateThread } = useThreadStore();
 
-  const { from, date, subject, flags, labels, cc, bcc, messageId } = thread;
+  const {
+    from,
+    to,
+    date,
+    subject,
+    flags,
+    labels,
+    cc,
+    bcc,
+    attachments,
+    messageId,
+  } = thread;
 
   const [archived, setArchived] = React.useState<boolean>(true);
 
@@ -67,6 +83,10 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
     setThreadId(messageId);
     if (inbox) lessFromNumber("unread", 1);
   };
+
+  const combinedTos = Array.isArray(to)
+    ? [...to, ...(cc || []), ...(bcc || [])]
+    : [to, ...(cc || []), ...(bcc || [])];
 
   return (
     <div
@@ -95,8 +115,21 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
         />
         <div className="flex flex-col flex-1">
           <div className="flex-1 flex gap-3 items-center">
-            <Heading4 className="text-sm lg:text-md leading-0">
-              {from.name || "No Name"}
+            <Heading4 className="text-sm lg:text-md leading-0 capitalize">
+              {from.address === user?.email ? (
+                <>
+                  {combinedTos.slice(0, 2).map((itm, index) => (
+                    <span key={index}>{itm.name || itm.address}</span>
+                  ))}
+                  {combinedTos.length > 2 ? (
+                    <span>+ {combinedTos.length - 2}</span>
+                  ) : (
+                    ""
+                  )}
+                </>
+              ) : (
+                from.name || "No Name"
+              )}
             </Heading4>
             <div className="flex-1 flex justify-between items-center">
               <div className="flex gap-2 items-center">
@@ -117,12 +150,25 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
                   )}
                 />
               </div>
-              <Paragraph>{formatDate(date.split(".")[0] || "")}</Paragraph>
+              <Paragraph className="flex items-center gap-4">
+                {attachments ? (
+                  <span className="flex gap-1 items-center justify-end text-xs text-muted-foregroun">
+                    <Paperclip size={14} />
+                    <span>
+                      {Array.isArray(attachments)
+                        ? attachments.length
+                        : attachments}
+                    </span>
+                  </span>
+                ) : null}
+                {formatDate(date.split(".")[0] || "")}
+              </Paragraph>
             </div>
           </div>
           <Paragraph className="text-muted-foreground">{subject}</Paragraph>
         </div>
       </div>
+      <Separator className="my-2" />
     </div>
   );
 };

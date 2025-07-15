@@ -14,7 +14,8 @@ import {
 } from "@/lib/utils";
 import { serializeFiles } from "@/lib/schemas";
 import { processHtml } from "@/hooks/use-process-html";
-import { sendMail } from "@/lib/api-calls/mails";
+// import { sendMail } from "@/lib/api-calls/mails";
+import { sendingMail } from "@/components/editor2/compose/send";
 
 export const ReplyCompose = () => {
   const { data: session } = useSession();
@@ -38,10 +39,6 @@ export const ReplyCompose = () => {
     if (m) setReplyToMessage(m);
   }, [mails, mailsLoading, activeReplyId]);
 
-  console.log(replyToMessage);
-
-  // process html from previous message
-
   const handleSendEmail = async (data: {
     to: string[];
     cc?: string[];
@@ -50,164 +47,21 @@ export const ReplyCompose = () => {
     message: string;
     attachments: File[];
   }) => {
-    console.log(data, "here");
-    if (!replyToMessage || !user) return;
-    try {
-      // current user
-      const { email, name, image } = user;
-      const fromEmail = email;
-      const userName = name;
-      const userImage = image;
+    if (!user) return;
+    const sendingUser: { email: string; name: string; image: any } = {
+      email: user.email,
+      name: user.name,
+      image: user.image,
+    };
 
-      // to, cc, bcc
-      const toRecipients = data.to.map((email) => ({
-        email,
-        address: email,
-        name: email.split("@")[0] || "User",
-      }));
-      const ccRecipients = data.cc
-        ? data.cc.map((email) => ({
-            email,
-            address: email,
-            name: email.split("@")[0] || "User",
-          }))
-        : undefined;
-      const bccRecipients = data.bcc
-        ? data.bcc.map((email) => ({
-            email,
-            address: email,
-            name: email.split("@")[0] || "User",
-          }))
-        : undefined;
-
-      // signature attach here - get from server or settings html
-      const signature = "";
-
-      // body
-      const emailBody =
-        mode === "forward"
-          ? constructForwardBody(
-              data.message + signature,
-              new Date(replyToMessage.date || "").toLocaleString(),
-              { ...replyToMessage.from, subject: replyToMessage.subject },
-              toRecipients,
-              processHtml(replyToMessage?.html || ""),
-            )
-          : constructReplyBody(
-              data.message + signature,
-              new Date(replyToMessage.date || "").toLocaleString(),
-              replyToMessage.from,
-              toRecipients,
-              processHtml(replyToMessage?.html || ""),
-            );
-
-      let serializedFiles = await serializeFiles(data.attachments);
-      const mail = {
-        to: toRecipients,
-        cc: ccRecipients,
-        bcc: bccRecipients,
-        subject: data.subject,
-        message: emailBody,
-        from: { address: fromEmail, name: userName },
-        attachments: serializedFiles,
-        headers: {
-          "In-Reply-To": replyToMessage?.messageId ?? "",
-          References: [
-            ...(replyToMessage?.references
-              ? replyToMessage.references.split(" ")
-              : []),
-            replyToMessage?.messageId,
-          ]
-            .filter(Boolean)
-            .join(" "),
-          "Thread-Id": replyToMessage?.threadId ?? "",
-        },
-        threadId: threadId,
-        isForward: mode === "forward",
-        originalMessage: decodeHtmlToText(
-          processHtml(replyToMessage?.html || ""),
-        ),
-      };
-
-      await sendMail(mail);
-      // console.log(mail);
-    } catch (error) {
-      console.error(error);
-    } finally {
-    }
-    // try {
-    //   const userEmail = activeConnection.email.toLowerCase();
-    //   const userName = activeConnection.name || session?.user?.name || '';
-    //   let fromEmail = userEmail;
-
-    //   const toRecipients: Sender[] = data.to.map((email) => ({
-    //     email,
-    //     name: email.split('@')[0] || 'User',
-    //   }));
-    //   const ccRecipients: Sender[] | undefined = data.cc
-    //     ? data.cc.map((email) => ({
-    //         email,
-    //         name: email.split('@')[0] || 'User',
-    //       }))
-    //     : undefined;
-    //   const bccRecipients: Sender[] | undefined = data.bcc
-    //     ? data.bcc.map((email) => ({
-    //         email,
-    //         name: email.split('@')[0] || 'User',
-    //       }))
-    //     : undefined;
-    //   const zeroSignature = settings?.settings.zeroSignature
-    //     ? '<p style="color: #666; font-size: 12px;">Sent via <a href="https://0.email/" style="color: #0066cc; text-decoration: none;">Zero</a></p>'
-    //     : '';
-    //   const emailBody =
-    //     mode === 'forward'
-    //       ? constructForwardBody(
-    //           data.message + zeroSignature,
-    //           new Date(replyToMessage.receivedOn || '').toLocaleString(),
-    //           { ...replyToMessage.sender, subject: replyToMessage.subject },
-    //           toRecipients,
-    //           replyToMessage.decodedBody,
-    //         )
-    //       : constructReplyBody(
-    //           data.message + zeroSignature,
-    //           new Date(replyToMessage.receivedOn || '').toLocaleString(),
-    //           replyToMessage.sender,
-    //           toRecipients,
-    //           replyToMessage.decodedBody,
-    //         );
-    // await sendEmail({
-    //   to: toRecipients,
-    //   cc: ccRecipients,
-    //   bcc: bccRecipients,
-    //   subject: data.subject,
-    //   message: emailBody,
-    //   attachments: await serializeFiles(data.attachments),
-    //   fromEmail: fromEmail,
-    //   headers: {
-    //     'In-Reply-To': replyToMessage?.messageId ?? '',
-    //     References: [
-    //       ...(replyToMessage?.references ? replyToMessage.references.split(' ') : []),
-    //       replyToMessage?.messageId,
-    //     ]
-    //       .filter(Boolean)
-    //       .join(' '),
-    //     'Thread-Id': replyToMessage?.threadId ?? '',
-    //   },
-    //   threadId: replyToMessage?.threadId,
-    //   isForward: mode === 'forward',
-    //   originalMessage: replyToMessage.decodedBody,
-    // });
-    // posthog.capture('Reply Email Sent');
-    // Reset states
-    //   setMode(null);
-    //   await refetch();
-    //   toast.success(m['pages.createEmail.emailSent']());
-    // } catch (error) {
-    //   console.error('Error sending email:', error);
-    //   toast.error(m['pages.createEmail.failedToSendEmail']());
-    // }
+    const res = await sendingMail(
+      data,
+      sendingUser,
+      mode,
+      replyToMessage,
+      threadId,
+    );
   };
-
   return (
     <div className="w-full rounded-xl">
       <EmailCompose
