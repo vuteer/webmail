@@ -46,8 +46,9 @@ export const MailIframe = ({
     setHeight(newHeight);
   }, [iframeRef, setHeight]);
 
+  const actualHTML: any = html;
   let processedHtml = useProcessedHtml({
-    reactNodes: html,
+    reactNodes: actualHTML,
     isTrustedSender: false,
   });
 
@@ -127,7 +128,7 @@ export const MailIframe = ({
         </div>
       )}
       <iframe
-        height={height + 2}
+        height={height}
         ref={iframeRef}
         className={cn(
           "rounded-xl !min-h-0 w-full flex-1  overflow-hidden my-4 transition-opacity duration-200",

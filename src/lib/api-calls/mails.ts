@@ -77,6 +77,14 @@ export const sendMail = async (data: any) => {
   return res?.data?.doc || false;
 };
 
+// draft
+export const createDraft = async (data: any) => {
+  const res = await postDoc("/mails/draft", data, true);
+
+  console.log(res);
+  return res?.data?.doc || false;
+};
+
 // old
 // update mail
 export const updateThread = async (threadId: string, data: any) => {

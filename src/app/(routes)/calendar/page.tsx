@@ -1,15 +1,15 @@
-// calender page 
+// calender page
 
-import Calendar from "@/components/calendar";
+import { Calendar } from "./components";
 import Protected from "../components/protected";
+import { getCalendar } from "@/lib/api-calls/calendar";
 
-const Page = () => {
+const Page = async () => {
+  return (
+    <Protected title="📅  VuMail Calendar">
+      <Calendar />
+    </Protected>
+  );
+};
 
-    return (
-        <Protected title="Calender">
-            <Calendar />
-        </Protected>
-    )
-}; 
-
-export default Page; 
+export default Page;

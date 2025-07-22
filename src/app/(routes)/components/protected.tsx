@@ -63,6 +63,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
       <div
         className={cn(
           "my-1 flex-1 h-[99vh] overflow-hidden gap-2 flex flex-col ",
+          title && "bg-background rounded-xl px-4 pt-5",
         )}
       >
         {title && (

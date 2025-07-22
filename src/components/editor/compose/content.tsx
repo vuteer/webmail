@@ -25,7 +25,7 @@ export const EmailContent = ({
             aiGeneratedMessage !== null ? "blur-sm" : "",
           )}
         >
-          <EditorContent editor={editor} className="h-full w-full" />
+          <EditorContent placeholder="Start your email here" editor={editor} className="text-sm h-full w-full" />
         </div>
       </div>
     </>

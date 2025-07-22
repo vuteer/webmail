@@ -274,4 +274,25 @@
   scrollbar-width: none; /* Firefox */
 }
 
-/* Add scrollbar styling */
+/* calendar resets */
+.fc-button-group {
+  gap: 1 !important;
+}
+.fc-button-group {
+  background-color: #fefefe;
+}
+.fc-button-group button,
+.fc-today-button {
+  text-transform: capitalize !important ;
+  border-color: transparent !important;
+  border: 0 solid transparent !important;
+  cursor: pointer;
+}
+.fc-toolbar-title {
+  font-size: 1.4rem !important;
+  font-weight: bold !important;
+}
+.fc-button-group button.fc-button-active,
+.fc-button-group button.fc-button-active:hover {
+  background-color: #016ffe !important;
+}

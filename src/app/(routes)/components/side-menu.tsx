@@ -43,8 +43,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/useMobile";
-import { EmailCompose } from "@/components/editor2/compose";
-import { sendingMail } from "@/components/editor2/compose/send";
+import { EmailCompose } from "@/components/editor/compose";
+import { sendingMail } from "@/components/editor/compose/send";
 
 const SideMenu = () => {
   const params = useSearch();
@@ -93,7 +93,7 @@ const SideMenu = () => {
             )}
           </span>
           <Separator className="my-3 bg-secondary" />
-          <ComposeButton sidemenuOpen={!opened} />
+          <ComposeButton sidemenuOpen={opened} />
           <Separator className="my-3 bg-secondary" />
 
           <div className="flex-1">
@@ -170,7 +170,7 @@ const MenuItem = ({
 
 const core: MenuItemType[] = [
   { text: "Inbox", icon: <Inbox size={18} />, href: "/?sec=inbox" },
-  { text: "Drafts", icon: <FileText size={18} />, href: "/?sec=draft" },
+  { text: "Drafts", icon: <FileText size={18} />, href: "/?sec=drafts" },
   // { text: "Outbox", icon: <ArrowUpFromLine size={18} />, href: "/?sec=outbox" },
   { text: "Sent", icon: <Send size={18} />, href: "/?sec=sent" },
 ];
@@ -180,7 +180,7 @@ const management: MenuItemType[] = [
   {
     text: "Spam",
     icon: <CircleAlert size={18} />,
-    href: "/?sec=spam",
+    href: "/?sec=junk",
   },
   { text: "Trash", icon: <Trash2 size={18} />, href: "/?sec=trash" },
 ];
@@ -216,8 +216,8 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
       name: user.name,
       image: user.image,
     };
-    const res = await sendingMail(data, sendingUser, null, null, null);
-    console.log(res);
+    const res = await sendingMail(data, sendingUser);
+    return res;
   };
   return (
     <Dialog open={!!dialogOpen} onOpenChange={handleOpenChange}>
@@ -229,7 +229,7 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
           size={isMobile || !sidemenuOpen ? "sm" : "default"}
           className="relative mb-1.5 inline-flex lg:gap-4 items-center justify-center gap-1 self-stretch overflow-hidden rounded-lg"
         >
-          {sidemenuOpen && !isMobile ? (
+          {!sidemenuOpen ? (
             <SquarePen
               size={18}
               className="fill-iconLight dark:fill-iconDark mt-0.5"
@@ -247,8 +247,8 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
           )}
         </Button>
       </DialogTrigger>
-
-      <DialogContent className="h-screen w-screen flex flex-col items-center justify-center max-w-none border-none bg-[#FAFAFA] p-0 shadow-none dark:bg-[#141414]">
+      <DialogContent className="h-screen w-screen flex flex-col items-center justify-center max-w-none border-none bg-white/40 dark:bg-black/40 backdrop-blur-md p-0 shadow-none">
+        {/* <DialogContent className="h-screen w-screen flex flex-col items-center justify-center max-w-none border-none bg-[#FAFAFA] bg-blur p-0 shadow-none dark:bg-[#141414]"> */}
         <div className="max-w-[750px] mx-auto  w-full">
           <DialogClose asChild className="flex">
             <Button size={"sm"} className="flex items-center gap-1 rounded-lg ">

@@ -1,16 +1,17 @@
 "use client"
 import * as React from 'react';
-import useNetworkStatus from "@/hooks/useNetwork"; 
+import useNetworkStatus from "@/hooks/useNetwork";
 
-import {createToast} from "@/utils/toast"; 
-import { useAuthUser, useSignOut } from "@/auth/authHooks";
+import {createToast} from "@/utils/toast";
+import { useSession } from '@/lib/auth-client';
+// import { useAuthUser, useSignOut } from "@/auth/authHooks";
 
 const NetworkStatusIndicator = () => {
     const isOnline = useNetworkStatus();
     const firstUpdate = React.useRef(true);
-    const auth = useAuthUser();
-
-    let user = auth();
+    // const auth = useAuthUser();
+    const { data: session } = useSession();
+    const user = session?.user;
 
 
     React.useLayoutEffect(() => {
@@ -18,10 +19,10 @@ const NetworkStatusIndicator = () => {
             firstUpdate.current = false;
             return;
         }
-        if (!isOnline) createToast("error", 'You are currently offline');
+        if (!isOnline) createToast("Error", 'You are currently offline', "danger");
     }, [isOnline]);
 
     return null;
 };
 
-export default NetworkStatusIndicator; 
+export default NetworkStatusIndicator;

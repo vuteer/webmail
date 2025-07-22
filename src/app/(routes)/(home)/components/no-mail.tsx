@@ -21,7 +21,7 @@ const NoMailId = () => {
         Select a thread to access its content or send a new mail.
       </Heading4>
       <div className="max-w-2xl mx-auto">
-        <ComposeButton sidemenuOpen={false} />
+        <ComposeButton sidemenuOpen={true} />
       </div>
     </div>
   );

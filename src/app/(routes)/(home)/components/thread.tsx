@@ -1,6 +1,6 @@
 // thread item
 import React, { use } from "react";
-import { useQueryState, useQueryStates } from "nuqs";
+import { useQueryState } from "nuqs";
 
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,19 +18,14 @@ import { ThreadType } from "@/types";
 import { useMailNumbersStore } from "@/stores/mail-numbers";
 
 import { AppAvatar } from "@/components";
-import {
-  Archive2,
-  ExclamationCircle,
-  GroupPeople,
-  Star2,
-  Trash,
-} from "@/components/icons/icons";
+import { ExclamationCircle, Star2 } from "@/components/icons/icons";
 import { formatDate } from "@/lib/utils";
 import { useThreadStore } from "@/stores/threads";
 import { updateMailFlags } from "@/lib/api-calls/mails";
 import { handleToggleFlag, includesFlag } from "./thread-items/actions";
 import { Paperclip } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { combine } from "zustand/middleware";
 
 interface ThreadProps {
   thread: ThreadType;
@@ -58,13 +53,12 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
     messageId,
   } = thread;
 
-  const [archived, setArchived] = React.useState<boolean>(true);
-
   // zustand state
   const { inbox, lessFromNumber } = useMailNumbersStore();
 
+  const mailAdmin = from?.name === "Mail Delivery System";
   const handleOpenMail = async () => {
-    if (!includesFlag("\\Seen", flags)) {
+    if (!includesFlag("\\Seen", flags) && !mailAdmin) {
       // 1. Optimistic update
       const previousFlags = [...thread.flags];
       const newFlags = [...previousFlags, "\\Seen"];
@@ -81,7 +75,7 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
       }
     }
     setThreadId(messageId);
-    if (inbox) lessFromNumber("unread", 1);
+    if (inbox && !mailAdmin) lessFromNumber("unread", 1);
   };
 
   const combinedTos = Array.isArray(to)
@@ -100,35 +94,36 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
         index={index}
         starred={includesFlag("\\Flagged", flags)}
         important={includesFlag("$Important", flags)}
-        archived={archived}
-        setArchived={setArchived}
       />
       <div className="flex items-center gap-3 py-4 px-2 w-full overflow-hidden">
         <AppAvatar
-          name={from.name || "No Name"}
+          name={from?.name || "No Name"}
           dimension="h-10 w-10"
           src={
-            from.image ||
-            from.avatar ||
+            from?.image ||
+            from?.avatar ||
             "https://res.cloudinary.com/dyo0ezwgs/image/upload/v1701022046/digital/users/profiles/v0bhjiet4xpkkeqpygn0.png"
           }
         />
         <div className="flex flex-col flex-1">
           <div className="flex-1 flex gap-3 items-center">
             <Heading4 className="text-sm lg:text-md leading-0 capitalize">
-              {from.address === user?.email ? (
+              {from?.address === user?.email ? (
                 <>
                   {combinedTos.slice(0, 2).map((itm, index) => (
-                    <span key={index}>{itm.name || itm.address}</span>
+                    <span key={index}>
+                      {itm.name || itm.address}
+                      {index === 1 || combinedTos.length === 1 ? "" : ", "}
+                    </span>
                   ))}
                   {combinedTos.length > 2 ? (
-                    <span>+ {combinedTos.length - 2}</span>
+                    <span>&nbsp; + {combinedTos.length - 2}</span>
                   ) : (
                     ""
                   )}
                 </>
               ) : (
-                from.name || "No Name"
+                from?.name || "No Name"
               )}
             </Heading4>
             <div className="flex-1 flex justify-between items-center">
@@ -136,9 +131,12 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
                 <div
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    includesFlag("\\Seen", flags)
+                    !mailAdmin &&
+                      (includesFlag("\\Seen", flags) || sec !== "inbox")
                       ? "bg-transparent"
-                      : "bg-main-color",
+                      : mailAdmin
+                        ? "bg-red-500"
+                        : "bg-main-color",
                   )}
                 />
                 <Star2
@@ -205,14 +203,10 @@ const ThreadButtons = ({
   index,
   starred,
   important,
-  archived,
-  setArchived,
 }: {
   index: number;
   starred: boolean;
   important: boolean;
-  archived: boolean;
-  setArchived: (archived: boolean) => void;
 }) => {
   const { threads, updateThread } = useThreadStore();
   const [threadId] = useQueryState("threadId");
@@ -291,50 +285,6 @@ const ThreadButtons = ({
           Important
         </TooltipContent>
       </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 [&_svg]:size-3.5"
-            onClick={(e) => {
-              e.stopPropagation();
-              // moveThreadTo('archive');
-            }}
-          >
-            <Archive2 className="fill-[#9D9D9D]" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent
-          side={index === 0 ? "bottom" : "top"}
-          className="dark:bg-panelDark mb-1 bg-white"
-        >
-          Archive
-        </TooltipContent>
-      </Tooltip>
-      {!false ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 hover:bg-[#FDE4E9] dark:hover:bg-[#411D23] [&_svg]:size-3.5"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                // moveThreadTo('bin');
-              }}
-            >
-              <Trash className="fill-[#F43F5E]" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent
-            side={index === 0 ? "bottom" : "top"}
-            className="dark:bg-panelDark mb-1 bg-white"
-          >
-            Move to Trash
-          </TooltipContent>
-        </Tooltip>
-      ) : null}
     </div>
   );
 };

@@ -7,8 +7,8 @@ type MailNumbers = {
   drafts: number;
   outbox: number;
   sent: number;
-  archived: number;
-  spam: number;
+  archive: number;
+  junk: number;
   trash: number;
   addToNumber: (category: MailCategory) => void;
   lessFromNumber: (category: MailCategory, value: number) => void;
@@ -23,8 +23,8 @@ export const useMailNumbersStore = create<MailNumbers>((set, get) => ({
   drafts: 0,
   outbox: 0,
   sent: 0,
-  archived: 0,
-  spam: 0,
+  archive: 0,
+  junk: 0,
   trash: 0,
   setInitialNumbers: async () => {
     let res = await getNumbers();
@@ -33,8 +33,8 @@ export const useMailNumbersStore = create<MailNumbers>((set, get) => ({
     set({ drafts: res.drafts?.total });
     set({ outbox: res.outbox?.total });
     set({ sent: res.sent?.total });
-    set({ archived: res.archived?.total });
-    set({ spam: res.spam?.total });
+    set({ archive: res.archive?.total });
+    set({ junk: res.junk?.total });
     set({ trash: res.trash?.total });
   },
   addToNumber: (category: MailCategory) => {

@@ -51,7 +51,7 @@ const SortPopover = () => {
         <AppLinkButton
           type="outline"
           size="sm"
-          className="border rounded-full flex items-center justify-between gap-2 w-[100px]"
+          className="border flex items-center justify-between gap-2 w-[100px]"
         >
           <span className="capitalize">{current}</span>
           <ChevronDown size={18} />

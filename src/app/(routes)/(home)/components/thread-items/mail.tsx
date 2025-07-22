@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Lock, HardDriveDownload } from "lucide-react";
+import { Lock, HardDriveDownload, Send } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { format } from "date-fns-tz";
 
 import {
   Forward,
   Reply,
-  ReplyAll,
+  // ReplyAll,
   ThreeDots,
   Printer,
 } from "@/components/icons/icons";
@@ -36,8 +36,6 @@ import {
   printThread,
   handleDownloadAllAttachments,
 } from "./actions";
-import { decodeAttachmentToText, deserializeFiles } from "@/lib/schemas";
-import { Paragraph } from "@/components/ui/typography";
 import { useCustomEffect } from "@/hooks/useEffect";
 import { useSession } from "@/lib/auth-client";
 
@@ -53,17 +51,19 @@ export const Mail = ({
   const { data: session } = useSession();
   const user = session?.user;
 
+  const mailAdmin = emailData?.from?.name === "Mail Delivery System";
+
   const [openDetailsPopover, setOpenDetailsPopover] = useState<boolean>(false);
   const [preventCollapse, setPreventCollapse] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(
-    emailData.flags.includes("\\Seen") ?? false,
-  );
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  // (emailData.flags.includes("\\Seen") || !mailAdmin) ?? true,
+
   const [attachments, setAttachments] = useState<any[]>([]);
-  const [attachmentsText, setAttachmentsText] = useState<string[]>([]);
 
   const [threadId] = useQueryState("threadId");
   const [, setMode] = useQueryState("mode");
   const [, setActiveReplyId] = useQueryState("activeReplyId");
+  const [sec] = useQueryState("sec");
 
   // Handle email collapse toggle
   const toggleCollapse = useCallback(() => {
@@ -73,27 +73,16 @@ export const Mail = ({
     }
   }, [isCollapsed, preventCollapse, openDetailsPopover]);
 
-  async function testAttachments() {
+  async function extractAttachments() {
     setAttachments([]);
-    setAttachmentsText([]);
     if (!threadId) return;
     if (!emailData.attachments.length) return;
     const rfc = emailData.attachments.find((fl: any) =>
       fl.contentType.includes("rfc822"),
     );
-
-    if (rfc) {
-      for (let i = 0; i < emailData.attachments.length; i++) {
-        let curr = emailData.attachments[i];
-
-        let fl = decodeAttachmentToText(curr);
-        setAttachmentsText([...attachmentsText, fl]);
-      }
-    } else {
-      setAttachments(emailData.attachments);
-    }
+    if (!rfc) setAttachments(emailData.attachments);
   }
-  useCustomEffect(testAttachments, [threadId]);
+  useCustomEffect(extractAttachments, [threadId]);
 
   const isLastEmail = totalEmails && index === totalEmails - 1;
 
@@ -182,40 +171,63 @@ export const Mail = ({
 
             <Attachments
               attachments={attachments}
-              attachmentsText={attachmentsText}
+              // attachmentsText={attachmentsText}
             />
             <Separator className="my-4" />
             {/* action buttons */}
 
-            <div className="flex gap-2 py-4">
-              <ActionButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCollapsed(false);
-                  setMode("reply");
-                  setActiveReplyId(emailData.messageId);
-                }}
-                icon={
-                  <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
-                }
-                text={"Reply"}
-                shortcut={isLastEmail ? "r" : undefined}
-              />
-
-              <ActionButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCollapsed(false);
-                  setMode("forward");
-                  setActiveReplyId(emailData.messageId);
-                }}
-                icon={
-                  <Forward className="fill-muted-foreground dark:fill-[#9B9B9B]" />
-                }
-                text={"Forward"}
-                shortcut={isLastEmail ? "f" : undefined}
-              />
-            </div>
+            {!mailAdmin && (
+              <div className="flex gap-2 py-4">
+                {sec === "inbox" && (
+                  <>
+                    <ActionButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsCollapsed(false);
+                        setMode("reply");
+                        setActiveReplyId(emailData.messageId);
+                      }}
+                      icon={
+                        <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
+                      }
+                      text={"Reply"}
+                      shortcut={isLastEmail ? "r" : undefined}
+                    />
+                  </>
+                )}
+                {sec === "drafts" && (
+                  <ActionButton
+                    onClick={(e) => {
+                      // handleSend
+                      // e.stopPropagation();
+                      // setIsCollapsed(false);
+                      // setMode("reply");
+                      // setActiveReplyId(emailData.messageId);
+                    }}
+                    icon={
+                      <Send className="fill-muted-foreground dark:fill-[#9B9B9B]" />
+                    }
+                    text={"Send"}
+                    shortcut={isLastEmail ? "s" : undefined}
+                  />
+                )}
+                {(sec === "inbox" || sec === "sent") && (
+                  <ActionButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsCollapsed(false);
+                      setMode("forward");
+                      setActiveReplyId(emailData.messageId);
+                    }}
+                    icon={
+                      <Forward className="fill-muted-foreground dark:fill-[#9B9B9B]" />
+                    }
+                    text={"Forward"}
+                    shortcut={isLastEmail ? "f" : undefined}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -346,7 +358,7 @@ const DetailsPopover = ({
               </span>
               <span className="text-muted-foreground ml-3 text-nowrap">
                 {emailData?.cc
-                  ?.map((t: any) => cleanEmailDisplay(t.email))
+                  ?.map((t: any) => cleanEmailDisplay(t.email || t.address))
                   .join(", ")}
               </span>
             </div>
@@ -356,7 +368,7 @@ const DetailsPopover = ({
               <span className="w-24 text-end text-gray-500">BCC:</span>
               <span className="text-muted-foreground ml-3 text-nowrap">
                 {emailData?.bcc
-                  ?.map((t: any) => cleanEmailDisplay(t.email))
+                  ?.map((t: any) => cleanEmailDisplay(t.email || t.address))
                   .join(", ")}
               </span>
             </div>
@@ -477,7 +489,7 @@ const MailTo = ({ emailData }: { emailData: any }) => {
             return (
               <>
                 {visibleRecipients.map((recipient, index) => (
-                  <span key={recipient.email} key={index}>
+                  <span key={index}>
                     {cleanNameDisplay(recipient.name) ||
                       cleanEmailDisplay(recipient.email || recipient.address)}
                     {index < visibleRecipients.length - 1 ? ", " : ""}
@@ -510,13 +522,7 @@ const MailTo = ({ emailData }: { emailData: any }) => {
 {
   /* mail attachments */
 }
-const Attachments = ({
-  attachments,
-  attachmentsText,
-}: {
-  attachments: any;
-  attachmentsText: string[];
-}) => {
+const Attachments = ({ attachments }: { attachments: any }) => {
   return (
     <>
       {attachments && attachments.length > 0 ? (
@@ -551,38 +557,6 @@ const Attachments = ({
           </div>
         </>
       ) : null}
-
-      {attachmentsText && attachmentsText.length > 0 ? (
-        <>
-          <Separator className="my-4" />
-          <div className="mb-4 flex flex-wrap items-center gap-2 ">
-            {attachmentsText.map((att, index) => (
-              <div key={index}>
-                {rawLines(att).map((text, ind) => (
-                  <Paragraph key={ind}>{text}</Paragraph>
-                ))}
-              </div>
-            ))}
-          </div>
-        </>
-      ) : null}
     </>
   );
-};
-
-const rawLines = (text: string) => {
-  const lines = text.split(/\r?\n/);
-  const headerLines: string[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (/^\s/.test(line)) {
-      // continuation of previous header
-      headerLines[headerLines.length - 1] += "\n" + line;
-    } else {
-      headerLines.push(line);
-    }
-  }
-
-  return headerLines;
 };

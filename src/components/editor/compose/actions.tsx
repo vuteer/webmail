@@ -6,6 +6,7 @@ import {
   Command,
   Loader,
   Paperclip,
+  PaperclipIcon,
   Plus,
   X as XIcon,
 } from "lucide-react";
@@ -78,7 +79,7 @@ export const BottomActions = ({
               className="flex h-7 items-center gap-0.5 overflow-hidden rounded-md border bg-white/5 px-1.5 shadow-sm hover:bg-white/10 dark:border-none"
               onClick={() => fileInputRef.current?.click()}
             >
-              <Plus className="h-3 w-3 fill-[#9A9A9A]" />
+              <Paperclip className="h-3 w-3 fill-[#9A9A9A]" />
               <span className="hidden px-0.5 text-sm md:block">Add</span>
             </button>
             <Input
@@ -87,14 +88,21 @@ export const BottomActions = ({
               className="hidden"
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const fileList = event.target.files;
+                const allowedList = [];
+
                 if (fileList) {
-                  handleAttachment(
-                    Array.from(fileList),
-                    setValue,
-                    attachments,
-                    setHasUnsavedChanges,
-                  );
+                  for (let i = 0; i < fileList.length; i++) {
+                    const file = fileList[i];
+                    console.log(file.size, file.name);
+                    if (file.size > 100) allowedList.push(file);
+                  }
                 }
+                // handleAttachment(
+                //   Array.from(fileList),
+                //   setValue,
+                //   attachments,
+                //   setHasUnsavedChanges,
+                // );
               }}
               multiple
               accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"

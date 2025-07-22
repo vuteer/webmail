@@ -1,5 +1,5 @@
 import { serializeFiles } from "@/lib/schemas";
-import { sendMail } from "@/lib/api-calls/mails";
+import { createDraft, sendMail } from "@/lib/api-calls/mails";
 import {
   constructForwardBody,
   constructMailBody,
@@ -18,9 +18,11 @@ export const sendingMail = async (
     subject: string;
     message: string;
     attachments: File[];
+    draftId?: string | null;
   },
   user: { email: string; name: string; image: any },
-  mode: string | null,
+  mode?: string | null,
+  type?: "draft" | "send" | null,
   replyToMessage?: any,
   threadId?: string | null,
 ) => {
@@ -94,6 +96,7 @@ export const sendingMail = async (
       message: emailBody,
       from: { address: fromEmail, name: userName },
       attachments: serializedFiles,
+      draftId: data.draftId ?? null,
       headers: {
         "In-Reply-To": replyToMessage?.messageId ?? "",
         References: [
@@ -114,11 +117,13 @@ export const sendingMail = async (
     };
 
     console.log(mail);
+    let res: any;
+    if (type === "draft") res = await createDraft(mail);
+    else res = await sendMail(mail);
 
-    await sendMail(mail);
-
-    createToast("Success", "Mail sent successfully!", "success");
-    return true;
+    if (type !== "draft")
+      createToast("Success", "Mail sent successfully!", "success");
+    return res;
   } catch (error: any) {
     console.log(error);
     createToast("Error", error.message || "Error sending mail", "danger");

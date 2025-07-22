@@ -7,14 +7,15 @@ import { Moon, Sun, SunMedium } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import useMounted from "@/hooks/useMounted";
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const mounted = useMounted();
 
   React.useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (theme === "system") setTheme("light");
+  }, [mounted]);
 
   if (!mounted) return <Button size="icon" variant="secondary" />;
   return (

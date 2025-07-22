@@ -1,6 +1,5 @@
 // public layout
 
-import AuthProvider from "@/auth/auth-provider";
 import SideMenu from "./components/side-menu";
 import Contacts from "./components/contacts";
 
@@ -15,16 +14,16 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AuthProvider authType="cookie" authName="_auth">
-      <FinalizeSetup />
+    <>
+      {/* <FinalizeSetup />
       <Notifications />
       <SetupSocket />
-      <NetworkStatusIndicator />
+      <NetworkStatusIndicator /> */}
       <main className="h-full w-full flex">
         <SideMenu />
         {children}
         {/* <Contacts /> */}
       </main>
-    </AuthProvider>
+    </>
   );
 }

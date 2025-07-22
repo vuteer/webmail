@@ -6,13 +6,17 @@ import { z } from "zod";
 
 import { cn } from "@/lib/utils";
 import { ToItems } from "./to";
-import { useSession } from "@/lib/auth-client";
-import useMounted from "@/hooks/useMounted";
 import { Subject } from "./subject";
 import { EmailContent } from "./content";
 import { createToast } from "@/utils/toast";
 import useComposeEditor from "@/hooks/use-compose-editor";
 import { BottomActions } from "./actions";
+import { useSession } from "@/lib/auth-client";
+import useMounted from "@/hooks/useMounted";
+import { useQueryState } from "nuqs";
+// import { createDraft } from "@/lib/api-calls/mails";
+import { sendingMail } from "./send";
+import { useMailStoreState } from "@/stores/mail-store";
 
 interface EmailComposeProps {
   initialTo?: string[];
@@ -30,7 +34,8 @@ interface EmailComposeProps {
     message: string;
     attachments: File[];
     fromEmail?: string;
-  }) => Promise<void>;
+    draftId: string | null;
+  }) => Promise<string>;
   onClose?: () => void;
   className?: string;
   autofocus?: boolean;
@@ -65,17 +70,24 @@ export const EmailCompose = ({
   settingsLoading = false,
   replyingTo,
   editorClassName,
-  mode = "new",
 }: EmailComposeProps) => {
   const { data: session } = useSession();
+  const user = session?.user;
   const mounted = useMounted();
+  const { mails, mailsLoading } = useMailStoreState();
+
+  const [threadId] = useQueryState("threadId");
+  const [draftId, setDraftId] = useQueryState("draftId");
+  const [mode] = useQueryState("mode");
+
+  const [activeReplyId, setActiveReplyId] = useQueryState("activeReplyId");
 
   const [showCc, setShowCc] = useState(initialCc.length > 0);
   const [showBcc, setShowBcc] = useState(initialBcc.length > 0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [messageLength, setMessageLength] = useState(0);
+  // const [messageLength, setMessageLength] = useState(0);
   const [aiGeneratedMessage, setAiGeneratedMessage] = useState<string | null>(
     null,
   );
@@ -84,6 +96,8 @@ export const EmailCompose = ({
   const [isAddingRecipients, setIsAddingRecipients] = useState(false);
   const [isAddingCcRecipients, setIsAddingCcRecipients] = useState(false);
   const [isAddingBccRecipients, setIsAddingBccRecipients] = useState(false);
+  const [replyToMessage, setReplyToMessage] = useState<any>(null);
+
   const toWrapperRef = useRef<HTMLDivElement>(null);
   const ccWrapperRef = useRef<HTMLDivElement>(null);
   const bccWrapperRef = useRef<HTMLDivElement>(null);
@@ -99,7 +113,9 @@ export const EmailCompose = ({
       to: initialTo,
       cc: initialCc,
       bcc: initialBcc,
-      subject: initialSubject,
+      subject:
+        (mode === "forward" ? "FWD: " : mode?.includes("reply") ? "RE: " : "") +
+        initialSubject,
       message: initialMessage,
       attachments: initialAttachments,
       fromEmail: session?.user?.email || "",
@@ -112,7 +128,7 @@ export const EmailCompose = ({
   const bccEmails = watch("bcc");
   const subjectInput = watch("subject");
   const attachments = watch("attachments");
-  const fromEmail = watch("fromEmail");
+  // const fromEmail = watch("fromEmail");
 
   useEffect(() => {
     if (!mounted) return;
@@ -120,20 +136,29 @@ export const EmailCompose = ({
       to: initialTo,
       cc: initialCc,
       bcc: initialBcc,
-      subject: initialSubject,
+      subject:
+        (mode === "forward" ? "FWD: " : mode?.includes("reply") ? "RE: " : "") +
+        initialSubject,
       message: initialMessage,
       attachments: initialAttachments,
       fromEmail: session?.user?.email || "",
     });
-  }, [mounted]);
+  }, [mode, mounted]);
+
+  useEffect(() => {
+    if (mailsLoading || !activeReplyId) return;
+    // get replyTo based on activeReplyId
+    const m: any = mails.find((ml) => ml.messageId === activeReplyId);
+    if (m) setReplyToMessage(m);
+  }, [mails, mailsLoading, activeReplyId]);
 
   // editor
-  const editor = useComposeEditor({
+  const editor: any = useComposeEditor({
     initialValue: initialMessage,
     isReadOnly: isLoading,
-    onLengthChange: (length) => {
+    onLengthChange: (length: number) => {
       setHasUnsavedChanges(true);
-      setMessageLength(length);
+      // setMessageLength(length);
     },
     onModEnter: () => {
       void handleSend();
@@ -173,7 +198,7 @@ export const EmailCompose = ({
         fromEmail: values.fromEmail,
       });
 
-      await onSendEmail({
+      const messageId = await onSendEmail({
         to: values.to,
         cc: showCc ? values.cc : undefined,
         bcc: showBcc ? values.bcc : undefined,
@@ -181,7 +206,14 @@ export const EmailCompose = ({
         message: editor.getHTML(),
         attachments: values.attachments || [],
         fromEmail: values.fromEmail,
+        draftId,
       });
+
+      console.log(messageId);
+
+      // push to threads if no threadId & sec === sent
+      // append to mails if threadId exists
+
       // setHasUnsavedChanges(false);
       // editor.commands.clearContent(true);
       // form.reset();
@@ -194,6 +226,75 @@ export const EmailCompose = ({
       setIsLoading(false);
     }
   };
+
+  // save draft
+  const saveDraft = async () => {
+    const values = getValues();
+
+    if (!hasUnsavedChanges || !user) return;
+    const messageText = editor.getText();
+
+    if (messageText.trim() === initialMessage.trim()) return;
+    if (editor.getHTML() === initialMessage.trim()) return;
+    if (!values.to.length || !values.subject.length || !messageText.length)
+      return;
+    if (aiGeneratedMessage || aiIsLoading || isGeneratingSubject) return;
+
+    try {
+      setIsSavingDraft(true);
+
+      const mail = {
+        to: values.to,
+        cc: showCc ? values.cc : undefined,
+        bcc: showBcc ? values.bcc : undefined,
+        subject: values.subject,
+        message: editor.getHTML(),
+        attachments: values.attachments || [],
+        fromEmail: values.fromEmail,
+        draftId,
+      };
+      const sendingUser: { email: string; name: string; image: any } = {
+        email: user.email,
+        name: user.name,
+        image: user.image,
+      };
+
+      const res = await sendingMail(
+        mail,
+        sendingUser,
+        null,
+        "draft",
+        replyToMessage,
+        threadId,
+      );
+
+      // console.log(draftData)
+      // const response = await createDraft(draftData);
+
+      if (res) setDraftId(res);
+      // if (response?.id && response.id !== draftId) {
+      //   setDraftId(response.id);
+      // }
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      createToast("Error", "Failed to save draft", "danger");
+      setIsSavingDraft(false);
+      setHasUnsavedChanges(false);
+    } finally {
+      setIsSavingDraft(false);
+      setHasUnsavedChanges(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+
+    const autoSaveTimer = setTimeout(() => {
+      saveDraft();
+    }, 3000);
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [hasUnsavedChanges]);
 
   return (
     <div
@@ -284,6 +385,7 @@ const handleAttachment = (
   setHasUnsavedChanges: any,
 ) => {
   if (files && files.length > 0) {
+    // handle checking file size here
     setValue("attachments", [...(attachments ?? []), ...files]);
     setHasUnsavedChanges(true);
   }

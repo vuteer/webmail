@@ -4,8 +4,8 @@ import {
   Extension,
   generateJSON,
 } from "@tiptap/react";
-import { AutoComplete } from "@/components/editor2/editor-autocomplete";
-import { defaultExtensions } from "@/components/editor2/extensions";
+import { AutoComplete } from "@/components/editor/editor-autocomplete";
+import { defaultExtensions } from "@/components/editor/extensions";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { TextSelection } from "prosemirror-state";

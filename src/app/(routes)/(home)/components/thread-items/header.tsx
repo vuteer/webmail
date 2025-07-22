@@ -1,5 +1,5 @@
 // thread header
-import { use, useState } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useQueryState } from "nuqs";
 
@@ -31,18 +31,57 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useThreadStore } from "@/stores/threads";
 
-import {
-  handleToggleFlag,
-  // includesFlag,
-  handleToggleLocation,
-  printThread,
-} from "./actions";
+import { handleToggleFlag, handleToggleLocation, printThread } from "./actions";
 import { useMailStoreState } from "@/stores/mail-store";
+import { useMailNumbersStore } from "@/stores/mail-numbers";
+
+import { MailTrashModal } from "./delete-modal";
+import { Paragraph } from "@/components/ui/typography";
 
 export const MailHeader = ({ threadId }: { threadId: string }) => {
+  const { threads } = useThreadStore();
+  const { inbox, drafts, sent, archive, junk, trash } = useMailNumbersStore();
   const [, setMode] = useQueryState("mode");
   const [, setThreadId] = useQueryState("threadId");
+  const [sec] = useQueryState("sec");
   const [, setActiveReplyId] = useQueryState("activeReplyId");
+
+  const currentIndex = threads.findIndex(
+    (thread) => thread.messageId === threadId,
+  );
+  const total =
+    sec === "inbox"
+      ? inbox
+      : sec === "drafts"
+        ? drafts
+        : sec === "sent"
+          ? sent
+          : sec === "archive"
+            ? archive
+            : sec === "junk"
+              ? junk
+              : sec === "trash"
+                ? trash
+                : 0;
+
+  const isFromAdmin =
+    threads[currentIndex].from.name === "Mail Delivery System";
+
+  const handleNextOrPrev = (dir: "next" | "prev") => {
+    const threadsLength = threads.length;
+    if (threadsLength <= 1) return;
+
+    // next
+
+    let moveToIndex = dir === "next" ? currentIndex + 1 : currentIndex - 1;
+
+    if (dir === "next" && moveToIndex > threadsLength - 1) moveToIndex = 0;
+    if (dir === "prev" && moveToIndex < 0) moveToIndex = threadsLength - 1;
+    const newThread = threads[moveToIndex];
+    setThreadId(newThread.messageId);
+    setActiveReplyId(null);
+    setMode(null);
+  };
 
   return (
     <>
@@ -63,34 +102,56 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
             </Button>
             <div className="dark:bg-iconDark/20 relative h-5 w-0.5 rounded-full bg-[#E7E7E7]" />{" "}
             <div className="flex gap-2">
-              <Button variant="ghost" size="sm" className="p-0 px-2 py-1">
+              <Button
+                disabled={threads.length === 1}
+                variant="ghost"
+                size="sm"
+                className="p-0 px-2 py-1"
+                onClick={() => handleNextOrPrev("prev")}
+              >
                 <ChevronLeft size={18} />
               </Button>
-              <Button variant="ghost" size="sm" className="p-0 px-2 py-1">
+              <Button
+                disabled={threads.length === 1}
+                variant="ghost"
+                size="sm"
+                className="p-0 px-2 py-1"
+                onClick={() => handleNextOrPrev("next")}
+              >
                 <ChevronRight size={18} />
               </Button>
             </div>
+            <div className="dark:bg-iconDark/20 relative h-5 w-0.5 rounded-full bg-[#E7E7E7]" />{" "}
+            <Paragraph className="flex items-center gap-2 font-semibold">
+              <span>&nbsp;{currentIndex + 1}</span>
+              <span>out of</span>
+              <span>{total}</span>
+            </Paragraph>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setMode("replyAll");
-                setActiveReplyId(threadId);
-              }}
-              className="inline-flex h-7 items-center justify-center gap-1 overflow-hidden rounded-lg border bg-white px-1.5 dark:border-none dark:bg-[#313131]"
-            >
-              <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
-              <div className="flex items-center justify-center gap-2.5 pl-0.5 pr-1">
-                <div className="justify-start text-sm leading-none text-black dark:text-white">
-                  Reply All
+            {sec === "inbox" && !isFromAdmin && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMode("replyAll");
+                  setActiveReplyId(threadId);
+                }}
+                className="inline-flex h-7 items-center justify-center gap-1 overflow-hidden rounded-lg border bg-white px-1.5 dark:border-none dark:bg-[#313131]"
+              >
+                <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
+                <div className="flex items-center justify-center gap-2.5 pl-0.5 pr-1">
+                  <div className="justify-start text-sm leading-none text-black dark:text-white">
+                    Reply All
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            )}
             <Starred threadId={threadId} />
             <Important threadId={threadId} />
-            <Archived threadId={threadId} />
-            <Trashed threadId={threadId} />
+            {(sec === "inbox" || sec === "archive") && (
+              <Archived threadId={threadId} />
+            )}
+            {sec !== "trash" && <Trashed threadId={threadId} />}
             <Dots />
           </div>
         </div>
@@ -226,6 +287,7 @@ export const Archived = ({ threadId }: { threadId: string }) => {
 
 export const Trashed = ({ threadId }: { threadId: string }) => {
   const [loading, setLoading] = useState(false);
+  const [openConfirmModal, setOpenConfirmModal] = useState<boolean>(false);
   const [sec, setSec] = useQueryState("sec");
   const [, setThreadId] = useQueryState("threadId");
 
@@ -247,12 +309,20 @@ export const Trashed = ({ threadId }: { threadId: string }) => {
   };
   return (
     <>
-      {true && (
+      <MailTrashModal
+        loading={loading}
+        isOpen={openConfirmModal}
+        onClose={() => setOpenConfirmModal(false)}
+        onMoveToTrash={toggleTrashed}
+        onDelete={() => {}}
+      />
+      {sec !== "trash" && (
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={toggleTrashed}
+                onClick={() => setOpenConfirmModal(true)}
+                disabled={loading}
                 className="inline-flex h-7 w-7 items-center justify-center gap-1 overflow-hidden rounded-lg border border-[#FCCDD5] bg-[#FDE4E9] dark:border-[#6E2532] dark:bg-[#411D23]"
               >
                 <Trash className="fill-[#F43F5E]" />
@@ -280,18 +350,18 @@ export const Dots = () => {
 
   const toggleSpam = async () => {
     if (!threadId) return;
-    const action: "add" | "remove" = sec === "spam" ? "remove" : "add";
+    const action: "add" | "remove" = sec === "junk" ? "remove" : "add";
     let res = await handleToggleLocation(
       threadId,
       sec,
-      sec !== "spam" ? "spam" : "inbox",
+      sec !== "junk" ? "junk" : "inbox",
       setLoading,
       action,
     );
 
     if (res) {
       setThreadId(null);
-      setSec(action === "add" ? "spam" : "inbox");
+      setSec(action === "add" ? "junk" : "inbox");
     }
   };
   const toggleInbox = async () => {
@@ -318,8 +388,8 @@ export const Dots = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white dark:bg-[#313131]">
-        {sec !== "inbox" ? (
-          <DropdownMenuItem onClick={toggleInbox}>
+        {sec !== "inbox" && sec !== "sent" ? (
+          <DropdownMenuItem onClick={toggleInbox} disabled={loading}>
             <Inbox className="fill-iconLight dark:fill-iconDark  mr-2 h-4 w-4" />
             <span>Move to Inbox</span>
           </DropdownMenuItem>
@@ -330,12 +400,13 @@ export const Dots = () => {
             e.stopPropagation();
             printThread(mails);
           }}
+          disabled={loading}
         >
           <Printer className="fill-iconLight dark:fill-iconDark mr-2 h-4 w-4" />
           <span>Print thread</span>
         </DropdownMenuItem>
-        {sec !== "spam" ? (
-          <DropdownMenuItem onClick={toggleSpam}>
+        {sec !== "junk" && sec !== "sent" ? (
+          <DropdownMenuItem onClick={toggleSpam} disabled={loading}>
             <ArchiveX className="fill-iconLight dark:fill-iconDark h-4 w-4 mr-2" />
             <span>{"Move to Spam"}</span>
           </DropdownMenuItem>

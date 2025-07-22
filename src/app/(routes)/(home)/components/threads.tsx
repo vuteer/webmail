@@ -25,8 +25,7 @@ import { useThreadStore } from "@/stores/threads";
 import useMounted from "@/hooks/useMounted";
 
 const Threads = () => {
-  // global state items
-  const { unread, inbox, drafts, outbox, sent, archived, spam, trash } =
+  const { unread, inbox, drafts, sent, archive, junk, trash, setInitialNumbers } =
     useMailNumbersStore();
   const { threads, fetchThreads, threadsLoading } = useThreadStore();
   const mounted = useMounted();
@@ -45,26 +44,22 @@ const Threads = () => {
     fetchThreads(sec || "inbox", Number(page || 0));
   }, [mounted, sec, page]);
 
-  React.useEffect(() => {
-    if (!mounted) return;
-    setCount(0);
-    const cnt =
-      sec === "inbox"
-        ? inbox
-        : sec === "drafts"
-          ? drafts
-          : sec === "outbox"
-            ? outbox
-            : sec === "sent"
-              ? sent
-              : sec === "archived"
-                ? archived
-                : sec === "spam"
-                  ? spam
-                  : trash;
 
-    setCount(cnt);
-  }, [mounted, sec, inbox]);
+  useCustomEffect(setInitialNumbers, [sec])
+
+  const sectionsMap: Record<string, number> = {
+    inbox,
+    drafts,
+    sent,
+    archive,
+    junk,
+    trash,
+  };
+  useCustomEffect(() => {
+    const countValue = sectionsMap[sec || "inbox"] ?? 0;
+
+    setCount(countValue);
+  }, [sectionsMap, sec]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -76,7 +71,7 @@ const Threads = () => {
               {sec}
             </Heading1>
             {sec === "inbox" ? (
-              <div className="flex gap-2 items-center text-xs lg:text-sm font-normal mt-1">
+              <div className="flex gap-2 items-center text-xs lg:text-xs font-normal mt-1">
                 <span>{`Total - ${numberWithCommas(inbox)}`}</span>
                 {inbox && sec === "inbox" ? (
                   <>
@@ -88,7 +83,7 @@ const Threads = () => {
                 )}
               </div>
             ) : (
-              <></>
+              <div><span className="text-foreground-muted text-xs">Found {threadsLoading ? "..." : count} thread{ count == 1 ? "": "s"}</span></div>
             )}
           </div>
 
@@ -97,9 +92,12 @@ const Threads = () => {
             <Button
               variant="outline"
               disabled={threadsLoading}
-              onClick={() => fetchThreads(sec || "inbox", Number(page || 0))}
+              onClick={() => {
+                setInitialNumbers()
+                fetchThreads(sec || "inbox", Number(page || 0));
+
+              }}
               size={"sm"}
-              className="rounded-full border"
             >
               <RefreshCcw size={18} />
             </Button>

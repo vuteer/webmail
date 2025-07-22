@@ -26,7 +26,6 @@ export const openAttachment = (attachment: {
   filename: string;
 }) => {
   try {
-    console.log(attachment);
     const byteArray = new Uint8Array(attachment.content.data);
     const blob = new Blob([byteArray], { type: attachment.contentType });
     const url = window.URL.createObjectURL(blob);
@@ -89,7 +88,6 @@ export const downloadAttachment = (attachment: {
   filename: string;
 }) => {
   try {
-    console.log(attachment);
     const byteArray = new Uint8Array(attachment.content.data);
     const blob = new Blob([byteArray], { type: attachment.contentType });
 
@@ -105,33 +103,6 @@ export const downloadAttachment = (attachment: {
     console.error("Error downloading attachment:", error);
   }
 };
-
-// export const downloadAttachment = (attachment: {
-//   body: string;
-//   mimeType: string;
-//   filename: string;
-// }) => {
-//   try {
-//     const byteCharacters = atob(attachment.body);
-//     const byteNumbers = new Array(byteCharacters.length);
-//     for (let i = 0; i < byteCharacters.length; i++) {
-//       byteNumbers[i] = byteCharacters.charCodeAt(i);
-//     }
-//     const byteArray = new Uint8Array(byteNumbers);
-//     const blob = new Blob([byteArray], { type: attachment.mimeType });
-
-//     const url = window.URL.createObjectURL(blob);
-//     const link = document.createElement("a");
-//     link.href = url;
-//     link.download = attachment.filename;
-//     document.body.appendChild(link);
-//     link.click();
-//     document.body.removeChild(link);
-//     window.URL.revokeObjectURL(url);
-//   } catch (error) {
-//     console.error("Error downloading attachment:", error);
-//   }
-// };
 
 // handleToggleFlag
 export const handleToggleFlag = async (
@@ -176,7 +147,7 @@ export const includesFlag = (flag: string, flags: string[]) =>
 export const handleToggleLocation = async (
   threadId: string,
   sec: string | null,
-  folder: "archive" | "trash" | "spam" | "inbox",
+  folder: "archive" | "trash" | "junk" | "inbox",
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   action: "add" | "remove",
 ) => {
@@ -608,7 +579,11 @@ export const printThread = (mails: any[]) => {
 export const handleDownloadAllAttachments =
   (
     subject: string,
-    attachments: { body: string; mimeType: string; filename: string }[],
+    attachments: {
+      content: { type: string; data: number[] };
+      contentType: string;
+      filename: string;
+    }[],
   ) =>
   async () => {
     if (!attachments.length) return;
@@ -616,16 +591,9 @@ export const handleDownloadAllAttachments =
     const JSZip = (await import("jszip")).default;
     const zip = new JSZip();
 
-    console.log("attachments", attachments);
     attachments.forEach((attachment) => {
       try {
-        const byteCharacters = atob(attachment.body);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-
+        const byteArray = new Uint8Array(attachment.content.data);
         zip.file(attachment.filename, byteArray, {
           binary: true,
           date: new Date(),
@@ -636,28 +604,22 @@ export const handleDownloadAllAttachments =
       }
     });
 
-    // Generate and download the zip file
-    zip
-      .generateAsync({
+    try {
+      const content = await zip.generateAsync({
         type: "blob",
         compression: "DEFLATE",
-        compressionOptions: {
-          level: 9,
-        },
-      })
-      .then((content: any) => {
-        const url = window.URL.createObjectURL(content);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `attachments-${subject || "email"}.zip`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((error: any) => {
-        console.error("Error generating zip file:", error);
+        compressionOptions: { level: 9 },
       });
 
-    console.log("downloaded", subject, attachments);
+      const url = window.URL.createObjectURL(content);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `attachments-${subject || "email"}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating zip file:", error);
+    }
   };

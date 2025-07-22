@@ -1,21 +1,13 @@
 import React from "react";
 import { useQueryState } from "nuqs";
 
-// import { EmailComposer } from "@/components/editor2/email-compose";
-import { EmailCompose } from "@/components/editor2/compose";
+import { EmailCompose } from "@/components/editor/compose";
 import { useDraft } from "@/hooks/use-drafts";
 import { useSettings } from "@/hooks/useSettings";
 import { useMailStoreState } from "@/stores/mail-store";
 import { useSession } from "@/lib/auth-client";
-import {
-  constructReplyBody,
-  constructForwardBody,
-  decodeHtmlToText,
-} from "@/lib/utils";
-import { serializeFiles } from "@/lib/schemas";
-import { processHtml } from "@/hooks/use-process-html";
-// import { sendMail } from "@/lib/api-calls/mails";
-import { sendingMail } from "@/components/editor2/compose/send";
+
+import { sendingMail } from "@/components/editor/compose/send";
 
 export const ReplyCompose = () => {
   const { data: session } = useSession();
@@ -58,10 +50,14 @@ export const ReplyCompose = () => {
       data,
       sendingUser,
       mode,
+      "send",
       replyToMessage,
       threadId,
     );
+
+    return res;
   };
+
   return (
     <div className="w-full rounded-xl">
       <EmailCompose
@@ -94,19 +90,19 @@ export const ReplyCompose = () => {
 
 // helper functions
 //
-const ensureEmailArray = (
-  emails: string | string[] | undefined | null,
-): string[] => {
-  if (!emails) return [];
-  if (Array.isArray(emails)) {
-    return emails.map((email) => email.trim().replace(/[<>]/g, ""));
-  }
-  if (typeof emails === "string") {
-    return emails
-      .split(",")
-      .map((email) => email.trim())
-      .filter((email) => email.length > 0)
-      .map((email) => email.replace(/[<>]/g, ""));
-  }
-  return [];
-};
+// const ensureEmailArray = (
+//   emails: string | string[] | undefined | null,
+// ): string[] => {
+//   if (!emails) return [];
+//   if (Array.isArray(emails)) {
+//     return emails.map((email) => email.trim().replace(/[<>]/g, ""));
+//   }
+//   if (typeof emails === "string") {
+//     return emails
+//       .split(",")
+//       .map((email) => email.trim())
+//       .filter((email) => email.length > 0)
+//       .map((email) => email.replace(/[<>]/g, ""));
+//   }
+//   return [];
+// };
