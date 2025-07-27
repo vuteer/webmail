@@ -43,6 +43,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
   const { inbox, drafts, sent, archive, junk, trash } = useMailNumbersStore();
   const [, setMode] = useQueryState("mode");
   const [, setThreadId] = useQueryState("threadId");
+  const [, setDraftId] = useQueryState("draftId");
   const [sec] = useQueryState("sec");
   const [, setActiveReplyId] = useQueryState("activeReplyId");
 
@@ -96,6 +97,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
                 setMode(null);
                 setThreadId(null);
                 setActiveReplyId(null);
+                setDraftId(null);
               }}
             >
               <X size={20} />

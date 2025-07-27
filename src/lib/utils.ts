@@ -321,9 +321,9 @@ export const constructReplyBody = (
       <div style="padding-left: 16px; border-left: 3px solid #e2e8f0; color: #64748b;">
         <div style="font-size: 12px;">
           On ${originalDate}, ${senderName} ${recipientEmails ? `&lt;${recipientEmails}&gt;` : ""} wrote:
-          <p style="text-decoration: italic;">
+          <span style="text-decoration: italic;">
             ${quotedMessage || "Unavailable Text"}
-          </p>
+          </span>
         </div>
       </div>
     </div>

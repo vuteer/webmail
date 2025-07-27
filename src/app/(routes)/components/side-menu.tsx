@@ -209,7 +209,7 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
 
   const handleSend = async (data: any) => {
     // Implement send logic here
-    console.log("Sending email:", data);
+
     if (!user) return;
     const sendingUser: { email: string; name: string; image: any } = {
       email: user.email,
@@ -217,6 +217,7 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
       image: user.image,
     };
     const res = await sendingMail(data, sendingUser);
+    if (res) setDialogOpen(false);
     return res;
   };
   return (
@@ -262,6 +263,7 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
           <EmailCompose
             editorClassName="min-h-[150px]"
             onSendEmail={(data) => handleSend(data)}
+            initialMessage={""}
           />
         </div>
       </DialogContent>

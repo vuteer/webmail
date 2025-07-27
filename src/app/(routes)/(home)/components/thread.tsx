@@ -85,7 +85,7 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
   return (
     <div
       className={cn(
-        "group relative duration-700 p-1 pb-0 rounded-lg my-1 w-full cursor-pointer overflow-hidden hover:bg-background  ",
+        "group relative duration-700 p-1 py-2 rounded-lg my-1 w-full cursor-pointer overflow-hidden hover:bg-background  ",
         threadId === messageId ? "bg-secondary" : "",
       )}
       onClick={handleOpenMail}
@@ -95,7 +95,7 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
         starred={includesFlag("\\Flagged", flags)}
         important={includesFlag("$Important", flags)}
       />
-      <div className="flex items-center gap-3 py-4 px-2 w-full overflow-hidden">
+      <div className="flex items-center gap-3 py-2 px-2 w-full overflow-hidden">
         <AppAvatar
           name={from?.name || "No Name"}
           dimension="h-10 w-10"
@@ -105,7 +105,7 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
             "https://res.cloudinary.com/dyo0ezwgs/image/upload/v1701022046/digital/users/profiles/v0bhjiet4xpkkeqpygn0.png"
           }
         />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1 gap-1">
           <div className="flex-1 flex gap-3 items-center">
             <Heading4 className="text-sm lg:text-md leading-0 capitalize">
               {from?.address === user?.email ? (
@@ -166,7 +166,7 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
           <Paragraph className="text-muted-foreground">{subject}</Paragraph>
         </div>
       </div>
-      <Separator className="my-2" />
+      {/* <Separator className="my-2" /> */}
     </div>
   );
 };

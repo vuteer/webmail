@@ -8,39 +8,17 @@ import { Paragraph } from "@/components/ui/typography";
 
 import PopoverContainer from "./container";
 import { AppLinkButton } from "@/components";
-
-import { useSearch } from "@/hooks";
+import { useQueryState } from "nuqs";
 
 type SortTypes = "recent" | "unread";
 
 const SortPopover = () => {
   const [current, setCurrent] = React.useState<SortTypes>("recent");
-
-  const searchParams = useSearch();
-  let sort: any = searchParams?.get("sort") || "recent";
-
-  const { push } = useRouter();
+  const [sort, setSort] = useQueryState("sort");
 
   React.useEffect(() => {
-    setCurrent(sort);
+    setCurrent(!sort ? "recent" : "unread");
   }, [sort]);
-
-  const handleItemSwitch = (item: SortTypes) => {
-    setCurrent(item);
-
-    // let entries = Object.entries(searchParams?.entries());
-    let entries: any = searchParams?.entries();
-
-    let queryStr = "?";
-
-    for (const [key, value] of entries) {
-      console.log(key, value);
-      if (key !== "sort" && key !== "threadId")
-        queryStr = queryStr + `${key}=${value}&`;
-    }
-    queryStr = queryStr + `sort=${item}`;
-    push(`/${queryStr}`);
-  };
 
   const list = ["recent", "unread"] as const;
 
@@ -51,9 +29,9 @@ const SortPopover = () => {
         <AppLinkButton
           type="outline"
           size="sm"
-          className="border flex items-center justify-between gap-2 w-[100px]"
+          className="rounded-full border flex items-center justify-between gap-2 w-[100px]"
         >
-          <span className="capitalize">{current}</span>
+          <span className="capitalize text-xs lg:text-sm">{current}</span>
           <ChevronDown size={18} />
         </AppLinkButton>
       }
@@ -63,11 +41,18 @@ const SortPopover = () => {
           <Paragraph
             key={index}
             className="duration-700 cursor-pointer hover:text-main-color flex items-center gap-2"
-            onClick={() => handleItemSwitch(item)}
+            onClick={() => {
+              setSort(item === "unread" ? "unread" : null);
+            }}
           >
             <CheckCheck
               size={18}
-              color={item === current ? "#1C63EA" : "transparent"}
+              color={
+                (item === "recent" && !sort) ||
+                (item === "unread" && sort === "unread")
+                  ? "#1C63EA"
+                  : "transparent"
+              }
             />
             <span className={"text-xs lg:text-sm capitalize"}>{item}</span>
           </Paragraph>

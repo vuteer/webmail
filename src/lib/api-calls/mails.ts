@@ -72,17 +72,25 @@ export const toggleLocation = async (
 
 export const sendMail = async (data: any) => {
   const res = await postDoc("/mails", data, true);
-
-  console.log(res);
   return res?.data?.doc || false;
 };
 
 // draft
 export const createDraft = async (data: any) => {
   const res = await postDoc("/mails/draft", data, true);
-
-  console.log(res);
   return res?.data?.doc || false;
+};
+
+// search for mail
+export const searchMail = async (q: string, folder: string) => {
+  const res = await getDoc(`/mails/search/list?q=${q}&folder=${folder}`);
+  return res?.data || [];
+};
+
+// mark all as read
+export const markAllAsRead = async () => {
+  const res = await patchDoc("/mails/update/mark/all/read", {}, true);
+  return res?.status === "success" || false;
 };
 
 // old
@@ -157,24 +165,3 @@ export const markAsRead = async (all?: boolean, selected?: string[]) => {
   );
   return res?.status === "success";
 };
-
-// sending
-
-// Appointments -
-// — notifications
-// — notify others when near
-// — total number
-
-// Events
-// — notify others on creation and on near
-// — total
-
-// Files
-// — file sharing
-// — upon deleting, delete everywhere
-// — grid
-
-// Profile
-// Settings - mail signatures
-
-// State numbers

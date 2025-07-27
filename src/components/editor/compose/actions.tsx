@@ -1,15 +1,7 @@
 import pluralize from "pluralize";
 import { motion, AnimatePresence } from "motion/react";
 
-import {
-  Check,
-  Command,
-  Loader,
-  Paperclip,
-  PaperclipIcon,
-  Plus,
-  X as XIcon,
-} from "lucide-react";
+import { Check, Command, Loader, Paperclip, X as XIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,

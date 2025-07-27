@@ -7,7 +7,7 @@
 
 // import {createToast} from "@/utils/toast";
 import Instance from "@/helpers/axios-interceptor";
-// import { removeCookie } from "@/helpers/cookies";
+import { removeCookie } from "@/helpers/cookies";
 
 export const postDoc = async (url: string, form: any, log: boolean = false) => {
   try {
@@ -65,16 +65,8 @@ const handleAuthErr = (err: any, log: boolean = false) => {
   // handle 403 - forbidden and 401 unauthorized errors
   // by removing the user details and prompting for login
   if (code === 403 || code === 401) {
-    let currentUrl = window.location.pathname;
-
-    if (currentUrl !== "/") {
-      // removeCookie("_auth");
-      // removeCookie("_auth_state")
-      // removeCookie("_auth_storage")
-      // removeCookie("_auth_type")
-
-      window.location.assign("/auth/login");
-    }
+    window.location.assign("/auth/login");
+    removeCookie("better-auth.session_token");
   }
 
   return {

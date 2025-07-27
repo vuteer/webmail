@@ -1,19 +1,13 @@
-// profile page 
+// profile page
 import Protected from "../components/protected";
-import PersonalDetails from "./components/details";
-import Password from "./components/password";
-
+import { Profile } from "./components/container";
 
 const Page = () => {
+  return (
+    <Protected title="Profile">
+      <Profile />
+    </Protected>
+  );
+};
 
-    return (
-        <Protected title="Profile">
-            <div className="flex gap-2">
-                <PersonalDetails />
-                <Password />
-            </div>
-        </Protected>
-    )
-}; 
-
-export default Page; 
+export default Page;

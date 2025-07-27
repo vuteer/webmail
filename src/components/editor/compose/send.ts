@@ -19,6 +19,7 @@ export const sendingMail = async (
     message: string;
     attachments: File[];
     draftId?: string | null;
+    inReplyTo?: string | null;
   },
   user: { email: string; name: string; image: any },
   mode?: string | null,
@@ -37,6 +38,7 @@ export const sendingMail = async (
     }
     // Send email logic here
     // to, cc, bcc
+
     let toRecipients = data.to.map((email) => ({
       email,
       address: email,
@@ -97,6 +99,7 @@ export const sendingMail = async (
       from: { address: fromEmail, name: userName },
       attachments: serializedFiles,
       draftId: data.draftId ?? null,
+      inReplyTo: data.inReplyTo ?? null,
       headers: {
         "In-Reply-To": replyToMessage?.messageId ?? "",
         References: [
@@ -116,7 +119,6 @@ export const sendingMail = async (
       ),
     };
 
-    console.log(mail);
     let res: any;
     if (type === "draft") res = await createDraft(mail);
     else res = await sendMail(mail);

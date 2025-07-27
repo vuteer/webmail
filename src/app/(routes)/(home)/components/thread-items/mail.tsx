@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Lock, HardDriveDownload, Send } from "lucide-react";
+import { Lock, HardDriveDownload, Send, SquarePen } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { format } from "date-fns-tz";
 
@@ -38,6 +38,11 @@ import {
 } from "./actions";
 import { useCustomEffect } from "@/hooks/useEffect";
 import { useSession } from "@/lib/auth-client";
+import { jsxToHtml } from "@/components/editor/compose/jsx-to-html";
+import { sendingMail } from "@/components/editor/compose/send";
+import { useThreadStore } from "@/stores/threads";
+import { useMailNumbersStore } from "@/stores/mail-numbers";
+import { ForwardToInputs } from "./forward";
 
 export const Mail = ({
   emailData,
@@ -49,6 +54,8 @@ export const Mail = ({
   index: number;
 }) => {
   const { data: session } = useSession();
+  const { removeThread } = useThreadStore();
+  const { setInitialNumbers } = useMailNumbersStore();
   const user = session?.user;
 
   const mailAdmin = emailData?.from?.name === "Mail Delivery System";
@@ -56,11 +63,11 @@ export const Mail = ({
   const [openDetailsPopover, setOpenDetailsPopover] = useState<boolean>(false);
   const [preventCollapse, setPreventCollapse] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
-  // (emailData.flags.includes("\\Seen") || !mailAdmin) ?? true,
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [attachments, setAttachments] = useState<any[]>([]);
 
-  const [threadId] = useQueryState("threadId");
+  const [threadId, setThreadId] = useQueryState("threadId");
   const [, setMode] = useQueryState("mode");
   const [, setActiveReplyId] = useQueryState("activeReplyId");
   const [sec] = useQueryState("sec");
@@ -85,6 +92,37 @@ export const Mail = ({
   useCustomEffect(extractAttachments, [threadId]);
 
   const isLastEmail = totalEmails && index === totalEmails - 1;
+
+  const handleDraftSend = async () => {
+    if (!user) return;
+    const mail = {
+      to: emailData.to.map((m: any) => m.address),
+      cc: emailData.cc.map((m: any) => m.address),
+      bcc: emailData.bcc.map((m: any) => m.address),
+      subject: emailData.subject,
+      message: jsxToHtml(emailData.html),
+      attachments: emailData.attachments,
+      fromEmail: emailData.from.address,
+      draftId: emailData.messageId,
+      inReplyTo: emailData.inReplyTo,
+    };
+    setLoading(true);
+    const sendingUser = {
+      email: user.email,
+      name: user.name,
+      image: user.image,
+    };
+
+    const messageId = await sendingMail(mail, sendingUser);
+
+    if (messageId) {
+      // clear the draft from threads,
+      setThreadId(null);
+      removeThread(emailData.messageId);
+      setInitialNumbers();
+    }
+    setLoading(false);
+  };
 
   return (
     <div
@@ -196,35 +234,28 @@ export const Mail = ({
                   </>
                 )}
                 {sec === "drafts" && (
-                  <ActionButton
-                    onClick={(e) => {
-                      // handleSend
-                      // e.stopPropagation();
-                      // setIsCollapsed(false);
-                      // setMode("reply");
-                      // setActiveReplyId(emailData.messageId);
-                    }}
-                    icon={
-                      <Send className="fill-muted-foreground dark:fill-[#9B9B9B]" />
-                    }
-                    text={"Send"}
-                    shortcut={isLastEmail ? "s" : undefined}
-                  />
+                  <>
+                    <ActionButton
+                      disabled={loading}
+                      onClick={(e) => {
+                        setMode("draft");
+                        setActiveReplyId(emailData.messageId);
+                      }}
+                      icon={<SquarePen size={18} />}
+                      text={"Edit"}
+                      shortcut={isLastEmail ? "d" : undefined}
+                    />
+                    <ActionButton
+                      disabled={loading}
+                      onClick={handleDraftSend}
+                      icon={<Send size={18} />}
+                      text={"Send"}
+                      shortcut={isLastEmail ? "s" : undefined}
+                    />
+                  </>
                 )}
                 {(sec === "inbox" || sec === "sent") && (
-                  <ActionButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsCollapsed(false);
-                      setMode("forward");
-                      setActiveReplyId(emailData.messageId);
-                    }}
-                    icon={
-                      <Forward className="fill-muted-foreground dark:fill-[#9B9B9B]" />
-                    }
-                    text={"Forward"}
-                    shortcut={isLastEmail ? "f" : undefined}
-                  />
+                  <ForwardToInputs disabled={loading} emailData={emailData} />
                 )}
               </div>
             )}
@@ -241,12 +272,20 @@ type ActionButtonProps = {
   icon: React.ReactNode;
   text: string;
   shortcut?: string;
+  disabled?: boolean;
 };
 
-const ActionButton = ({ onClick, icon, text, shortcut }: ActionButtonProps) => {
+export const ActionButton = ({
+  disabled,
+  onClick,
+  icon,
+  text,
+  shortcut,
+}: ActionButtonProps) => {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className="inline-flex h-7 items-center justify-center gap-1 overflow-hidden rounded-md border bg-white px-1.5 dark:border-none dark:bg-[#313131]"
     >
       {icon}

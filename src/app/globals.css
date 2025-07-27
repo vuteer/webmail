@@ -296,3 +296,14 @@
 .fc-button-group button.fc-button-active:hover {
   background-color: #016ffe !important;
 }
+
+/* reset scrollbars */
+*::-webkit-scrollbar {
+  width: 0px !important;
+}
+*::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}

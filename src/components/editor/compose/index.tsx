@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { useRef, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,9 @@ import { useQueryState } from "nuqs";
 // import { createDraft } from "@/lib/api-calls/mails";
 import { sendingMail } from "./send";
 import { useMailStoreState } from "@/stores/mail-store";
+import { useThreadStore } from "@/stores/threads";
+import { extractBodyContent } from "./jsx-to-html";
+import { useMailNumbersStore } from "@/stores/mail-numbers";
 
 interface EmailComposeProps {
   initialTo?: string[];
@@ -75,10 +79,13 @@ export const EmailCompose = ({
   const user = session?.user;
   const mounted = useMounted();
   const { mails, mailsLoading } = useMailStoreState();
+  const { appendThread, removeThread } = useThreadStore();
+  const { setInitialNumbers } = useMailNumbersStore();
 
-  const [threadId] = useQueryState("threadId");
+  const [threadId, setThreadId] = useQueryState("threadId");
   const [draftId, setDraftId] = useQueryState("draftId");
-  const [mode] = useQueryState("mode");
+  const [mode, setMode] = useQueryState("mode");
+  const [sec] = useQueryState("sec");
 
   const [activeReplyId, setActiveReplyId] = useQueryState("activeReplyId");
 
@@ -171,10 +178,18 @@ export const EmailCompose = ({
     autofocus,
   });
 
+  useEffect(() => {
+    if (!mounted) return;
+    // editor.focus();
+    // editor.commands.setContent("<p>Hello <strong>world</strong></p>");
+    if (initialMessage)
+      editor.commands.setContent(extractBodyContent(initialMessage));
+  }, [mounted]);
+
   // sending
   const handleSend = async () => {
     try {
-      if (isLoading || isSavingDraft) return;
+      if (isLoading || isSavingDraft || !user) return;
 
       const values = getValues();
 
@@ -209,15 +224,38 @@ export const EmailCompose = ({
         draftId,
       });
 
-      console.log(messageId);
-
       // push to threads if no threadId & sec === sent
       // append to mails if threadId exists
+      if (messageId) {
+        if (sec === "sent") {
+          const thread: any = {
+            uid: Math.floor(Math.random() * 3000),
+            id: messageId,
+            messageId,
+            subject: values.subject,
+            from: { address: user.email, name: user.name },
+            to: [{ address: values.to, name: values.to }],
+            date: new Date().toISOString(),
+            flags: ["\\Seen"],
+            hasAttachment: values?.attachments?.length ? true : false,
+            trashed: false,
+          };
+          appendThread(thread);
+        }
 
-      // setHasUnsavedChanges(false);
-      // editor.commands.clearContent(true);
-      // form.reset();
-      // setIsComposeOpen(null);
+        if (sec === "drafts") {
+          setDraftId(null);
+          setThreadId(null);
+          if (threadId) removeThread(threadId);
+          setInitialNumbers();
+        }
+        setHasUnsavedChanges(false);
+        editor.commands.clearContent(true);
+        form.reset();
+        setMode(null);
+        setActiveReplyId(null);
+        // setIsComposeOpen(null);
+      }
     } catch (error) {
       console.error("Error sending email:", error);
       createToast("Error", "Error Sending Email", "danger");
@@ -231,15 +269,33 @@ export const EmailCompose = ({
   const saveDraft = async () => {
     const values = getValues();
 
-    if (!hasUnsavedChanges || !user) return;
     const messageText = editor.getText();
-
-    if (messageText.trim() === initialMessage.trim()) return;
-    if (editor.getHTML() === initialMessage.trim()) return;
-    if (!values.to.length || !values.subject.length || !messageText.length)
+    if (!hasUnsavedChanges || !user) {
+      setHasUnsavedChanges(false);
       return;
-    if (aiGeneratedMessage || aiIsLoading || isGeneratingSubject) return;
+    }
 
+    if (messageText.trim() === initialMessage.trim()) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+    if (editor.getHTML() === initialMessage.trim()) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+    if (!values.to.length || !values.subject.length || !messageText.length) {
+      setHasUnsavedChanges(false);
+      return;
+    }
+    if (
+      isSavingDraft ||
+      aiGeneratedMessage ||
+      aiIsLoading ||
+      isGeneratingSubject
+    ) {
+      setHasUnsavedChanges(false);
+      return;
+    }
     try {
       setIsSavingDraft(true);
 
@@ -276,7 +332,7 @@ export const EmailCompose = ({
       //   setDraftId(response.id);
       // }
     } catch (error) {
-      console.error("Error saving draft:", error);
+      console.error("Error saving draft:");
       createToast("Error", "Failed to save draft", "danger");
       setIsSavingDraft(false);
       setHasUnsavedChanges(false);
@@ -288,8 +344,10 @@ export const EmailCompose = ({
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
+    if (mode === "forward" || mode === "draft") return;
 
     const autoSaveTimer = setTimeout(() => {
+      console.log("Saving draft...");
       saveDraft();
     }, 3000);
 

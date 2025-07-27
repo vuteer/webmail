@@ -27,7 +27,8 @@ type ThreadStore = {
   updateThread: (messageId: string, updates: Partial<ThreadType>) => void;
   removeThread: (messageId: string) => void;
   clearThreads: () => void;
-  fetchThreads: (title: string, page: number) => Promise<void>;
+  fetchThreads: (title: string, page: number, status?: string) => Promise<void>;
+  appendThread: (thread: ThreadType) => void;
 };
 
 export const useThreadStore = create<ThreadStore>()(
@@ -58,12 +59,12 @@ export const useThreadStore = create<ThreadStore>()(
         state.threads = [];
       }),
 
-    fetchThreads: async (title, page) => {
+    fetchThreads: async (title, page, status) => {
       try {
         set((state) => {
           state.threadsLoading = true;
         });
-        const result = await getThreads(title, page);
+        const result = await getThreads(title, page, status);
         // Assume the API returns: { success: true, data: { docs: ThreadType[] } }
         if (result) {
           set((state) => {
@@ -78,5 +79,9 @@ export const useThreadStore = create<ThreadStore>()(
         });
       }
     },
+    appendThread: (thread) =>
+      set((state) => {
+        state.threads.unshift(thread);
+      }),
   })),
 );
