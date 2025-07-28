@@ -11,12 +11,6 @@
   "dependencies": {
     "@bitnoi.se/react-scheduler": "^0.2.0",
     "@emotion/css": "^11.11.2",
-    "@fullcalendar/core": "^6.1.18",
-    "@fullcalendar/daygrid": "^6.1.18",
-    "@fullcalendar/interaction": "^6.1.18",
-    "@fullcalendar/list": "^6.1.18",
-    "@fullcalendar/react": "^6.1.18",
-    "@fullcalendar/timegrid": "^6.1.18",
     "@hookform/resolvers": "^3.6.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.0.4",
