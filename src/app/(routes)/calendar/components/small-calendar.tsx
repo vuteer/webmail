@@ -1,16 +1,16 @@
-"use client"; 
+"use client";
 
 import React, { useContext, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
- 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+
 import { getMonth } from "@/utils/month";
 import { calendarStateStore } from "@/stores/calendar";
 import { handleSelectEvent } from "./year";
 
-import {cn} from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export default function SmallCalendar() {
   const [currentMonth, setCurrentMonth] = useState(getMonth());
@@ -20,13 +20,12 @@ export default function SmallCalendar() {
     setDaySelected,
     daySelected,
     setShowEventModal,
-    year
+    year,
   } = calendarStateStore();
 
   useEffect(() => {
     setCurrentMonth(getMonth(smallCalendarMonth));
   }, [smallCalendarMonth]);
-
 
   function handlePrevMonth() {
     setSmallCalendarMonth(smallCalendarMonth - 1);
@@ -35,11 +34,10 @@ export default function SmallCalendar() {
     setSmallCalendarMonth(smallCalendarMonth + 1);
   }
   function getDayClass(day: any) {
-  
     const format = "DD-MM-YY";
     const nowDay = dayjs().format(format);
     const currDay = day.format(format);
-    const slcDay = ""; 
+    const slcDay = "";
     // daySelected && daySelected.format(format);
     if (nowDay === currDay) {
       return "bg-blue-500 text-white";
@@ -54,15 +52,15 @@ export default function SmallCalendar() {
       <header className="flex items-center justify-between my-1 pl-2">
         <p className="text-gray-500 font-bold my-2">
           {dayjs(new Date(dayjs().year(), smallCalendarMonth)).format(
-            "MMM YYYY"
+            "MMM YYYY",
           )}
         </p>
         <div className="flex gap-2 self-end">
           <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
-            <ChevronLeft size={18}/>
+            <ChevronLeft size={18} />
           </Button>
           <Button variant="ghost" size="icon" onClick={handleNextMonth}>
-            <ChevronRight size={18}/>
+            <ChevronRight size={18} />
           </Button>
         </div>
       </header>
@@ -72,14 +70,26 @@ export default function SmallCalendar() {
             {day.format("dd").charAt(0)}
           </span>
         ))}
-         
+
         {currentMonth.map((row: any, i: number) => (
           <React.Fragment key={i}>
             {row.map((day: any, idx: any) => (
               <span
                 key={idx}
-                onClick={() => handleSelectEvent(day.format("D"), smallCalendarMonth, year, setDaySelected, setShowEventModal)}
-                className={cn("cursor-pointer duration-700  flex items-center justify-center", `${getDayClass(day)}`, "hover:bg-secondary rounded-full")}
+                onClick={() =>
+                  handleSelectEvent(
+                    day.format("D"),
+                    smallCalendarMonth,
+                    year,
+                    setDaySelected,
+                    setShowEventModal,
+                  )
+                }
+                className={cn(
+                  "cursor-pointer duration-700  flex items-center justify-center",
+                  `${getDayClass(day)}`,
+                  "hover:bg-secondary rounded-full",
+                )}
               >
                 <span className="text-xs font-normal">{day.format("D")}</span>
               </span>

@@ -11,7 +11,7 @@ import {
 } from "./mail";
 import FormType from "./form-type";
 import NotificationType from "./notification";
-import { EventType, EventLabelType } from "./calendar";
+import { EventType } from "./event";
 import { WithType, AppointmentType } from "./appointment";
 
 export type {
