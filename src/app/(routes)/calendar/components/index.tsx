@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
-import { getMonth, getYear } from "@/utils/month";
+import { getMonth } from "@/utils/month";
 import Sidebar from "./sidebar";
 import Month from "./month";
 import Year from "./year";
@@ -10,10 +10,8 @@ import Week from "./week";
 import DayContainer from "./day-container";
 
 import { calendarStateStore } from "@/stores/calendar";
-// import AddEvent from "../modals/add-event";
 import { useSearch } from "@/hooks";
-
-// type CalendarType = "day" | "week" | "month" | "year";
+import { EventSheet } from "@/components/sheets/event-sheet";
 
 const Calendar = () => {
   const [currenMonth, setCurrentMonth] = useState(getMonth());
@@ -29,7 +27,12 @@ const Calendar = () => {
 
   return (
     <>
-      {/* <FetchEvents /> */}
+      {/* <EventSheet
+        open={showEventModal}
+        onClose={() => {
+          setShowEventModal();
+        }}
+      /> */}
       <div className="h-screen flex">
         <Sidebar />
         <div className="flex-1 h-full">

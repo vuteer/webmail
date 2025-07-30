@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { images } from "@/assets";
 import { AppImage } from "@/components";
 import { FetchEvents } from "../calendar/components/fetch-events";
+import { GetQuotas } from "./CheckUserQuotas";
 
 type ProtectedProps = PropsWithChildren<{
   title: string;
@@ -62,6 +63,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
   return (
     <>
       <FetchEvents />
+      <GetQuotas />
       <div
         className={cn(
           "my-1 flex-1 h-[99vh] overflow-hidden gap-2 flex flex-col ",

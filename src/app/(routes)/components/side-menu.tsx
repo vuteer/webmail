@@ -20,6 +20,8 @@ import {
   X,
   ArrowUpFromLine,
   FileText,
+  CalendarDays,
+  Files,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -124,6 +126,20 @@ const SideMenu = () => {
                 current={pathname === "/" ? sec || "inbox" : pathname}
               />
             ))}
+            <Separator className="my-5 bg-background" />
+            {opened ? (
+              <Paragraph className="ml-2 text-muted-foreground my-5 font-bold">
+                Utilities
+              </Paragraph>
+            ) : null}
+            {more.map((itm, index) => (
+              <MenuItem
+                item={itm}
+                key={index}
+                menuOpen={opened}
+                current={pathname === "/" ? sec || "inbox" : pathname}
+              />
+            ))}
           </div>
         </nav>
       )}
@@ -185,12 +201,12 @@ const management: MenuItemType[] = [
   { text: "Trash", icon: <Trash2 size={18} />, href: "/?sec=trash" },
 ];
 
-// const more: MenuItemType[] = [
-//   { text: "Appointments", icon: <Clock size={18} />, href: "/appointments" },
-//   { text: "Calendar", icon: <CalendarDays size={18} />, href: "/calendar" },
-//   { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
-//   { text: "Files", icon: <Files size={18} />, href: "/files" },
-// ];
+const more: MenuItemType[] = [
+  // { text: "Appointments", icon: <Clock size={18} />, href: "/appointments" },
+  { text: "Calendar", icon: <CalendarDays size={18} />, href: "/calendar" },
+  // { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
+  { text: "Files", icon: <Files size={18} />, href: "/files" },
+];
 
 export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
   const { data: session } = useSession();

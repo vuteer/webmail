@@ -1,16 +1,29 @@
 // events container
 import React from "react";
+import dayjs from "dayjs";
 import { EventType } from "@/types";
 import { Paragraph } from "@/components/ui/typography";
-// import AddEvent from "@/components/modals/add-event";
-// import { getBg } from "./labels";
+
 import { cn } from "@/lib/utils";
 
-const Events = ({ events }: { events: EventType[] }) => {
+const Events = ({
+  events,
+  setSelectedEvent,
+  setOpenEventSheet,
+}: {
+  events: EventType[];
+  setSelectedEvent: React.Dispatch<React.SetStateAction<EventType | null>>;
+  setOpenEventSheet: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   return (
-    <div className="flex-1 cursor-pointer flex flex-col gap-2 justify-end w-full h-full">
+    <div className="flex-1 cursor-pointer flex flex-col gap-2 w-full">
       {events.map((event: EventType, index: number) => (
-        <Event event={event} key={index} />
+        <Event
+          event={event}
+          key={index}
+          setSelectedEvent={setSelectedEvent}
+          setOpenEventSheet={setOpenEventSheet}
+        />
       ))}
     </div>
   );
@@ -18,38 +31,45 @@ const Events = ({ events }: { events: EventType[] }) => {
 
 export default Events;
 
-const Event = ({ event }: { event: EventType }) => {
-  const [showEventModal, setShowEventModal] = React.useState<boolean>(false);
-
+const Event = ({
+  event,
+  setSelectedEvent,
+  setOpenEventSheet,
+}: {
+  event: EventType;
+  setSelectedEvent: React.Dispatch<React.SetStateAction<EventType | null>>;
+  setOpenEventSheet: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  // const [openEventSheet, setOpenEventSheet] = React.useState(false);
   return (
     <>
-      {/* <AddEvent
-        isOpen={showEventModal}
-        onClose={() => setShowEventModal(false)}
+      {/* <EventSheet
         event={event}
+        open={openEventSheet}
+        onClose={() => {
+          setOpenEventSheet(false);
+          setSelectedEvent(null);
+        }}
       /> */}
       <div
+        className={`cursor-pointer w-full py-1 hover:text-white duration-700 hover:bg-main-color rounded-full px-2`}
         onClick={(e) => {
           e.stopPropagation();
-          setShowEventModal(true);
+          setSelectedEvent(event);
+          setOpenEventSheet(true);
         }}
-        className={`cursor-pointer w-full py-1`}
-        // style={{
-        //   backgroundColor:
-        //     event.status === "cancelled" ? "tomato" : getBg(event.label || ""),
-        // }}
       >
         <Paragraph
           className={cn(
-            "text-xs lg:text-sm line-clamp-1 text-center font-bold",
-            event?.status === "cancelled"
-              ? "text-white"
-              : event.label === "work" || !event.label
-                ? "!text-black"
-                : "text-white",
+            "text-xs lg:text-xs line-clamp-1 text-center font-bold gap-1 flex items-center ",
           )}
         >
-          {event.title}
+          <span
+            className="block w-3 h-3 rounded-full"
+            style={{ backgroundColor: event.calendar.color }}
+          />
+          <span>{dayjs(event.startDate).format("HH:mm")}</span>
+          <span className="line-clamp-1">{event.summary}</span>
         </Paragraph>
       </div>
     </>

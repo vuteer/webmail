@@ -4,7 +4,7 @@ import { getDoc, postDoc, deleteDoc, patchDoc } from "@/utils/api-calls";
 
 export const createEvent = async (data: any) => {
   let res = await postDoc(`/events`, data, true);
-  return res?.data?.doc;
+  return res?.data || false;
 };
 
 export const getEvents = async (query?: string) => {
@@ -12,17 +12,26 @@ export const getEvents = async (query?: string) => {
   return res?.data || false;
 };
 
-export const getRecentEvents = async () => {
-  let res = await getDoc("/events/recent", true);
+export const getUpcomingEvents = async () => {
+  let res = await getDoc("/events/upcoming", true);
+
   return res?.data?.docs || false;
 };
 
-export const updateEvent = async (eventId: string, data: any) => {
-  let res = await patchDoc(`/events/${eventId}`, data, true);
-  return res?.status === "success";
+export const updateEvent = async (
+  eventURL: string,
+  calendarId: string,
+  data: any,
+) => {
+  let res = await patchDoc(
+    `/events/${eventURL}?calendarId=${calendarId}`,
+    data,
+    true,
+  );
+  return res?.success ? res.data : false;
 };
 
-export const cancelEvent = async (eventId: string) => {
-  let res = await patchDoc(`/events/cancel/${eventId}`, {}, true);
-  return res?.status === "success";
+export const deleteEvent = async (eventId: string) => {
+  let res = await deleteDoc(`/events/${eventId}`, true);
+  return res?.success;
 };

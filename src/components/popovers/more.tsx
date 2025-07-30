@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CalendarDays, Files, Grip, LogOut, User } from "lucide-react";
 
 import { AppLinkButton } from "@/components";
-import { Button } from "@/components/ui/button";
+
 import PopoverContainer from "./container";
 import Logout from "../modals/logout";
 
@@ -60,7 +60,7 @@ const items: MoreItemType[] = [
   },
   {
     title: "Calendar",
-    href: "/calendar",
+    href: "/calendar?cal=week",
     icon: <CalendarDays size={18} />,
   },
   // {

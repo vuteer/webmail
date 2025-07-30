@@ -1,5 +1,5 @@
 import React from "react";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 
 import { getWeek } from "@/utils/month";
@@ -9,6 +9,8 @@ import { calendarStateStore } from "@/stores/calendar";
 import { EventType } from "@/types";
 import Events from "./events";
 import { createToast } from "@/utils/toast";
+import { eventStateStore } from "@/stores/events";
+import { EventSheet } from "@/components/sheets/event-sheet";
 
 dayjs.extend(weekOfYear);
 
@@ -112,40 +114,30 @@ export const Day = ({
 };
 
 export const checkEvent = (event: EventType, hour: number) => {
-  let actualTimeArr = event.time.split(" ");
-  let actualTime = actualTimeArr[0];
-  let timeOfDay = actualTimeArr[1];
-
-  let providedTimeArr = generateHour(hour).split(" ");
-  let providedTime = providedTimeArr[0];
-  let providedTimeOfDay = providedTimeArr[1];
-
-  if (timeOfDay === providedTimeOfDay) {
-    let actualHourArr = actualTime.split(":");
-    let actualHour = actualHourArr[0];
-    let actualMinutes = actualHourArr[1];
-
-    let providedHourArr = providedTime.split(":");
-    let providedHour = providedHourArr[0];
-    let providedMinutes = providedHourArr[1];
-
-    if (actualHour === providedHour) return event;
-  }
+  const eventHour = Number(dayjs(event.startDate).format("HH"));
+  if (eventHour === hour) return event;
+  return false;
 };
 
 const Hour = ({ hour, currentWeek }: { hour: number; currentWeek: any }) => {
-  const { events } = calendarStateStore();
+  const { events } = eventStateStore();
   const [hourEvents, setHourEvents] = React.useState<EventType[]>([]);
 
   React.useEffect(() => {
+    const updatedCurr = currentWeek.map((curr: Dayjs) =>
+      curr.format("MM-DD-YYYY"),
+    );
     let currentEvents: EventType[] = [];
     for (let i = 0; i < events.length; i++) {
-      let event = checkEvent(events[i], hour);
-      if (event) currentEvents.push(event);
+      const curr = events[i];
+      const eventDate = dayjs(curr.startDate).format("MM-DD-YYYY");
+      if (updatedCurr.includes(eventDate)) {
+        let event = checkEvent(curr, hour);
+        if (event) currentEvents.push(event);
+      }
     }
-
     setHourEvents(currentEvents);
-  }, [events]);
+  }, [events, currentWeek]);
 
   return (
     <div key={hour} className="flex border-b h-[100px]">
@@ -178,39 +170,63 @@ const HourGrid = ({
   currentWeek: any;
   events: EventType[];
 }) => {
-  const { setShowEventModal, setSelectedTime, setDaySelected } =
-    calendarStateStore();
+  const { setSelectedTime, setDaySelected } = calendarStateStore();
+  const [showEventSheet, setShowEventSheet] = React.useState(false);
+  const [selectedEvent, setSelectedEvent] = React.useState<EventType | null>(
+    null,
+  );
+
+  let time = generateHour(hour);
+  let date = currentWeek[currentIndex].format("D");
+  let month = currentWeek[currentIndex].format("M");
+  let year = currentWeek[currentIndex].format("YYYY");
+
+  let datetimeString = `${year}-${month.padStart(2, "0")}-${date.padStart(2, "0")} ${time}`;
+
+  let isPast = dayjs(datetimeString, "YYYY-MM-DD h:mm A").isBefore(dayjs());
 
   return (
-    <div
-      className="border-r px-4 p-7 cursor-pointer flex flex-col w-full"
-      onClick={() => {
-        let time = generateHour(hour);
-        let date = currentWeek[currentIndex].format("D");
-        let month = currentWeek[currentIndex].format("M");
-        let year = currentWeek[currentIndex].format("YYYY");
+    <>
+      <EventSheet
+        open={showEventSheet}
+        onClose={() => {
+          setShowEventSheet(false);
+          setSelectedEvent(null);
+        }}
+        event={selectedEvent}
+      />
 
-        let isPast = dayjs(new Date(year, month - 1, date)).isBefore(dayjs());
-        if (isPast) {
-          createToast(
-            "Schedule Error",
-            "Event can only be set in the future!",
-            "danger",
+      <div
+        className={cn(
+          "border-r px-1 py-2  flex flex-col items-start w-full",
+          isPast ? "bg-secondary/80 cursor-not-allowed" : "cursor-pointer",
+        )}
+        onClick={() => {
+          if (isPast) {
+            createToast(
+              "Schedule Error",
+              "Event can only be set in the future!",
+              "danger",
+            );
+            return;
+          }
+
+          selectCubeTime(
+            new Date(year, month - 1, date),
+            time,
+            setSelectedTime,
+            setDaySelected,
           );
-          return;
-        }
-
-        selectCubeTime(
-          new Date(year, month - 1, date),
-          time,
-          setSelectedTime,
-          setDaySelected,
-        );
-        setShowEventModal();
-      }}
-    >
-      <Events events={events} />
-    </div>
+          if (!showEventSheet) setShowEventSheet(true);
+        }}
+      >
+        <Events
+          events={events}
+          setSelectedEvent={setSelectedEvent}
+          setOpenEventSheet={setShowEventSheet}
+        />
+      </div>
+    </>
   );
 };
 
@@ -219,9 +235,10 @@ const getEventsOfBox = (events: EventType[], index: number) => {
 
   for (let i = 0; i < events.length; i++) {
     let event = events[i];
-    let date = event.date;
+    let date = event.startDate;
 
-    let day = dayjs(new Date(date)).day();
+    let day = dayjs(date).day();
+
     if (day === index) items.push(event);
   }
 

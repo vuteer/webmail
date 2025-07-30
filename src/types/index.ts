@@ -13,6 +13,7 @@ import FormType from "./form-type";
 import NotificationType from "./notification";
 import { EventType } from "./event";
 import { WithType, AppointmentType } from "./appointment";
+import { StorageFileType, QuotaType } from "./file";
 
 export type {
   AttachmentType,
@@ -25,9 +26,11 @@ export type {
   FormType,
   NotificationType,
   EventType,
-  EventLabelType,
+  // EventLabelType,
   WithType,
   AppointmentType,
+  StorageFileType,
+  QuotaType,
 };
 
 export type Label = {

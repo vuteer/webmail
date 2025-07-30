@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 
-import { CheckCheck, ChevronDown } from "lucide-react";
+import { CheckCheck, LayoutList } from "lucide-react";
 
 import { AppLinkButton } from "@/components";
 import PopoverContainer from "./container";
@@ -15,14 +15,14 @@ const CalendarPopover = () => {
   return (
     <>
       <PopoverContainer
-        contentClassName="w-[150px] absolute  -right-[4rem]"
+        contentClassName="w-[130px] absolute -right-[2rem]"
         trigger={
           <AppLinkButton
-            type="secondary"
+            type="outline"
             size="sm"
-            className="flex gap-2 items-center rounded-full capitalize justify-between"
+            className="flex gap-2 items-center  capitalize justify-between"
           >
-            {cal.slice(0, 1)} <ChevronDown size={20} />
+            {cal.slice(0, 1)} <LayoutList size={20} />
           </AppLinkButton>
         }
       >

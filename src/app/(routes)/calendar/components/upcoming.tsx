@@ -1,29 +1,26 @@
 import React from "react";
+import dayjs from "dayjs";
 
 import { Separator } from "@/components/ui/separator";
 import { Heading3, Heading4, Paragraph } from "@/components/ui/typography";
 
-import { cn } from "@/lib/utils";
 import { EventType } from "@/types";
-import { getRecentEvents } from "@/lib/api-calls/events";
+import { getUpcomingEvents } from "@/lib/api-calls/events";
 import { useCustomEffect } from "@/hooks";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createArray } from "@/utils/format-numbers";
-// import { getBg } from "./labels";
-import dayjs from "dayjs";
-import { calendarStateStore } from "@/stores/calendar";
+import useMounted from "@/hooks/useMounted";
 
 export default function Labels() {
   const [currentEvents, setEvents] = React.useState<EventType[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
-
-  const { events } = calendarStateStore();
+  const mounted = useMounted();
 
   const fetchRecentEvents = async () => {
-    return;
+    if (!mounted) return;
     setLoading(true);
-    let res = await getRecentEvents();
+    let res = await getUpcomingEvents();
 
     if (res) {
       setEvents(res);
@@ -32,7 +29,7 @@ export default function Labels() {
     setLoading(false);
   };
 
-  useCustomEffect(fetchRecentEvents, [events]);
+  useCustomEffect(fetchRecentEvents, [mounted]);
 
   return (
     <React.Fragment>
@@ -46,11 +43,16 @@ export default function Labels() {
         {currentEvents.map((event, index) => (
           <Event event={event} key={index} />
         ))}
-        {!loading && currentEvents.length === 0 && (
+        {!loading && currentEvents.length === 0 ? (
           <Paragraph className="text-center my-4 text-md lg:text-base font-bold">
             No upcoming events.
           </Paragraph>
-        )}
+        ) : null}
+        {!loading && currentEvents.length === 0 ? (
+          <Card className="h-[80px] w-full flex items-center justify-center">
+            <Paragraph>No upcoming events</Paragraph>
+          </Card>
+        ) : null}
       </div>
     </React.Fragment>
   );
@@ -70,14 +72,14 @@ const Event = ({ event }: { event: EventType }) => {
       <div className="flex gap-2 items-center">
         <div
           className="h-4 w-4 rounded-full"
-          // style={{ backgroundColor: getBg(event.label || "") }}
+          style={{ backgroundColor: event.calendar.color }}
         />
         <Heading4 className="text-xs lg:text-sm font-bold line-clamp-1">
-          {event.title}
+          {event.summary}
         </Heading4>
       </div>
       <Paragraph className="text-xs lg:text-xs">
-        {dayjs(new Date(event.date)).format("DD MMM, YYYY")} | {event.time}
+        {dayjs(event.startDate).format("DD MMM, YYYY, HH:mm")}
       </Paragraph>
     </Card>
   );

@@ -5,11 +5,12 @@ export type EventType = {
     id: string;
     displayName: string;
   };
+  url: string;
   data: string;
   description: string;
-  endDate: string;
+  endDate: number;
   location: string;
-  startDate: string;
+  startDate: number;
   status: string;
   summary: string;
 };

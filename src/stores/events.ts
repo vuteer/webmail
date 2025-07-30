@@ -1,4 +1,9 @@
-import { getEvents } from "@/lib/api-calls/events";
+import {
+  createEvent,
+  deleteEvent,
+  getEvents,
+  updateEvent,
+} from "@/lib/api-calls/events";
 import { EventType } from "@/types";
 import { create } from "zustand";
 
@@ -13,9 +18,13 @@ type EventStateType = {
     startDate?: Date,
     endDate?: Date,
   ) => Promise<void>;
-  updateEvent: (id: string, event: EventType) => Promise<void>;
+  updateEvent: (
+    url: string,
+    calendarId: string,
+    event: EventType,
+  ) => Promise<void>;
   appendEvent: (event: EventType) => Promise<void>;
-  deleteEvent: (id: string) => Promise<void>;
+  deleteEvent: (id: string) => Promise<boolean>;
 };
 
 export const eventStateStore = create<EventStateType>((set, get) => ({
@@ -27,25 +36,38 @@ export const eventStateStore = create<EventStateType>((set, get) => ({
 
     set({ events: rs?.docs || [], eventsLoading: false });
   },
-  updateEvent: async (id: string, event: EventType) => {
-    await Promise.resolve();
-    set((state) => ({
-      ...state,
-      events: state.events.map((e) => (e.id === id ? event : e)),
-    }));
+  updateEvent: async (url: string, calendarId: string, event: EventType) => {
+    const rs = await updateEvent(url, calendarId, event);
+    if (rs) {
+      set((state) => ({
+        ...state,
+        events: state.events.map((e) =>
+          e.url === url ? { ...e, ...event, ...rs } : e,
+        ),
+      }));
+    }
   },
   appendEvent: async (event: EventType) => {
-    await Promise.resolve();
-    set((state) => ({
-      ...state,
-      events: [...state.events, event],
-    }));
+    const rs = await createEvent(event);
+    if (rs) {
+      set((state) => ({
+        ...state,
+        eventsLoading: false,
+        events: [...state.events, { ...event, ...rs }],
+      }));
+    }
   },
   deleteEvent: async (id: string) => {
-    await Promise.resolve();
-    set((state) => ({
-      ...state,
-      events: state.events.filter((e) => e.id !== id),
-    }));
+    const rs = await deleteEvent(id);
+    if (rs) {
+      set((state) => ({
+        ...state,
+        events: state.events.filter((e) => e.id !== id),
+      }));
+
+      return true;
+    }
+
+    return false;
   },
 }));

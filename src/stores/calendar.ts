@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { getCalendars } from "@/lib/api-calls/calendar";
+import {
+  deleteCalendar,
+  getCalendars,
+  makeCalendar,
+  updateCalendar,
+} from "@/lib/api-calls/calendar";
 // import { EventType } from "@/types";
 
 type CalendarStateType = {
@@ -22,9 +27,12 @@ type CalendarStateType = {
   setShowEventModal: () => void;
   calendars: any;
   setCalendars: () => Promise<void>;
-  addCalendar: (calendar: any) => void;
-  editCalendar: (calendar: any) => void;
-  deleteCalendar: (calendar: any) => void;
+  addCalendar: (calendar: any) => Promise<boolean>;
+  editCalendar: (
+    last_url: string,
+    data: { url: string; name?: string; color?: string; description?: string },
+  ) => Promise<boolean>;
+  deleteCalendar: (calendar: any) => Promise<boolean>;
 };
 
 export const calendarStateStore = create<CalendarStateType>((set, get) => ({
@@ -70,27 +78,52 @@ export const calendarStateStore = create<CalendarStateType>((set, get) => ({
     const rs = await getCalendars();
     set({ calendars: rs?.docs || [], calendarLoading: false });
   },
-  addCalendar: (calendar: any) => {
+  addCalendar: async (calendar: any) => {
     let calendars = get().calendars;
-
-    let updated = [
-      ...calendars.filter((cal) => cal.id !== calendar.id),
-      calendar,
-    ];
-    set({ calendars: updated });
+    const rs = await makeCalendar(calendar);
+    if (rs) {
+      let updated = [
+        {
+          id: Date.now(),
+          caldavId: Date.now(),
+          calendarColor: calendar.color,
+          createdAt: Date.now(),
+          displayName: calendar.name,
+          description: calendar.description,
+          url: rs.url,
+        },
+        ...calendars.filter((cal: any) => cal.url !== rs.url),
+      ];
+      set({ calendars: updated });
+      return true;
+    }
+    return false;
   },
-  editCalendar: (calendar: any) => {
+  editCalendar: async (
+    last_url: string,
+    data: { url: string; name?: string; color?: string; description?: string },
+  ) => {
     let calendars = get().calendars;
 
-    let updated = calendars.map((cal) =>
-      cal.id === calendar.id ? calendar : cal,
-    );
-    set({ calendars: updated });
+    const rs = await updateCalendar(last_url, { ...data });
+    if (rs) {
+      let updated = calendars.map((cal: any) =>
+        cal.url === data.url ? { ...cal, ...data } : cal,
+      );
+
+      set({ calendars: updated });
+      return true;
+    }
+    return false;
   },
-  deleteCalendar: (calendar: any) => {
+  deleteCalendar: async (url: string) => {
     let calendars = get().calendars;
-
-    let filtered = calendars.filter((cal) => cal.id !== calendar.id);
-    set({ calendars: filtered });
+    const rs = await deleteCalendar(url);
+    if (rs) {
+      let filtered = calendars.filter((cal: any) => cal.url !== rs);
+      set({ calendars: filtered });
+      return true;
+    }
+    return false;
   },
 }));

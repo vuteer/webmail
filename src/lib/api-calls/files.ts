@@ -1,42 +1,56 @@
 // file endpoints
 import { FileType } from "@/types";
-import {getDoc, postDoc, deleteDoc, patchDoc} from "@/utils/api-calls"; 
+import { getDoc, postDoc, deleteDoc, patchDoc } from "@/utils/api-calls";
 
-// get files 
+// get base files
+export const getBaseFiles = async () => {
+  let res = await getDoc(`/files`, true);
+  return res?.data?.docs || [];
+};
+
+// get files
 export const getFiles = async (folder?: string, q?: string) => {
-    let url = `/files?`;
-    if (folder)  url = url + `folder=${folder}&`; 
-    if (q) url = url + `q=${q}`; 
+  let url = `/files?`;
+  if (folder) url = url + `folder=${folder}&`;
+  if (q) url = url + `q=${q}`;
 
-    let res = await getDoc(url, true);
-    return res?.data || false;
-}
+  let res = await getDoc(url, true);
+  return res?.data || false;
+};
+
+export const getQuotas = async () => {
+  let res = await getDoc(`/files/quotas`, true);
+  return res?.data || false;
+};
 
 export const getFile = async (fileId: string) => {
-    let res = await getDoc(`/files/${fileId}`, true); 
-    return res?.data || false; 
-}
+  let res = await getDoc(`/files/${fileId}`, true);
+  return res?.data || false;
+};
 
 // create folder
 export const createFolder = async (title: string, folder?: string) => {
-    let res = await postDoc(`/files/folder`, {title, folder}, true);
-    return res?.data || false
-}
+  let res = await postDoc(`/files/folder`, { title, folder }, true);
+  return res?.data || false;
+};
 
 //  delete file
 export const deleteFile = async (fileId: string) => {
-    let res = await deleteDoc(`/files/${fileId}`, true); 
-    return res?.status === "success" || false; 
+  let res = await deleteDoc(`/files/${fileId}`, true);
+  return res?.status === "success" || false;
 };
 
 // share file
-export const shareFile = async (fileId: string, data: {visibility: FileType, shared?: string[]}) => {
-    let res = await patchDoc(`/files/shared/${fileId}`, data, true); 
-    return res?.status === "success" || false; 
-}
+export const shareFile = async (
+  fileId: string,
+  data: { visibility: FileType; shared?: string[] },
+) => {
+  let res = await patchDoc(`/files/shared/${fileId}`, data, true);
+  return res?.status === "success" || false;
+};
 
-// update file 
+// update file
 export const renameFile = async (fileId: string, title: string) => {
-    let res = await patchDoc(`/files/${fileId}`, {title}, true); 
-    return res?.status === "success"; 
-}
+  let res = await patchDoc(`/files/${fileId}`, { title }, true);
+  return res?.status === "success";
+};
