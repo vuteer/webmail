@@ -14,6 +14,7 @@ export function FileBreadcrumbs() {
   const [viewMode] = useQueryState("view");
 
   const dirArr = dir ? dir.split("/").filter(Boolean) : [];
+  const cleanedDirArr = dirArr.filter(Boolean);
 
   return (
     <Breadcrumb>
@@ -24,17 +25,17 @@ export function FileBreadcrumbs() {
             <span>All Files</span>
           </Link>
         </BreadcrumbItem>
+        {cleanedDirArr.length > 0 && <BreadcrumbSeparator />}
 
-        {dirArr.map((item: string, index: number) => {
-          const path = `/files?view=${viewMode || "list"}&dir=${dirArr.slice(0, index + 1).join("/")}`;
+        {cleanedDirArr.map((item: string, index: number) => {
+          const path = `/files?view=${viewMode || "list"}&dir=/${cleanedDirArr.slice(0, index + 1).join("/")}`;
 
           return (
             <React.Fragment key={index}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem key={index}>
+              {index > 0 && <BreadcrumbSeparator />}
+              <BreadcrumbItem>
                 <Link href={path}>{item}</Link>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
             </React.Fragment>
           );
         })}

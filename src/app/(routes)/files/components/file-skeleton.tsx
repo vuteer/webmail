@@ -1,5 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MoreVertical } from "lucide-react";
 
 export const FileSkeleton = () => {
   return (
@@ -9,10 +11,13 @@ export const FileSkeleton = () => {
         <Skeleton className="h-4 w-4 rounded" />
         <Skeleton className="h-4 w-[70%]" />
       </div>
-      <div className="w-[200px] grid grid-cols-2 gap-2">
+      <div className="w-[25%] grid grid-cols-2 gap-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-full" />
       </div>
+      <Button variant="ghost" size="icon" disabled>
+        <MoreVertical className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

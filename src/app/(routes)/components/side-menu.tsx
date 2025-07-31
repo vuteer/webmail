@@ -247,16 +247,10 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
           className="relative mb-1.5 inline-flex lg:gap-4 items-center justify-center gap-1 self-stretch overflow-hidden rounded-lg"
         >
           {!sidemenuOpen ? (
-            <SquarePen
-              size={18}
-              className="fill-iconLight dark:fill-iconDark mt-0.5"
-            />
+            <SquarePen size={18} className=" mt-0.5" />
           ) : (
             <div className="flex items-center justify-center gap-2.5 pl-0.5 pr-1">
-              <SquarePen
-                size={18}
-                className="fill-iconLight dark:fill-iconDark"
-              />
+              <SquarePen size={18} className="" />
               <div className="justify-start text-sm leading-none">
                 <Paragraph className="font-semibold">New Email</Paragraph>
               </div>
