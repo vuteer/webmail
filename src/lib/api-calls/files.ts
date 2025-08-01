@@ -74,3 +74,12 @@ export const downloadFile = async (path: string) => {
     return false;
   }
 };
+
+// upload file
+export const uploadFile = async (data: FormData) => {
+  const res = await postDoc(`/files/upload`, data, true);
+  if (!res.success) {
+    createToast("Error", res.message || "Failed to upload file", "danger");
+  }
+  return res?.data?.url || false;
+};

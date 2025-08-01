@@ -13,72 +13,35 @@ import {
   XIcon,
 } from "lucide-react";
 
-import { formatBytes, useFileUpload } from "@/hooks/use-file-upload";
+import {
+  FileWithPreview,
+  formatBytes,
+  useFileUpload,
+} from "@/hooks/use-file-upload";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { createToast } from "@/utils/toast";
 
-// Create some dummy initial files
-const initialFiles = [
-  {
-    name: "document.pdf",
-    size: 528737,
-    type: "application/pdf",
-    url: "https://example.com/document.pdf",
-    id: "document.pdf-1744638436563-8u5xuls",
-  },
-  {
-    name: "intro.zip",
-    size: 252873,
-    type: "application/zip",
-    url: "https://example.com/intro.zip",
-    id: "intro.zip-1744638436563-8u5xuls",
-  },
-  {
-    name: "conclusion.xlsx",
-    size: 352873,
-    type: "application/xlsx",
-    url: "https://example.com/conclusion.xlsx",
-    id: "conclusion.xlsx-1744638436563-8u5xuls",
-  },
-];
-
-const getFileIcon = (file: { file: File | { type: string; name: string } }) => {
-  const fileType = file.file instanceof File ? file.file.type : file.file.type;
-  const fileName = file.file instanceof File ? file.file.name : file.file.name;
-
-  if (
-    fileType.includes("pdf") ||
-    fileName.endsWith(".pdf") ||
-    fileType.includes("word") ||
-    fileName.endsWith(".doc") ||
-    fileName.endsWith(".docx")
-  ) {
-    return <FileTextIcon className="size-4 opacity-60" />;
-  } else if (
-    fileType.includes("zip") ||
-    fileType.includes("archive") ||
-    fileName.endsWith(".zip") ||
-    fileName.endsWith(".rar")
-  ) {
-    return <FileArchiveIcon className="size-4 opacity-60" />;
-  } else if (
-    fileType.includes("excel") ||
-    fileName.endsWith(".xls") ||
-    fileName.endsWith(".xlsx")
-  ) {
-    return <FileSpreadsheetIcon className="size-4 opacity-60" />;
-  } else if (fileType.includes("video/")) {
-    return <VideoIcon className="size-4 opacity-60" />;
-  } else if (fileType.includes("audio/")) {
-    return <HeadphonesIcon className="size-4 opacity-60" />;
-  } else if (fileType.startsWith("image/")) {
-    return <ImageIcon className="size-4 opacity-60" />;
-  }
-  return <FileIcon className="size-4 opacity-60" />;
+export type FilePreviewWithUploadStatus = FileWithPreview & {
+  uploadStatus: "pending" | "uploading" | "success" | "error";
 };
-
-export function FileUpload() {
+export function FileUpload({
+  onUpload,
+}: {
+  onUpload: (
+    files: FilePreviewWithUploadStatus[],
+    setUploadFiles: React.Dispatch<
+      React.SetStateAction<FilePreviewWithUploadStatus[]>
+    >,
+  ) => Promise<void>;
+}) {
   const maxSize = 100 * 1024 * 1024; // 10MB default
   const maxFiles = 10;
+  const [loading, setLoading] = useState(false);
+
+  const [filesPreviewWithUploadStatus, setFilesPreviewWithUploadStatus] =
+    useState<FilePreviewWithUploadStatus[]>([]);
 
   const [
     { files, isDragging, errors },
@@ -96,11 +59,61 @@ export function FileUpload() {
     multiple: true,
     maxFiles,
     maxSize,
-    initialFiles,
+    initialFiles: [],
   });
 
-  const handleUpload = () => {
-    // Implement upload logic here
+  useEffect(() => {
+    if (files.length > 0) {
+      let updatedFiles: FilePreviewWithUploadStatus[] = [];
+
+      // update new files to upload
+      for (let i = 0; i < files.length; i++) {
+        let curr = files[i];
+
+        // check if file is withStatus then leave it
+        const notInPreview = filesPreviewWithUploadStatus.find(
+          (fl) => fl.id === curr.id,
+        );
+        if (!notInPreview) {
+          updatedFiles.push({
+            ...curr,
+            uploadStatus: "pending",
+          });
+        } else {
+          updatedFiles.push(notInPreview);
+        }
+      }
+
+      // check files that have been removed
+      for (let i = 0; i < filesPreviewWithUploadStatus.length; i++) {
+        let curr = filesPreviewWithUploadStatus[i];
+
+        // check if file has been removed from files
+        const inFiles = files.find((fl) => fl.id === curr.id);
+        if (!inFiles) {
+          updatedFiles = updatedFiles.filter((fl) => fl.id !== curr.id);
+        }
+      }
+
+      setFilesPreviewWithUploadStatus(updatedFiles);
+    }
+  }, [files]);
+
+  const allUploaded = filesPreviewWithUploadStatus.every(
+    (file) => file.uploadStatus === "success",
+  );
+  const handleUpload = async () => {
+    if (allUploaded) {
+      createToast("File Upload", "Nothing to upload", "danger");
+      return;
+    }
+    setLoading(true);
+    await onUpload(
+      filesPreviewWithUploadStatus,
+      setFilesPreviewWithUploadStatus,
+    );
+
+    setLoading(false);
   };
 
   return (
@@ -120,6 +133,7 @@ export function FileUpload() {
           {...getInputProps()}
           className="sr-only"
           aria-label="Upload files"
+          disabled={loading}
         />
 
         <div className="flex flex-col items-center justify-center text-center">
@@ -154,12 +168,21 @@ export function FileUpload() {
       )}
 
       {/* File list */}
-      {files.length > 0 && (
-        <div className="space-y-2">
-          {files.map((file) => (
+      {filesPreviewWithUploadStatus.length > 0 && (
+        <div className={cn("space-y-2")}>
+          {filesPreviewWithUploadStatus.map((file) => (
             <div
               key={file.id}
-              className="bg-background flex items-center justify-between gap-2 rounded-lg border p-2 pe-3"
+              className={cn(
+                "bg-background flex items-center justify-between gap-2 rounded-lg border p-2 pe-3",
+                file.uploadStatus === "uploading"
+                  ? "border-yellow-500"
+                  : file.uploadStatus === "success"
+                    ? "border-green-500"
+                    : file.uploadStatus === "error"
+                      ? "border-red-500"
+                      : "",
+              )}
             >
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className="flex aspect-square size-10 shrink-0 items-center justify-center rounded border">
@@ -171,12 +194,34 @@ export function FileUpload() {
                       ? file.file.name
                       : file.file.name}
                   </p>
-                  <p className="text-muted-foreground text-xs">
-                    {formatBytes(
-                      file.file instanceof File
-                        ? file.file.size
-                        : file.file.size,
-                    )}
+                  <p className="flex gap-4 text-muted-foreground text-xs">
+                    <span>
+                      {formatBytes(
+                        file.file instanceof File
+                          ? file.file.size
+                          : file.file.size,
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-muted-foreground text-xs",
+                        file.uploadStatus === "uploading"
+                          ? "text-yellow-500"
+                          : file.uploadStatus === "success"
+                            ? "text-green-500"
+                            : file.uploadStatus === "error"
+                              ? "text-red-500"
+                              : "",
+                      )}
+                    >
+                      {file.uploadStatus === "uploading"
+                        ? "Uploading..."
+                        : file.uploadStatus === "success"
+                          ? "Uploaded"
+                          : file.uploadStatus === "error"
+                            ? "Error"
+                            : ""}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -187,6 +232,7 @@ export function FileUpload() {
                 className="text-muted-foreground/80 hover:text-foreground -me-2 size-8 hover:bg-transparent"
                 onClick={() => removeFile(file.id)}
                 aria-label="Remove file"
+                disabled={loading}
               >
                 <XIcon className="size-4" aria-hidden="true" />
               </Button>
@@ -194,12 +240,17 @@ export function FileUpload() {
           ))}
 
           {/* Remove all files button */}
-          {files.length > 0 && (
+          {filesPreviewWithUploadStatus.length > 0 && (
             <div className="grid grid-cols-2 gap-2">
-              <Button size="sm" variant="outline" onClick={clearFiles}>
+              <Button
+                disabled={loading}
+                size="sm"
+                variant="outline"
+                onClick={clearFiles}
+              >
                 Remove files
               </Button>
-              <Button size="sm" onClick={handleUpload}>
+              <Button disabled={loading} size="sm" onClick={handleUpload}>
                 Upload files
               </Button>
             </div>
@@ -209,3 +260,40 @@ export function FileUpload() {
     </div>
   );
 }
+
+export const getFileIcon = (file: {
+  file: File | { type: string; name: string };
+}) => {
+  const fileType = file.file instanceof File ? file.file.type : file.file.type;
+  const fileName = file.file instanceof File ? file.file.name : file.file.name;
+
+  if (
+    fileType.includes("pdf") ||
+    fileName.endsWith(".pdf") ||
+    fileType.includes("word") ||
+    fileName.endsWith(".doc") ||
+    fileName.endsWith(".docx")
+  ) {
+    return <FileTextIcon className="size-4 opacity-60" />;
+  } else if (
+    fileType.includes("zip") ||
+    fileType.includes("archive") ||
+    fileName.endsWith(".zip") ||
+    fileName.endsWith(".rar")
+  ) {
+    return <FileArchiveIcon className="size-4 opacity-60" />;
+  } else if (
+    fileType.includes("excel") ||
+    fileName.endsWith(".xls") ||
+    fileName.endsWith(".xlsx")
+  ) {
+    return <FileSpreadsheetIcon className="size-4 opacity-60" />;
+  } else if (fileType.includes("video/")) {
+    return <VideoIcon className="size-4 opacity-60" />;
+  } else if (fileType.includes("audio/")) {
+    return <HeadphonesIcon className="size-4 opacity-60" />;
+  } else if (fileType.startsWith("image/")) {
+    return <ImageIcon className="size-4 opacity-60" />;
+  }
+  return <FileIcon className="size-4 opacity-60" />;
+};

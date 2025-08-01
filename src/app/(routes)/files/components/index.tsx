@@ -16,12 +16,11 @@ import { Folder } from "./folder";
 import { fileStateStore } from "@/stores/files";
 import useMounted from "@/hooks/useMounted";
 import { formatBytes } from "@/utils/size";
-import { UploadFilesModal } from "./upload-file";
 import { cn } from "@/lib/utils";
 
 export const FilesContainer = () => {
   const mounted = useMounted();
-  const { total, used } = fileStateStore();
+  const { total, used, triggerQuotaCheck } = fileStateStore();
   const [dir] = useQueryState("dir");
   const [refresh, setRefresh] = React.useState(false);
   const [openFolderModal, setOpenFolderModal] = React.useState(false);
@@ -40,7 +39,10 @@ export const FilesContainer = () => {
             <Button
               size="sm"
               className="space-x-3"
-              onClick={() => setRefresh(!refresh)}
+              onClick={async () => {
+                setRefresh(!refresh);
+                await triggerQuotaCheck();
+              }}
             >
               <RefreshCcw size={16} />
               <span>Refresh</span>

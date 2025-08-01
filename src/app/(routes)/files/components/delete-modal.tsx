@@ -13,6 +13,7 @@ import { useState } from "react";
 import { deleteFolder } from "@/lib/api-calls/files";
 import { useQueryState } from "nuqs";
 import { createToast } from "@/utils/toast";
+import { fileStateStore } from "@/stores/files";
 
 interface DeleteModalProps {
   open: boolean;
@@ -28,6 +29,8 @@ export function DeleteModal({
   setFiles,
 }: DeleteModalProps) {
   const [loading, setLoading] = useState(false);
+  const { triggerQuotaCheck } = fileStateStore();
+
   const [dir] = useQueryState("dir");
   const handleDelete = async () => {
     // Implement delete logic here
@@ -39,6 +42,7 @@ export function DeleteModal({
     if (res) {
       createToast("Success", "Deletion was successfull", "success");
       setFiles((prevFiles) => prevFiles.filter((f) => f.path !== file.path));
+      await triggerQuotaCheck();
       onClose();
     }
     setLoading(false);

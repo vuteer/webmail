@@ -3,6 +3,7 @@
 // uploadFile
 //
 
+import { getQuotas } from "@/lib/api-calls/files";
 import { QuotaType } from "@/types";
 import { create } from "zustand";
 
@@ -10,9 +11,7 @@ type FileStateType = {
   total: number;
   used: number;
   adjustStorage: (size: number, key: string) => void;
-  uploadFile: (file: File) => Promise<void>;
-  deleteFile: (path: string) => Promise<void>;
-  editFile: (path: string, newContent: string) => Promise<void>;
+  triggerQuotaCheck: () => Promise<void>;
 };
 
 export const fileStateStore = create<FileStateType>((set, get) => ({
@@ -21,7 +20,12 @@ export const fileStateStore = create<FileStateType>((set, get) => ({
   adjustStorage: (size: number, key: string) => {
     set({ [key]: size });
   },
-  uploadFile: async (file: File) => {},
-  deleteFile: async (path: string) => {},
-  editFile: async (path: string, newContent: string) => {},
+  triggerQuotaCheck: async () => {
+    const res = await getQuotas();
+
+    if (res.quota) {
+      set({ used: res.quota.used });
+      set({ total: res.quota.quota });
+    }
+  },
 }));
