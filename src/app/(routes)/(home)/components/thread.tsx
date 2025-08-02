@@ -1,5 +1,5 @@
 // thread item
-import React, { use } from "react";
+import React from "react";
 import { useQueryState } from "nuqs";
 
 import { Separator } from "@/components/ui/separator";
@@ -25,7 +25,6 @@ import { updateMailFlags } from "@/lib/api-calls/mails";
 import { handleToggleFlag, includesFlag } from "./thread-items/actions";
 import { Paperclip } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { combine } from "zustand/middleware";
 
 interface ThreadProps {
   thread: ThreadType;

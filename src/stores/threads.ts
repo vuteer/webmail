@@ -23,11 +23,17 @@ export type ThreadType = {
 type ThreadStore = {
   threads: ThreadType[];
   threadsLoading: boolean;
+  moreLoading: boolean;
   setThreads: (threads: ThreadType[]) => void;
   updateThread: (messageId: string, updates: Partial<ThreadType>) => void;
   removeThread: (messageId: string) => void;
   clearThreads: () => void;
-  fetchThreads: (title: string, page: number, status?: string) => Promise<void>;
+  fetchThreads: (
+    title: string,
+    page: number,
+    status?: string,
+    refreshing?: boolean,
+  ) => Promise<void>;
   appendThread: (thread: ThreadType) => void;
 };
 
@@ -35,7 +41,7 @@ export const useThreadStore = create<ThreadStore>()(
   immer((set) => ({
     threads: [],
     threadsLoading: true,
-
+    moreLoading: false,
     setThreads: (threads) =>
       set((state) => {
         state.threads = threads;
@@ -59,23 +65,42 @@ export const useThreadStore = create<ThreadStore>()(
         state.threads = [];
       }),
 
-    fetchThreads: async (title, page, status) => {
+    fetchThreads: async (title, page, status, refreshing) => {
       try {
-        set((state) => {
-          state.threadsLoading = true;
-        });
+        if (!page || page === 0 || refreshing) {
+          set((state) => {
+            state.threadsLoading = true;
+          });
+        } else {
+          set((state) => {
+            state.moreLoading = true;
+          });
+        }
         const result = await getThreads(title, page, status);
         // Assume the API returns: { success: true, data: { docs: ThreadType[] } }
         if (result) {
-          set((state) => {
-            state.threads = result;
-          });
+          if (!page || page === 0 || refreshing) {
+            set((state) => {
+              state.threads = result;
+            });
+          } else {
+            set((state) => {
+              const merged = [...state.threads, ...result];
+              const unique = Array.from(
+                new Map(merged.map((item) => [item.messageId, item])).values(),
+              );
+              state.threads = unique;
+            });
+          }
         }
       } catch (error) {
         console.error("Failed to fetch threads:", error);
       } finally {
         set((state) => {
           state.threadsLoading = false;
+        });
+        set((state) => {
+          state.moreLoading = false;
         });
       }
     },

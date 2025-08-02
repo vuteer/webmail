@@ -27,6 +27,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
 import { formatDate } from "@/lib/utils";
+import { useThreads } from "@/hooks/use-threads";
 
 const Threads = () => {
   const {
@@ -48,8 +49,6 @@ const Threads = () => {
   const [sort] = useQueryState("sort");
 
   const [count, setCount] = React.useState<number>(sec === "inbox" ? inbox : 0);
-
-  const [moreLoading, setMoreLoading] = React.useState<boolean>(false);
 
   useCustomEffect(() => {
     if (!mounted) return;
@@ -112,7 +111,12 @@ const Threads = () => {
               className="rounded-full gap-2"
               onClick={() => {
                 setInitialNumbers();
-                fetchThreads(sec || "inbox", Number(page || 0));
+                fetchThreads(
+                  sec || "inbox",
+                  Number(page || 0),
+                  sort ? "unread=true" : "",
+                  true,
+                );
               }}
               size={"sm"}
             >
@@ -150,7 +154,6 @@ const Threads = () => {
 
         <Separator className={cn(count ? "mt-4" : "")} />
         <div className="relative overflow-hidden">
-          {/* <ScrollArea className={cn(" w-full")}> */}
           <div className="overflow-y-auto h-[90vh] w-full">
             {threadsLoading && <Loading />}
             {!threadsLoading && count ? (
@@ -169,25 +172,9 @@ const Threads = () => {
                 </Paragraph>
               </>
             )}
-            {count > (Number(page || 0) + 1) * 30 && (
-              <>
-                <div className="w-full flex items-center justify-center py-2">
-                  <span
-                    className="cursor-pointer hover:text-main-color font-bold text-xs lg:text-sm"
-                    onClick={() => {
-                      let curr = Number(page || 0);
-                      setPage(String(curr + 1));
-                    }}
-                  >
-                    Load{moreLoading ? "ing" : " more"}...
-                  </span>
-                </div>
-                <Separator />
-              </>
-            )}
+            <PaginateThreads count={count} />
             <div className="h-[100px]" />
           </div>
-          {/* </ScrollArea> */}
         </div>
       </div>
     </TooltipProvider>
@@ -388,5 +375,33 @@ const SearchItem = ({ search }: { search: SearchedType }) => {
         {search.snippet.slice(0, 90) || ""}
       </Paragraph>
     </Card>
+  );
+};
+
+// paginate threads
+const PaginateThreads = ({ count }: { count: number }) => {
+  const [page, setPage] = useQueryState("page");
+  const { moreLoading } = useThreadStore();
+
+  const offset = (Number(page || 0) + 1) * 20;
+
+  const handleLoadMore = async () => {
+    const nextPage = Number(page) + 1;
+    setPage(nextPage.toString());
+  };
+
+  if (count < offset) return null;
+
+  return (
+    <div className="w-full my-3">
+      <Separator />
+      <Button
+        onClick={handleLoadMore}
+        className="w-full rounded-full"
+        disabled={moreLoading}
+      >
+        Load{moreLoading ? "ing..." : " more"}
+      </Button>
+    </div>
   );
 };

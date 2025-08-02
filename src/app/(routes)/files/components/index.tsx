@@ -35,7 +35,7 @@ export const FilesContainer = () => {
         <div className="flex justify-between w-full ">
           <FileBreadcrumbs />
           <div className="flex items-center gap-2 w-fit">
-            <ViewTabs />
+            {/*<ViewTabs />*/}
             <Button
               size="sm"
               className="space-x-3"

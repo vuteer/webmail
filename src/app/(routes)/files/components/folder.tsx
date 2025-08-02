@@ -14,8 +14,9 @@ import useMounted from "@/hooks/useMounted";
 import { getBaseFiles, getFilesInFolder } from "@/lib/api-calls/files";
 import { StorageFileType } from "@/types";
 import { CreateFolderModal } from "./create-folder-modal";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Trash, Trash2 } from "lucide-react";
 import { UploadFilesModal } from "./upload-file";
+import { DeleteMultipleModal } from "./delete-modal";
 
 interface FolderProps {
   refresh: boolean;
@@ -72,7 +73,7 @@ export const Folder: React.FC<FolderProps> = ({
       <div className="px-2 flex justify-between items-center">
         <div className="flex gap-4 items-center flex-1">
           <AppCheckbox
-            checked={selectedFiles.length === files.length}
+            checked={selectedFiles.length === files.length && files.length > 0}
             onCheck={() => {
               if (selectedFiles.length === files.length) {
                 setSelectedFiles([]);
@@ -83,6 +84,13 @@ export const Folder: React.FC<FolderProps> = ({
           />
           <div className="w-6 h-4" />
           <Heading4 className=" text-xs lg:text-sm">Name</Heading4>
+          {selectedFiles.length > 0 ? (
+            <DeleteMultiple
+              selectedFiles={selectedFiles}
+              setSelectedFiles={setSelectedFiles}
+              setFiles={setFiles}
+            />
+          ) : null}
         </div>
         <div className="w-[26%] grid grid-cols-2 gap-2">
           <Heading4 className="text-xs lg:text-sm">Size</Heading4>
@@ -121,6 +129,37 @@ export const Folder: React.FC<FolderProps> = ({
           </Card>
         ) : null}
       </div>
+    </>
+  );
+};
+
+const DeleteMultiple = ({
+  selectedFiles,
+  setSelectedFiles,
+  setFiles,
+}: {
+  selectedFiles: StorageFileType[];
+  setSelectedFiles: React.Dispatch<React.SetStateAction<StorageFileType[]>>;
+  setFiles: React.Dispatch<React.SetStateAction<StorageFileType[]>>;
+}) => {
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  return (
+    <>
+      <DeleteMultipleModal
+        selectedFiles={selectedFiles}
+        setSelectedFiles={setSelectedFiles}
+        setFiles={setFiles}
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+      />
+      <button
+        onClick={() => setOpenDeleteModal(true)}
+        // disabled={loading}
+        className="inline-flex h-7 px-2 items-center justify-center gap-1 overflow-hidden rounded-lg border border-[#FCCDD5] bg-[#FDE4E9] dark:border-[#6E2532] dark:bg-[#411D23]"
+      >
+        <Trash className="fill-[#F43F5E]" size={16} />
+        <span className="text-xs">Delete Selected</span>
+      </button>
     </>
   );
 };
