@@ -79,7 +79,7 @@ export const BottomActions = ({
               id="attachment-input"
               className="hidden"
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                const fileList = event.target.files;
+                const fileList: any = event.target.files;
                 const allowedList = [];
 
                 if (fileList) {
