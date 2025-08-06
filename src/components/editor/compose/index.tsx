@@ -404,7 +404,7 @@ export const EmailCompose = ({
       </div>
       <BottomActions
         handleSend={handleSend}
-        isLoading={isLoading}
+        isLoading={isLoading || isSavingDraft}
         aiIsLoading={aiIsLoading}
         subjectInput={subjectInput}
         settingsLoading={settingsLoading}

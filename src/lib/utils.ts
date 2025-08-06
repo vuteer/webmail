@@ -71,7 +71,7 @@ export const getCookie = (key: string): string | null => {
   const cookies = Object.fromEntries(
     document.cookie
       .split("; ")
-      .map((v) => v.split(/=(.*)/s).map(decodeURIComponent)),
+      .map((v) => v.split("/=(.*)/s").map(decodeURIComponent)),
   );
   return cookies?.[key] ?? null;
 };
@@ -286,7 +286,7 @@ export const contentToHTML = (content: string) => `
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<body style="margin: 0; padding: 0; font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
 ${content}
 </body></html>`;
 

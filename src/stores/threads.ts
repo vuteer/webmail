@@ -24,6 +24,7 @@ type ThreadStore = {
   threads: ThreadType[];
   threadsLoading: boolean;
   moreLoading: boolean;
+  setMoreLoading: () => void;
   setThreads: (threads: ThreadType[]) => void;
   updateThread: (messageId: string, updates: Partial<ThreadType>) => void;
   removeThread: (messageId: string) => void;
@@ -33,6 +34,7 @@ type ThreadStore = {
     page: number,
     status?: string,
     refreshing?: boolean,
+    notificationTrigger?: boolean,
   ) => Promise<void>;
   appendThread: (thread: ThreadType) => void;
 };
@@ -64,22 +66,28 @@ export const useThreadStore = create<ThreadStore>()(
       set((state) => {
         state.threads = [];
       }),
-
-    fetchThreads: async (title, page, status, refreshing) => {
+    setMoreLoading: () =>
+      set((state) => {
+        state.moreLoading = !state.moreLoading;
+      }),
+    fetchThreads: async (
+      title,
+      page,
+      status,
+      refreshing,
+      notificationTrigger,
+    ) => {
       try {
-        if (!page || page === 0 || refreshing) {
+        if ((!page || page === 0 || refreshing) && !notificationTrigger) {
           set((state) => {
             state.threadsLoading = true;
-          });
-        } else {
-          set((state) => {
-            state.moreLoading = true;
           });
         }
         const result = await getThreads(title, page, status);
         // Assume the API returns: { success: true, data: { docs: ThreadType[] } }
+
         if (result) {
-          if (!page || page === 0 || refreshing) {
+          if (!page || page === 0) {
             set((state) => {
               state.threads = result;
             });
@@ -96,12 +104,14 @@ export const useThreadStore = create<ThreadStore>()(
       } catch (error) {
         console.error("Failed to fetch threads:", error);
       } finally {
-        set((state) => {
-          state.threadsLoading = false;
-        });
-        set((state) => {
-          state.moreLoading = false;
-        });
+        setTimeout(() => {
+          set((state) => {
+            state.threadsLoading = false;
+          });
+          set((state) => {
+            state.moreLoading = false;
+          });
+        }, 1500);
       }
     },
     appendThread: (thread) =>

@@ -16,6 +16,8 @@ import { images } from "@/assets";
 import { AppImage } from "@/components";
 import { FetchEvents } from "../calendar/components/fetch-events";
 import { GetQuotas } from "./CheckUserQuotas";
+import { NotificationHandler } from "@/services/notification-handler";
+import Notifications from "@/components/notifications";
 
 type ProtectedProps = PropsWithChildren<{
   title: string;
@@ -28,6 +30,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
 
   const { data: session, isPending, error, refetch } = useSession();
 
+  console.log(session);
   // ❌ Unauthorized
   if (!session?.user && !isPending) {
     return (
@@ -64,6 +67,8 @@ const Protected = ({ title, children }: ProtectedProps) => {
     <>
       <FetchEvents />
       <GetQuotas />
+      <Notifications />
+      {session?.user && <NotificationHandler user={session.user.id} />}
       <div
         className={cn(
           "my-1 flex-1 h-[99vh] overflow-hidden gap-2 flex flex-col ",

@@ -44,7 +44,7 @@ const Threads = () => {
   const { threads, fetchThreads, threadsLoading, updateThread } =
     useThreadStore();
   const mounted = useMounted();
-  const [page, setPage] = useQueryState("page");
+  const [page] = useQueryState("page");
   const [sec] = useQueryState("sec");
   const [sort] = useQueryState("sort");
 
@@ -84,7 +84,7 @@ const Threads = () => {
             {sec === "inbox" ? (
               <div className="flex gap-2 items-center text-xs lg:text-xs font-normal mt-1">
                 <span>{`Total - ${numberWithCommas(inbox)}`}</span>
-                {inbox && sec === "inbox" && unread ? (
+                {inbox && sec === "inbox" ? (
                   <>
                     <div className="h-[13px] w-[1px] bg-gray-500" />
                     <span>{`Unread - ${numberWithCommas(unread)}`}</span>
@@ -381,17 +381,17 @@ const SearchItem = ({ search }: { search: SearchedType }) => {
 // paginate threads
 const PaginateThreads = ({ count }: { count: number }) => {
   const [page, setPage] = useQueryState("page");
-  const { moreLoading } = useThreadStore();
+  const { threadsLoading, moreLoading, setMoreLoading } = useThreadStore();
 
   const offset = (Number(page || 0) + 1) * 20;
 
   const handleLoadMore = async () => {
+    setMoreLoading();
     const nextPage = Number(page) + 1;
     setPage(nextPage.toString());
   };
 
-  if (count < offset) return null;
-
+  if ((count < offset || threadsLoading) && !moreLoading) return null;
   return (
     <div className="w-full my-3">
       <Separator />

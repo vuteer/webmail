@@ -66,7 +66,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
                 : 0;
 
   const isFromAdmin =
-    threads[currentIndex].from.name === "Mail Delivery System";
+    threads[currentIndex]?.from.name === "Mail Delivery System";
 
   const handleNextOrPrev = (dir: "next" | "prev") => {
     const threadsLength = threads.length;

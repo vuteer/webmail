@@ -89,12 +89,12 @@ export const BottomActions = ({
                     if (file.size > 100) allowedList.push(file);
                   }
                 }
-                // handleAttachment(
-                //   Array.from(fileList),
-                //   setValue,
-                //   attachments,
-                //   setHasUnsavedChanges,
-                // );
+                handleAttachment(
+                  Array.from(fileList),
+                  setValue,
+                  attachments,
+                  setHasUnsavedChanges,
+                );
               }}
               multiple
               accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
