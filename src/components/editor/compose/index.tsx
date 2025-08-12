@@ -351,7 +351,7 @@ export const EmailCompose = ({
 
     const autoSaveTimer = setTimeout(() => {
       console.log("Saving draft...");
-      saveDraft();
+      // saveDraft();
     }, 3000);
 
     return () => clearTimeout(autoSaveTimer);
