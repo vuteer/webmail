@@ -1,7 +1,11 @@
 // contact page
 import Protected from "../components/protected";
 import { Contacts } from "./components/container";
+import { generateDynamicMetadata } from "@/lib/generate-metadata";
 
+export async function generateMetadata() {
+  return generateDynamicMetadata("📇 My Contacts", "/");
+}
 const Page = () => {
   return (
     <Protected title="📇 My Contacts">

@@ -150,7 +150,7 @@ export function AccountSettings({ profile }: { profile: AdminProfile }) {
             )}
           />
 
-          <div className="flex justify-end">
+          <div className="flex ">
             <Button type="submit" disabled={isLoading}>
               {isLoading ? "Saving Changes..." : "Save Changes"}
             </Button>

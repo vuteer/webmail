@@ -90,7 +90,13 @@ export const searchMail = async (q: string, folder: string) => {
 // mark all as read
 export const markAllAsRead = async () => {
   const res = await patchDoc("/mails/update/mark/all/read", {}, true);
-  return res?.status === "success" || false;
+  return res?.success;
+};
+
+// delete mails
+export const deleteMails = async (folder: string, data: any) => {
+  const res = await postDoc(`/mails/delete/${folder}`, data, true);
+  return res?.success;
 };
 
 // old

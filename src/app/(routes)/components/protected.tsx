@@ -1,10 +1,15 @@
 // protect pages
 
 "use client";
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useState } from "react";
 import Link from "next/link";
 
-import { Heading1, Paragraph } from "@/components/ui/typography";
+import {
+  Heading1,
+  Heading2,
+  Heading3,
+  Paragraph,
+} from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 
 import { useSession } from "@/lib/auth-client";
@@ -18,6 +23,14 @@ import { FetchEvents } from "../calendar/components/fetch-events";
 import { GetQuotas } from "./CheckUserQuotas";
 import { NotificationHandler } from "@/services/notification-handler";
 import Notifications from "@/components/notifications";
+import { PasswordInput } from "@/auth/forms/auth-components/Password";
+import { Button } from "@/components/ui/button";
+import { createToast } from "@/utils/toast";
+import { Copyright } from "lucide-react";
+import { updateUserPassword } from "@/lib/api-calls/user";
+import { useRouter } from "next/navigation";
+import { signOut } from "@/lib/auth-client";
+import FinalizeSetup from "@/components/utils/setup";
 
 type ProtectedProps = PropsWithChildren<{
   title: string;
@@ -29,8 +42,24 @@ const Protected = ({ title, children }: ProtectedProps) => {
   const mounted = useMounted();
 
   const { data: session, isPending, error, refetch } = useSession();
+  const user: any = session?.user;
+  const first_password = user?.first_password;
 
-  console.log(session);
+  const first_password_changed_at: any =
+    user?.first_password_changed_at || new Date();
+  const date = new Date(first_password_changed_at);
+  // Add 30 days
+  date.setDate(date.getDate() + 30);
+  const now = new Date();
+  const timePassed = now.getTime() > date.getTime();
+  const { push } = useRouter();
+
+  // updating password to something user centered.
+  const [currentPassword, setCurrentPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
   // ❌ Unauthorized
   if (!session?.user && !isPending) {
     return (
@@ -61,6 +90,88 @@ const Protected = ({ title, children }: ProtectedProps) => {
     );
   }
 
+  //  first time password / Change
+  const handleChangePassword = async () => {
+    if (!password || !confirmPassword || !currentPassword) {
+      createToast("Input Error", "Fields cannot be empty", "danger");
+      return;
+    }
+    if (password !== confirmPassword) {
+      createToast("Input Error", "Passwords do not match", "danger");
+      return;
+    }
+    if (password === currentPassword) {
+      createToast(
+        "Input Error",
+        "Password should not match to current one.",
+        "danger",
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await updateUserPassword({
+        currentPassword,
+        newPassword: password,
+      });
+      createToast("Update", "Password updated. Login again!", "success");
+      signOut();
+      push("/auth/login");
+    } catch (error: any) {
+      createToast("Error", error?.message || "Internal Server Error", "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isPending && user && (first_password || timePassed)) {
+    return (
+      <div className="py-7 bg-background flex flex-col items-center justify-center w-screen h-screen">
+        <div className="flex-1 max-w-2xl mx-auto space-y-5 flex flex-col justify-center">
+          <Heading2 className="text-center">Update Password.</Heading2>
+          <Separator />
+          <Paragraph className="text-center max-w-[80%]">
+            To ensure your account security, please change your password to
+            something more secure.
+          </Paragraph>
+          <PasswordInput
+            label="Current Password"
+            value={currentPassword}
+            setValue={setCurrentPassword}
+            loading={loading}
+          />
+          <PasswordInput
+            label="New Password"
+            value={password}
+            setValue={setPassword}
+            loading={loading}
+          />
+          <PasswordInput
+            label="Confirm Password"
+            value={confirmPassword}
+            setValue={setConfirmPassword}
+            loading={loading}
+          />
+
+          <Button
+            onClick={handleChangePassword}
+            disabled={loading}
+            className="w-full"
+          >
+            Change Password{loading ? "..." : ""}
+          </Button>
+        </div>
+        <div>
+          <Heading3 className="text-sm lg:text-md text-center flex gap-3 items-center">
+            <Copyright size={18} />
+            <span>VuMail. {new Date().getFullYear()}</span>
+          </Heading3>
+        </div>
+      </div>
+    );
+  }
+
   if (!mounted || isPending) return <Placeholder />;
 
   return (
@@ -68,6 +179,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
       <FetchEvents />
       <GetQuotas />
       <Notifications />
+      <FinalizeSetup />
       {session?.user && <NotificationHandler user={session.user.id} />}
       <div
         className={cn(

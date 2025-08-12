@@ -18,6 +18,7 @@ import { ReplyCompose } from "./thread-items/reply-compose";
 import { useThreadStore } from "@/stores/threads";
 import useMounted from "@/hooks/useMounted";
 import { useMailStoreState } from "@/stores/mail-store";
+import { cn } from "@/lib/utils";
 
 const Mail = ({}) => {
   const { threads } = useThreadStore();
@@ -55,7 +56,12 @@ const Mail = ({}) => {
   }, [mailsLoading]); // Scroll to bottom when content changes
 
   return (
-    <div className="bg-background rounded-xl h-screen relative overflow-hidden flex-1 flex flex-col gap-2 px-4 pt-5">
+    <div
+      className={cn(
+        "bg-background rounded-xl h-screen relative overflow-hidden flex-1 flex flex-col gap-2 px-1 lg:px-4 pt-5",
+        threadId ? "flex" : "lg:flex hidden",
+      )}
+    >
       <Menu />
       <Separator />
       <div className="flex-1 flex flex-col ">

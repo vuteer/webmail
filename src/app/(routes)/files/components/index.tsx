@@ -54,7 +54,7 @@ export const FilesContainer = () => {
             <Heading2 className="font-extrabold">
               Welcome to Vu.Mail Cloud Storage
             </Heading2>
-            <Paragraph className="max-w-[60%]">
+            <Paragraph className="lg:max-w-[60%]">
               Manage your files and folders here. There is so much more you can
               do with your files using our platform. Upload, share, collaborate,
               and secure your files with ease.

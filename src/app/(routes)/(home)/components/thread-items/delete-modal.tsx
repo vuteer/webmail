@@ -1,5 +1,12 @@
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useQueryState } from "nuqs";
 
 type MailTrashModalProps = {
   loading: boolean;
@@ -16,6 +23,7 @@ export const MailTrashModal = ({
   onMoveToTrash,
   onDelete,
 }: MailTrashModalProps) => {
+  const [sec] = useQueryState("sec");
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -23,10 +31,15 @@ export const MailTrashModal = ({
           <DialogTitle>What would you like to do?</DialogTitle>
         </DialogHeader>
         <div className="text-sm text-muted-foreground">
-          Do you want to move the selected mail to Trash or delete it permanently?
+          Do you want to move the selected mail to Trash or delete it
+          permanently?
         </div>
-        <DialogFooter className="flex gap-2 justify-end">
-          <Button disabled={loading} variant="outline" onClick={onMoveToTrash}>
+        <DialogFooter className="grid grid-cols-1 lg:grid-cols-2 gap-2 0">
+          <Button
+            disabled={sec === "trash" || loading}
+            variant="outline"
+            onClick={onMoveToTrash}
+          >
             Move to Trash
           </Button>
           <Button disabled={loading} variant="destructive" onClick={onDelete}>

@@ -9,9 +9,12 @@ import { useSession } from "@/lib/auth-client";
 
 import { sendingMail } from "@/components/editor/compose/send";
 import { jsxToHtml } from "@/components/editor/compose/jsx-to-html";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/useMobile";
 
 export const ReplyCompose = () => {
   const { data: session } = useSession();
+  const isMobile = useIsMobile();
   const user = session?.user;
 
   const { mails, mailsLoading } = useMailStoreState();
@@ -57,9 +60,9 @@ export const ReplyCompose = () => {
   };
 
   return (
-    <div className="w-full rounded-xl">
+    <div className={cn("w-full rounded-xl")}>
       <EmailCompose
-        editorClassName="min-h-[150px]"
+        editorClassName={isMobile ? "min-h-[130px]" : "min-h-[150px]"}
         className="w-full !max-w-none border pb-1"
         onSendEmail={handleSendEmail}
         onClose={async () => {
@@ -79,6 +82,16 @@ export const ReplyCompose = () => {
               : [replyToMessage?.from?.email || replyToMessage?.from?.address]
             : []
         }
+        initialAttachments={replyToMessage?.attachments.map(
+          (attachment: any) => ({
+            base64: `data:${attachment.content.type};base64,${Buffer.from(attachment.content.data).toString("base64")}`,
+            name: attachment.filename,
+            size: attachment.size,
+            type: attachment.contentType,
+            lastModified: Date.now(),
+            context: "draft",
+          }),
+        )}
         initialCc={replyToMessage?.cc?.map((em: any) => em.email || em.address)}
         initialBcc={replyToMessage?.bcc?.map(
           (em: any) => em.email || em.address,

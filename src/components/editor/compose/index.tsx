@@ -95,6 +95,7 @@ export const EmailCompose = ({
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   // const [messageLength, setMessageLength] = useState(0);
+
   const [aiGeneratedMessage, setAiGeneratedMessage] = useState<string | null>(
     null,
   );
@@ -139,13 +140,25 @@ export const EmailCompose = ({
 
   useEffect(() => {
     if (!mounted) return;
+
+    const pre = initialSubject?.slice(0, 3);
+    const replied = pre?.toLowerCase() === "re:";
+    const forwarded = pre?.toLowerCase() === "fwd:";
+
     form.reset({
       to: initialTo,
       cc: initialCc,
       bcc: initialBcc,
       subject:
-        (mode === "forward" ? "FWD: " : mode?.includes("reply") ? "RE: " : "") +
-        initialSubject,
+        (mode === "forward"
+          ? !forwarded && !replied
+            ? "FWD: "
+            : ""
+          : mode?.includes("reply")
+            ? !replied && !forwarded
+              ? "RE: "
+              : ""
+            : "") + initialSubject,
       message: initialMessage,
       attachments: initialAttachments,
       fromEmail: session?.user?.email || "",
@@ -190,7 +203,7 @@ export const EmailCompose = ({
   const handleSend = async () => {
     try {
       if (isLoading || isSavingDraft || !user) return;
-
+      // console.log(values.attachments);
       const values = getValues();
 
       // Validate recipient field
@@ -203,16 +216,6 @@ export const EmailCompose = ({
       setIsLoading(true);
       setAiGeneratedMessage(null);
 
-      console.log({
-        to: values.to,
-        cc: showCc ? values.cc : undefined,
-        bcc: showBcc ? values.bcc : undefined,
-        subject: values.subject,
-        message: editor.getHTML(),
-        attachments: values.attachments || [],
-        fromEmail: values.fromEmail,
-      });
-
       const messageId = await onSendEmail({
         to: values.to,
         cc: showCc ? values.cc : undefined,
@@ -221,7 +224,7 @@ export const EmailCompose = ({
         message: editor.getHTML(),
         attachments: values.attachments || [],
         fromEmail: values.fromEmail,
-        draftId,
+        draftId: sec === "drafts" ? threadId : draftId,
       });
 
       // push to threads if no threadId & sec === sent
@@ -244,7 +247,6 @@ export const EmailCompose = ({
         }
 
         if (sec === "drafts") {
-          setDraftId(null);
           setThreadId(null);
           if (threadId) removeThread(threadId);
           setInitialNumbers();
@@ -252,6 +254,7 @@ export const EmailCompose = ({
         setHasUnsavedChanges(false);
         editor.commands.clearContent(true);
         form.reset();
+        setDraftId(null);
         setMode(null);
         setActiveReplyId(null);
         // setIsComposeOpen(null);

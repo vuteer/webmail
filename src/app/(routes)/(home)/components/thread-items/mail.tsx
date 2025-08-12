@@ -356,7 +356,7 @@ const DetailsPopover = ({
           </p>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="dark:bg-panelDark flex w-[420px] overflow-auto rounded-lg border p-4 text-left shadow-lg">
+      <PopoverContent className="dark:bg-panelDark flex w-[290px] lg:w-[380px] overflow-auto rounded-lg border p-4 text-left shadow-lg">
         <div className="space-y-1 text-sm">
           <div className="flex">
             <span className="w-24 text-end text-gray-500">From:</span>

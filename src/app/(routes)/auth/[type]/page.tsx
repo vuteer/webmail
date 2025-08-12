@@ -5,6 +5,20 @@ import { Heading1, Heading2, Paragraph } from "@/components/ui/typography";
 import { images } from "@/assets";
 import AppImage from "@/components/common/app-image";
 
+import { generateDynamicMetadata } from "@/lib/generate-metadata";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ type: string }>;
+}) {
+  const type = (await params).type;
+  return generateDynamicMetadata(
+    type.charAt(0).toUpperCase() + type.slice(1),
+    "/",
+  );
+}
+
 const Auth = async ({ params }: { params: Promise<{ type: string }> }) => {
   const type = (await params).type;
   return (

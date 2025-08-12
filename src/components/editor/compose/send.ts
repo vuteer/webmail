@@ -88,7 +88,25 @@ export const sendingMail = async (
             processHtml(replyToMessage?.html || ""),
           );
 
-    let serializedFiles = await serializeFiles(data.attachments);
+    let serializedFiles: any = [];
+
+    for (let i = 0; i < data.attachments.length; i++) {
+      let att: any = data.attachments[i];
+      if (att.content?.type === "Buffer" || att.base64) {
+        serializedFiles.push({
+          base64:
+            att.base64 ||
+            `data:${att.content.type};base64,${Buffer.from(att.content.data).toString("base64")}`,
+          name: att.name || att.filename,
+          size: att.size,
+          type: att.type || att.contentType,
+          lastModified: att.lastModified || Date.now(),
+        });
+      } else {
+        const fileArray = await serializeFiles([att]);
+        serializedFiles.push(fileArray[0]);
+      }
+    }
 
     const mail = {
       to: toRecipients,
@@ -110,9 +128,9 @@ export const sendingMail = async (
         ]
           .filter(Boolean)
           .join(" "),
-        "Thread-Id": threadId ?? "",
+        "Thread-Id": mode === "compose" ? "" : (threadId ?? ""),
       },
-      threadId: threadId,
+      threadId: mode === "compose" ? "" : threadId,
       isForward: mode === "forward",
       originalMessage: decodeHtmlToText(
         processHtml(replyToMessage?.html || ""),

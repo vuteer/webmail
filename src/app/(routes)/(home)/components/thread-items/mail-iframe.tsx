@@ -1,13 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { renderToStaticMarkup } from "react-dom/server";
 import { useTheme } from "next-themes";
 import { fixNonReadableColors } from "@/lib/email-utils";
-import {
-  addStyleTags,
-  doesContainStyleTags,
-  template,
-} from "@/lib/email-utils.client";
+import { addStyleTags, doesContainStyleTags } from "@/lib/email-utils.client";
 import { cn } from "@/lib/utils";
 import { useProcessedHtml } from "@/hooks/use-process-html";
 

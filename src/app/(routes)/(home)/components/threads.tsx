@@ -27,7 +27,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
 import { formatDate } from "@/lib/utils";
-import { useThreads } from "@/hooks/use-threads";
+import Menu from "../../components/menu";
 
 const Threads = () => {
   const {
@@ -45,6 +45,7 @@ const Threads = () => {
     useThreadStore();
   const mounted = useMounted();
   const [page] = useQueryState("page");
+  const [threadId] = useQueryState("threadId");
   const [sec] = useQueryState("sec");
   const [sort] = useQueryState("sort");
 
@@ -75,7 +76,15 @@ const Threads = () => {
   return (
     <TooltipProvider delayDuration={0}>
       <FetchNumbers />
-      <div className="rounded-xl bg-background h-full flex flex-col max-w-[500px] w-full lg:min-w-[500px]  px-4 pt-5">
+      <div
+        className={cn(
+          "rounded-xl bg-background h-full flex flex-col lg:max-w-[500px] w-full lg:min-w-[500px]  px-4 pt-5",
+          threadId ? "hidden lg:flex" : "flex",
+        )}
+      >
+        <div className="lg:hidden flex justify-end ">
+          <Menu />
+        </div>
         <div className="flex justify-between items-end mb-4">
           <div className="flex flex-col gap-1">
             <Heading1 className="text-lg lg:text-2xl capitalize flex flex-col">
@@ -126,7 +135,7 @@ const Threads = () => {
             {sec === "inbox" && unread ? (
               <Button
                 // variant="secondary"
-                className="rounded-full min-w-[90px]"
+                className="lg:flex hidden rounded-full min-w-[90px]"
                 size="sm"
                 onClick={() => {
                   markAllAsRead();

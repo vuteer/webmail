@@ -11,6 +11,7 @@ import {
 import AppAvatar from "@/components/common/app-avatar";
 import { createToast } from "@/utils/toast";
 import { isValidEmail } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/useMobile";
 
 interface ToProps {
   isAddingRecipients: boolean;
@@ -118,12 +119,16 @@ export const ToItems = ({
   );
 };
 
-const ToAvatar = ({ email }: { email: string }) => (
-  <span className="flex gap-1 py-0.5 text-sm text-black dark:text-white">
-    <AppAvatar src="" name={email} />
-    {email}
-  </span>
-);
+const ToAvatar = ({ email }: { email: string }) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <span className="flex items-center gap-1 py-0.5 text-xs lg:text-sm text-black dark:text-white">
+      <AppAvatar src="" name={email} />
+      <span>{isMobile ? email.slice(0, 2) : email}</span>
+    </span>
+  );
+};
 
 // to component
 const To = ({
@@ -276,7 +281,7 @@ const To = ({
         }}
         className="flex w-full items-center gap-2"
       >
-        <p className="text-sm font-medium text-[#8C8C8C]">To:</p>
+        <p className="text-xs lg:text-sm font-medium text-[#8C8C8C]">To:</p>
         {isAddingRecipients || toEmails.length === 0 ? (
           <div ref={toWrapperRef} className="flex flex-wrap items-center gap-2">
             {toEmails.map((email, index) => (
@@ -313,7 +318,7 @@ const To = ({
             />
           </div>
         ) : (
-          <div className="flex min-h-6 flex-1 cursor-pointer items-center text-sm text-black dark:text-white">
+          <div className="flex min-h-6 flex-1 cursor-pointer items-center  text-xs lg:text-sm text-black dark:text-white">
             {toEmails.length > 0 && (
               <div className="flex flex-wrap items-center gap-1">
                 {toEmails.slice(0, 3).map((email, index) => (
@@ -351,14 +356,14 @@ const To = ({
       <div className="flex gap-2">
         <button
           tabIndex={-1}
-          className="flex h-full items-center gap-2 text-sm font-medium text-[#8C8C8C] hover:text-[#A8A8A8]"
+          className="flex h-full items-center gap-2 text-xs lg:text-sm font-medium text-[#8C8C8C] hover:text-[#A8A8A8]"
           onClick={() => setShowCc(!showCc)}
         >
           <span>Cc</span>
         </button>
         <button
           tabIndex={-1}
-          className="flex h-full items-center gap-2 text-sm font-medium text-[#8C8C8C] hover:text-[#A8A8A8]"
+          className="flex h-full items-center gap-2 text-xs lg:text-sm font-medium text-[#8C8C8C] hover:text-[#A8A8A8]"
           onClick={() => setShowBcc(!showBcc)}
         >
           <span>Bcc</span>

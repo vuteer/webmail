@@ -72,7 +72,9 @@ export const BottomActions = ({
               onClick={() => fileInputRef.current?.click()}
             >
               <Paperclip className="h-3 w-3 fill-[#9A9A9A]" />
-              <span className="hidden px-0.5 text-sm md:block">Add</span>
+              <span className="hidden px-0.5 text-sm md:block">
+                Add attachment
+              </span>
             </button>
             <Input
               type="file"
@@ -127,7 +129,7 @@ export const BottomActions = ({
                       </p>
                     </div>
                     <div className="max-h-[250px] flex-1 space-y-0.5 overflow-y-auto p-1.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                      {attachments.map((file: File, index: number) => {
+                      {attachments.map((file: any, index: number) => {
                         const nameParts = file.name.split(".");
                         const extension =
                           nameParts.length > 1 ? nameParts.pop() : undefined;
@@ -146,7 +148,11 @@ export const BottomActions = ({
                               <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded bg-[#F0F0F0] dark:bg-[#2C2C2C]">
                                 {file.type.startsWith("image/") ? (
                                   <img
-                                    src={URL.createObjectURL(file)}
+                                    src={
+                                      file.context === "draft"
+                                        ? file.base64
+                                        : URL.createObjectURL(file)
+                                    }
                                     alt={file.name}
                                     className="h-full w-full rounded object-cover"
                                     aria-hidden="true"

@@ -1,7 +1,6 @@
 // sort popover
 "use client";
 import React from "react";
-import { useRouter } from "next/navigation";
 
 import { CheckCheck, ChevronDown } from "lucide-react";
 import { Paragraph } from "@/components/ui/typography";
@@ -29,7 +28,7 @@ const SortPopover = () => {
         <AppLinkButton
           type="outline"
           size="sm"
-          className="rounded-full border flex items-center justify-between gap-2 w-[100px]"
+          className="rounded-full border lg:flex hidden items-center justify-between gap-2 w-[100px]"
         >
           <span className="capitalize text-xs lg:text-sm">{current}</span>
           <ChevronDown size={18} />

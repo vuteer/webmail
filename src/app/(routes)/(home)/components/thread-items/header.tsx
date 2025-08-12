@@ -37,6 +37,8 @@ import { useMailNumbersStore } from "@/stores/mail-numbers";
 
 import { MailTrashModal } from "./delete-modal";
 import { Paragraph } from "@/components/ui/typography";
+import { deleteMails } from "@/lib/api-calls/mails";
+import { createToast } from "@/utils/toast";
 
 export const MailHeader = ({ threadId }: { threadId: string }) => {
   const { threads } = useThreadStore();
@@ -103,7 +105,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
               <X size={20} />
             </Button>
             <div className="dark:bg-iconDark/20 relative h-5 w-0.5 rounded-full bg-[#E7E7E7]" />{" "}
-            <div className="flex gap-2">
+            <div className="hidden lg:flex gap-2">
               <Button
                 disabled={threads.length === 1}
                 variant="ghost"
@@ -123,8 +125,8 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
                 <ChevronRight size={18} />
               </Button>
             </div>
-            <div className="dark:bg-iconDark/20 relative h-5 w-0.5 rounded-full bg-[#E7E7E7]" />{" "}
-            <Paragraph className="flex items-center gap-2 font-semibold">
+            <div className="dark:bg-iconDark/20 relative h-5 w-0.5 rounded-full bg-[#E7E7E7] hidden lg:block" />{" "}
+            <Paragraph className="hidden lg:flex items-center gap-2 font-semibold">
               <span>&nbsp;{currentIndex + 1}</span>
               <span>out of</span>
               <span>{total}</span>
@@ -142,7 +144,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
               >
                 <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
                 <div className="flex items-center justify-center gap-2.5 pl-0.5 pr-1">
-                  <div className="justify-start text-sm leading-none text-black dark:text-white">
+                  <div className="justify-start text-xs lg:text-sm leading-none text-black dark:text-white">
                     Reply All
                   </div>
                 </div>
@@ -153,7 +155,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
             {(sec === "inbox" || sec === "archive") && (
               <Archived threadId={threadId} />
             )}
-            {sec !== "trash" && <Trashed threadId={threadId} />}
+            <Trashed threadId={threadId} />
             <Dots />
           </div>
         </div>
@@ -288,10 +290,14 @@ export const Archived = ({ threadId }: { threadId: string }) => {
 };
 
 export const Trashed = ({ threadId }: { threadId: string }) => {
+  const { setInitialNumbers } = useMailNumbersStore();
+  const { fetchThreads } = useThreadStore();
   const [loading, setLoading] = useState(false);
   const [openConfirmModal, setOpenConfirmModal] = useState<boolean>(false);
   const [sec, setSec] = useQueryState("sec");
   const [, setThreadId] = useQueryState("threadId");
+  const [page] = useQueryState("page");
+  const [sort] = useQueryState("sort");
 
   const toggleTrashed = async () => {
     const action: "add" | "remove" = sec === "trash" ? "remove" : "add";
@@ -309,6 +315,35 @@ export const Trashed = ({ threadId }: { threadId: string }) => {
       setSec(action === "add" ? "trash" : "inbox");
     }
   };
+  const handleDeletePermanently = async () => {
+    try {
+      setLoading(true);
+      const res = await deleteMails(sec || "INBOX", [threadId]);
+
+      if (res) {
+        createToast(
+          "Successfully deleted",
+          "Mail Permanently deleted",
+          "success",
+        );
+        setThreadId(null);
+        // setSec("inbox");
+        setInitialNumbers();
+        setOpenConfirmModal(false);
+        fetchThreads(
+          sec || "INBOX",
+          Number(page || 0),
+          sort ? "unread=true" : "",
+          false,
+          true,
+        );
+      }
+    } catch (err: any) {
+      createToast("Error", "Deletion failed. Try Again!", "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <MailTrashModal
@@ -316,29 +351,25 @@ export const Trashed = ({ threadId }: { threadId: string }) => {
         isOpen={openConfirmModal}
         onClose={() => setOpenConfirmModal(false)}
         onMoveToTrash={toggleTrashed}
-        onDelete={() => {}}
+        onDelete={handleDeletePermanently}
       />
-      {sec !== "trash" && (
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => setOpenConfirmModal(true)}
-                disabled={loading}
-                className="inline-flex h-7 w-7 items-center justify-center gap-1 overflow-hidden rounded-lg border border-[#FCCDD5] bg-[#FDE4E9] dark:border-[#6E2532] dark:bg-[#411D23]"
-              >
-                <Trash className="fill-[#F43F5E]" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              className="bg-white dark:bg-[#313131]"
+
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setOpenConfirmModal(true)}
+              disabled={loading}
+              className="inline-flex h-7 w-7 items-center justify-center gap-1 overflow-hidden rounded-lg border border-[#FCCDD5] bg-[#FDE4E9] dark:border-[#6E2532] dark:bg-[#411D23]"
             >
-              {sec === "trash" ? "Restore" : "Move to Bin"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
+              <Trash className="fill-[#F43F5E]" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="bg-white dark:bg-[#313131]">
+            {sec === "trash" ? "Restore" : "Move to Bin"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </>
   );
 };

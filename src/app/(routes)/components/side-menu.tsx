@@ -22,6 +22,7 @@ import {
   FileText,
   CalendarDays,
   Files,
+  Cog,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -47,12 +48,16 @@ import {
 import { useIsMobile } from "@/hooks/useMobile";
 import { EmailCompose } from "@/components/editor/compose";
 import { sendingMail } from "@/components/editor/compose/send";
+import { useQueryState } from "nuqs";
 
 const SideMenu = () => {
   const params = useSearch();
   const pathname = usePathname();
 
   const { data: session } = useSession();
+  const user: any = session?.user;
+  const first_password = user?.first_password;
+
   const mounted = useMounted();
 
   const sec = params?.get("sec");
@@ -79,7 +84,7 @@ const SideMenu = () => {
 
   return (
     <>
-      {session?.user && !pathname.includes("auth") && (
+      {user && !pathname.includes("auth") && !first_password && (
         <nav
           className={cn(
             "duration-500 bg-secondary  py-3  h-[100vh] pb-8 flex flex-col",
@@ -204,13 +209,17 @@ const management: MenuItemType[] = [
 const more: MenuItemType[] = [
   // { text: "Appointments", icon: <Clock size={18} />, href: "/appointments" },
   { text: "Calendar", icon: <CalendarDays size={18} />, href: "/calendar" },
-  // { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
   { text: "Files", icon: <Files size={18} />, href: "/files" },
+  { text: "Settings", icon: <Cog size={18} />, href: "/settings" },
+  // { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
 ];
 
 export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
   const { data: session } = useSession();
   const user = session?.user;
+  const [c, setMode] = useQueryState("c");
+  const [draft, setDraft] = useQueryState("draftId");
+
   const isMobile = useIsMobile();
 
   const [dialogOpen, setDialogOpen] = React.useState<boolean>(false);
@@ -232,10 +241,11 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
       name: user.name,
       image: user.image,
     };
-    const res = await sendingMail(data, sendingUser);
+    const res = await sendingMail({ ...data, draftId: draft }, sendingUser, c);
     if (res) setDialogOpen(false);
     return res;
   };
+
   return (
     <Dialog open={!!dialogOpen} onOpenChange={handleOpenChange}>
       <DialogTitle></DialogTitle>
@@ -244,6 +254,10 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
       <DialogTrigger asChild>
         <Button
           size={isMobile || !sidemenuOpen ? "sm" : "default"}
+          onClick={() => {
+            setMode("compose");
+            setDraft(null);
+          }}
           className="relative mb-1.5 inline-flex lg:gap-4 items-center justify-center gap-1 self-stretch overflow-hidden rounded-lg"
         >
           {!sidemenuOpen ? (
@@ -262,7 +276,14 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
         {/* <DialogContent className="h-screen w-screen flex flex-col items-center justify-center max-w-none border-none bg-[#FAFAFA] bg-blur p-0 shadow-none dark:bg-[#141414]"> */}
         <div className="max-w-[750px] mx-auto  w-full">
           <DialogClose asChild className="flex">
-            <Button size={"sm"} className="flex items-center gap-1 rounded-lg ">
+            <Button
+              size={"sm"}
+              className="flex items-center gap-1 rounded-lg "
+              onClick={() => {
+                setMode(null);
+                setDraft(null);
+              }}
+            >
               <X size={18} />
               <span className="text-sm font-medium">Esc</span>
             </Button>

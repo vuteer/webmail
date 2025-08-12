@@ -180,7 +180,7 @@ export function SecuritySettings() {
             )}
           />
 
-          <div className="flex justify-end pt-2">
+          <div className="flex pt-2">
             <Button type="submit" disabled={isLoading}>
               Updat{isLoading ? "ing" : "e"} Password{isLoading ? "..." : ""}
             </Button>
