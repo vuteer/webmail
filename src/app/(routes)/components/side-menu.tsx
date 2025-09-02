@@ -258,7 +258,10 @@ export function ComposeButton({ sidemenuOpen }: { sidemenuOpen: boolean }) {
             setMode("compose");
             setDraft(null);
           }}
-          className="relative mb-1.5 inline-flex lg:gap-4 items-center justify-center gap-1 self-stretch overflow-hidden rounded-lg"
+          className={cn(
+            "rounded-full relative mb-1.5 inline-flex lg:gap-4 items-center justify-center gap-1 self-stretch overflow-hidden",
+            isMobile || !sidemenuOpen ? "rounded-lg" : "rounded-full",
+          )}
         >
           {!sidemenuOpen ? (
             <SquarePen size={18} className=" mt-0.5" />

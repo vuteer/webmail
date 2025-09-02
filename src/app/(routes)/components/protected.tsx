@@ -31,6 +31,9 @@ import { updateUserPassword } from "@/lib/api-calls/user";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
 import FinalizeSetup from "@/components/utils/setup";
+import AIToggleButton from "@/components/ai-chat/ai-button";
+import AISidebar from "@/components/ai-chat";
+import { ResizablePanelGroup } from "@/components/ui/resizable";
 
 type ProtectedProps = PropsWithChildren<{
   title: string;
@@ -56,7 +59,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
 
   // updating password to something user centered.
   const [currentPassword, setCurrentPassword] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [psassword, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -175,11 +178,13 @@ const Protected = ({ title, children }: ProtectedProps) => {
   if (!mounted || isPending) return <Placeholder />;
 
   return (
-    <>
+    <ResizablePanelGroup direction="horizontal">
       <FetchEvents />
       <GetQuotas />
       <Notifications />
       <FinalizeSetup />
+      <AIToggleButton />
+
       {session?.user && <NotificationHandler user={session.user.id} />}
       <div
         className={cn(
@@ -201,7 +206,8 @@ const Protected = ({ title, children }: ProtectedProps) => {
 
         {children}
       </div>
-    </>
+      <AISidebar />
+    </ResizablePanelGroup>
   );
 };
 

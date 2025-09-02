@@ -424,7 +424,9 @@ export const EmailCompose = ({
         aiGeneratedMessage={aiGeneratedMessage}
         setAiGeneratedMessage={setAiGeneratedMessage}
         editor={editor}
-        handleGenerateSubject={handleGenerateSubject}
+        handleGenerateSubject={() =>
+          handleGenerateSubject(setIsGeneratingSubject)
+        }
         handleAiGenerate={() =>
           handleAiGenerate(setIsLoading, setAiIsLoading, getValues)
         }
@@ -437,6 +439,7 @@ const handleGenerateSubject = async (
   setIsGeneratingSubject: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
   setIsGeneratingSubject(true);
+  createToast("Info", "Feature coming soon", "warning");
   // const { subject } = await generateEmailSubject({ message: editor.getText() });
   // setValue('subject', subject);
   setTimeout(() => {
@@ -465,6 +468,11 @@ const handleAiGenerate = async (
   try {
     setIsLoading(true);
     setAiIsLoading(true);
+
+    createToast("Info", "Feature coming soon", "warning");
+    // const { subject } = await generateEmailSubject({ message: editor.getText() });
+    // setValue('subject', subject);
+
     const values = getValues();
 
     // const result = await aiCompose({
@@ -482,7 +490,9 @@ const handleAiGenerate = async (
     createToast("Error", "Error generating email", "danger");
     // toast.error("Failed to generate email");
   } finally {
-    setIsLoading(false);
-    setAiIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(false);
+      setAiIsLoading(false);
+    }, 2000);
   }
 };

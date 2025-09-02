@@ -72,7 +72,7 @@ const Mail = ({}) => {
         )}
         {!mailsLoading && (
           <>
-            {!threadId && <NoMailId />}
+            {!threadId && <NoMailId content={true} />}
             {threadId && thread && (
               <div className="px-2 space-y-3 flex flex-col h-full">
                 <MailHeader threadId={threadId || ""} />

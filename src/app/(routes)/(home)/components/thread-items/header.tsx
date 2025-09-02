@@ -244,7 +244,7 @@ export const Archived = ({ threadId }: { threadId: string }) => {
     let res = await handleToggleLocation(
       threadId,
       sec,
-      sec !== "archive" ? "archive" : "inbox",
+      "archive",
       setLoading,
       action,
     );
