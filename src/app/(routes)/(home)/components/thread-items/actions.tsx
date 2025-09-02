@@ -3,9 +3,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { format } from "date-fns";
 import { Docx, Figma, ImageFile, PDF } from "@/components/icons/icons";
 import { ThreadType } from "@/stores/threads";
-import { toggleLocation, updateMailFlags } from "@/lib/api-calls/mails";
+import { toggleLocation } from "@/lib/api-calls/mails";
 import { createToast } from "@/utils/toast";
 import { sanitizeHtml } from "@/hooks/use-process-html";
+import { updateThreadApi } from "@/lib/api-calls/threads";
 
 // Helper function to clean email display
 export const cleanEmailDisplay = (email?: string) => {
@@ -112,10 +113,12 @@ export const handleToggleFlag = async (
   updateThread: (messageId: string, data: Partial<ThreadType>) => void,
   flag: "\\Flagged" | "$Important",
 ) => {
-  const thread = threads.find((t: ThreadType) => t.messageId === threadId);
+  const thread = threads.find((t: ThreadType) => t._id === threadId);
   if (!thread) return;
 
   const isStarred = thread.flags.includes(flag);
+
+  console.log(threadId, flag);
 
   // 1. Optimistic update
   const previousFlags = [...thread.flags];
@@ -123,20 +126,34 @@ export const handleToggleFlag = async (
     ? previousFlags.filter((f) => f !== flag)
     : [...previousFlags, flag];
 
-  const messageId = thread.messageId;
+  const messageId = thread._id;
   const folder = sec || "inbox";
   const action = previousFlags.includes(flag) ? "remove" : "add";
+  const update: Record<string, any> = {};
+
+  if (action === "add") {
+    if (flag === "\\Flagged") {
+      update.starred = true;
+    } else if (flag === "$Important") {
+      update.important = true;
+    }
+  } else if (action === "remove") {
+    if (flag === "\\Flagged") {
+      update.starred = false;
+    } else if (flag === "$Important") {
+      update.important = false;
+    }
+  }
 
   updateThread(messageId, { flags: newFlags });
 
   // 2. API call
   let actualFlag = flag === "\\Flagged" ? "Flagged" : "Important";
-  const success = await updateMailFlags(messageId, folder, actualFlag, action);
+  const success = await updateThreadApi(messageId, update);
 
   // 3. Rollback if it failed
   if (!success) {
     updateThread(messageId, { flags: previousFlags });
-    // console.error("Failed to update flag on server.");
   }
 };
 
@@ -154,7 +171,17 @@ export const handleToggleLocation = async (
   setLoading(true);
 
   try {
-    let res = await toggleLocation(threadId, sec || "inbox", folder, action);
+    const update: Record<string, boolean> = {};
+    if (action === "add") {
+      if (folder === "archive") update.archive = true;
+      else if (folder === "trash") update.trash = true;
+      else if (folder === "junk") update.junk = true;
+    } else {
+      if (folder === "archive") update.archive = false;
+      else if (folder === "trash") update.trash = false;
+      else if (folder === "junk") update.junk = false;
+    }
+    let res = await updateThreadApi(threadId, update);
 
     if (res) {
       createToast("Success", "Thread action was successful", "success");

@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 
-import { CalendarDays, Files, Grip, LogOut, User } from "lucide-react";
+import { CalendarDays, Cog, Files, Grip, LogOut, User } from "lucide-react";
 
 import { AppAvatar, AppLinkButton } from "@/components";
 
@@ -34,7 +34,7 @@ const MorePopover = () => {
           />
         }
       >
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <Link
             href="/profile"
             className="flex items-center gap-2 hover:text-main-color"
@@ -42,11 +42,15 @@ const MorePopover = () => {
             <User size={18} />
             <span className="text-xs">Account</span>
           </Link>
-          {/*{items.map((itm: MoreItemType, index: number) => (
-            <MoreItem key={index} item={itm} />
-          ))}
-          */}
-          <Separator className="my-2" />
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 hover:text-main-color"
+          >
+            <Cog size={18} />
+            <span className="text-xs">Settings</span>
+          </Link>
+
+          <Separator className="my-0" />
           <Link
             href="#"
             onClick={(e) => {

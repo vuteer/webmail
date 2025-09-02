@@ -39,33 +39,19 @@ import { MailTrashModal } from "./delete-modal";
 import { Paragraph } from "@/components/ui/typography";
 import { deleteMails } from "@/lib/api-calls/mails";
 import { createToast } from "@/utils/toast";
+import { handleDeleteThread } from "@/lib/api-calls/threads";
 
 export const MailHeader = ({ threadId }: { threadId: string }) => {
-  const { threads } = useThreadStore();
-  const { inbox, drafts, sent, archive, junk, trash } = useMailNumbersStore();
+  const { threads, threadsCount } = useThreadStore();
   const [, setMode] = useQueryState("mode");
   const [, setThreadId] = useQueryState("threadId");
   const [, setDraftId] = useQueryState("draftId");
   const [sec] = useQueryState("sec");
   const [, setActiveReplyId] = useQueryState("activeReplyId");
 
-  const currentIndex = threads.findIndex(
-    (thread) => thread.messageId === threadId,
-  );
-  const total =
-    sec === "inbox"
-      ? inbox
-      : sec === "drafts"
-        ? drafts
-        : sec === "sent"
-          ? sent
-          : sec === "archive"
-            ? archive
-            : sec === "junk"
-              ? junk
-              : sec === "trash"
-                ? trash
-                : 0;
+  const currentIndex = threads.findIndex((thread) => thread._id === threadId);
+
+  const total = threadsCount;
 
   const isFromAdmin =
     threads[currentIndex]?.from.name === "Mail Delivery System";
@@ -81,7 +67,7 @@ export const MailHeader = ({ threadId }: { threadId: string }) => {
     if (dir === "next" && moveToIndex > threadsLength - 1) moveToIndex = 0;
     if (dir === "prev" && moveToIndex < 0) moveToIndex = threadsLength - 1;
     const newThread = threads[moveToIndex];
-    setThreadId(newThread.messageId);
+    setThreadId(newThread._id);
     setActiveReplyId(null);
     setMode(null);
   };
@@ -170,7 +156,7 @@ export const Starred = ({ threadId }: { threadId: string }) => {
   const [sec] = useQueryState("sec");
 
   const starred = () => {
-    let thread = threads.find((t) => t.messageId === threadId);
+    let thread = threads.find((t) => t._id === threadId);
     if (!thread) return false;
     return thread.flags.includes("\\Flagged");
   };
@@ -214,7 +200,7 @@ export const Important = ({ threadId }: { threadId: string }) => {
   const [sec] = useQueryState("sec");
 
   const important = () => {
-    let thread = threads.find((t) => t.messageId === threadId);
+    let thread = threads.find((t) => t._id === threadId);
     if (!thread) return false;
     return thread.flags.includes("$Important");
   };
@@ -291,7 +277,8 @@ export const Archived = ({ threadId }: { threadId: string }) => {
 
 export const Trashed = ({ threadId }: { threadId: string }) => {
   const { setInitialNumbers } = useMailNumbersStore();
-  const { fetchThreads } = useThreadStore();
+  const { clearMails } = useMailStoreState();
+  const { removeThread } = useThreadStore();
   const [loading, setLoading] = useState(false);
   const [openConfirmModal, setOpenConfirmModal] = useState<boolean>(false);
   const [sec, setSec] = useQueryState("sec");
@@ -318,7 +305,7 @@ export const Trashed = ({ threadId }: { threadId: string }) => {
   const handleDeletePermanently = async () => {
     try {
       setLoading(true);
-      const res = await deleteMails(sec || "INBOX", [threadId]);
+      const res = await handleDeleteThread(threadId);
 
       if (res) {
         createToast(
@@ -326,17 +313,11 @@ export const Trashed = ({ threadId }: { threadId: string }) => {
           "Mail Permanently deleted",
           "success",
         );
-        setThreadId(null);
-        // setSec("inbox");
         setInitialNumbers();
         setOpenConfirmModal(false);
-        fetchThreads(
-          sec || "INBOX",
-          Number(page || 0),
-          sort ? "unread=true" : "",
-          false,
-          true,
-        );
+        removeThread(threadId);
+        clearMails();
+        setThreadId(null);
       }
     } catch (err: any) {
       createToast("Error", "Deletion failed. Try Again!", "danger");
@@ -402,8 +383,8 @@ export const Dots = () => {
     // const action: "add" | "remove" = sec === "spam" ? "remove" : "add";
     let res = await handleToggleLocation(
       threadId,
-      sec,
-      "inbox",
+      sec, // not in use but remains to avoid crashing
+      sec === "trash" ? "trash" : "junk",
       setLoading,
       "remove",
     );

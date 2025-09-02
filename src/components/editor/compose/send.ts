@@ -20,6 +20,7 @@ export const sendingMail = async (
     attachments: File[];
     draftId?: string | null;
     inReplyTo?: string | null;
+    references?: string;
   },
   user: { email: string; name: string; image: any },
   mode?: string | null,
@@ -119,16 +120,10 @@ export const sendingMail = async (
       draftId: data.draftId ?? null,
       inReplyTo: data.inReplyTo ?? null,
       headers: {
-        "In-Reply-To": replyToMessage?.messageId ?? "",
-        References: [
-          ...(replyToMessage?.references?.length
-            ? replyToMessage?.references?.split(" ")
-            : []),
-          replyToMessage?.messageId,
-        ]
-          .filter(Boolean)
-          .join(" "),
-        "Thread-Id": mode === "compose" ? "" : (threadId ?? ""),
+        "In-Reply-To": mode === "forward" ? "" : data.inReplyTo,
+        References: mode === "forward" ? [] : data.references,
+        "Thread-Id":
+          mode === "compose" || mode === "forward" ? "" : (threadId ?? ""),
       },
       threadId: mode === "compose" ? "" : threadId,
       isForward: mode === "forward",

@@ -54,6 +54,8 @@ export const MailDisplay = ({ subject }: MailDisplayProps) => {
   );
   const { mails } = useMailStoreState();
 
+  // console.log(mails);
+
   const people: any = mails[0]
     ? mails[0]?.from.address === user?.email
       ? Array.isArray(mails[0]?.to)

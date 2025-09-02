@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 const Mail = ({}) => {
   const { threads } = useThreadStore();
-  const { mailsLoading, fetchThreads } = useMailStoreState();
+  const { mailsLoading, fetchMails } = useMailStoreState();
   const mounted = useMounted();
 
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -35,7 +35,7 @@ const Mail = ({}) => {
   const [threadId] = useQueryState("threadId");
   const [sec] = useQueryState("sec");
 
-  let thrd = threads.find((t) => t.messageId === threadId);
+  let thrd = threads.find((t) => t._id === threadId);
   useCustomEffect(() => {
     if (!mounted || !thrd) return;
     if (thrd) setThread(thrd);
@@ -44,7 +44,7 @@ const Mail = ({}) => {
   useCustomEffect(() => {
     if (!mounted || !threadId) return;
 
-    fetchThreads(threadId, page, sec || "inbox");
+    fetchMails(threadId, page, sec || "inbox");
   }, [threadId, mounted]);
 
   React.useEffect(() => {

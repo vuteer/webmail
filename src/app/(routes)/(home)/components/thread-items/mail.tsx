@@ -103,7 +103,7 @@ export const Mail = ({
       message: jsxToHtml(emailData.html),
       attachments: emailData.attachments,
       fromEmail: emailData.from.address,
-      draftId: emailData.messageId,
+      draftId: emailData._id,
       inReplyTo: emailData.inReplyTo,
     };
     setLoading(true);
@@ -113,16 +113,18 @@ export const Mail = ({
       image: user.image,
     };
 
-    const messageId = await sendingMail(mail, sendingUser);
+    const res = await sendingMail(mail, sendingUser);
 
-    if (messageId) {
+    if (res) {
       // clear the draft from threads,
       setThreadId(null);
-      removeThread(emailData.messageId);
+      removeThread(emailData._id);
       setInitialNumbers();
     }
     setLoading(false);
   };
+
+  // console.log(emailData);
 
   return (
     <div
@@ -133,7 +135,7 @@ export const Mail = ({
       <div className="mt-3 flex w-full items-start justify-between gap-4 ">
         <div className="flex w-full justify-center items-center gap-2">
           <AppAvatar
-            src={emailData.from.picture || emailData.from.image || ""}
+            src={emailData.from?.picture || emailData.from.image || ""}
             name={emailData.from.name || emailData.from.email}
             dimension="w-7 h-7"
           />
@@ -223,7 +225,7 @@ export const Mail = ({
                         e.stopPropagation();
                         setIsCollapsed(false);
                         setMode("reply");
-                        setActiveReplyId(emailData.messageId);
+                        setActiveReplyId(emailData._id);
                       }}
                       icon={
                         <Reply className="fill-muted-foreground dark:fill-[#9B9B9B]" />
@@ -239,7 +241,7 @@ export const Mail = ({
                       disabled={loading}
                       onClick={(e) => {
                         setMode("draft");
-                        setActiveReplyId(emailData.messageId);
+                        setActiveReplyId(emailData._id);
                       }}
                       icon={<SquarePen size={18} />}
                       text={"Edit"}

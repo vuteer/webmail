@@ -1,4 +1,4 @@
-import { getThreads } from "@/lib/api-calls/mails";
+import { getThreads } from "@/lib/api-calls/threads";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
@@ -9,7 +9,7 @@ export type MailAddress = {
 
 export type ThreadType = {
   uid: number;
-  id: string;
+  _id: string;
   subject: string;
   from: MailAddress;
   to: MailAddress[];
@@ -18,10 +18,12 @@ export type ThreadType = {
   flags: string[];
   hasAttachment: boolean;
   trashed: boolean;
+  unreadCount?: number;
 };
 
 type ThreadStore = {
   threads: ThreadType[];
+  threadsCount: number;
   threadsLoading: boolean;
   moreLoading: boolean;
   setMoreLoading: () => void;
@@ -42,6 +44,7 @@ type ThreadStore = {
 export const useThreadStore = create<ThreadStore>()(
   immer((set) => ({
     threads: [],
+    threadsCount: 0,
     threadsLoading: true,
     moreLoading: false,
     setThreads: (threads) =>
@@ -51,7 +54,8 @@ export const useThreadStore = create<ThreadStore>()(
 
     updateThread: (messageId, updates) =>
       set((state) => {
-        const thread = state.threads.find((t) => t.messageId === messageId);
+        console.log(messageId, updates);
+        const thread = state.threads.find((t) => t._id === messageId);
         if (thread) {
           Object.assign(thread, updates);
         }
@@ -59,7 +63,7 @@ export const useThreadStore = create<ThreadStore>()(
 
     removeThread: (messageId) =>
       set((state) => {
-        state.threads = state.threads.filter((t) => t.messageId !== messageId);
+        state.threads = state.threads.filter((t) => t._id !== messageId);
       }),
 
     clearThreads: () =>
@@ -83,17 +87,19 @@ export const useThreadStore = create<ThreadStore>()(
             state.threadsLoading = true;
           });
         }
-        const result = await getThreads(title, page, status);
-        // Assume the API returns: { success: true, data: { docs: ThreadType[] } }
+        const result = await getThreads(title, status, page);
 
         if (result) {
+          set((state) => {
+            state.threadsCount = result.total;
+          });
           if (!page || page === 0) {
             set((state) => {
-              state.threads = result;
+              state.threads = result.docs;
             });
           } else {
             set((state) => {
-              const merged = [...state.threads, ...result];
+              const merged = [...state.threads, ...result.docs];
               const unique = Array.from(
                 new Map(merged.map((item) => [item.messageId, item])).values(),
               );

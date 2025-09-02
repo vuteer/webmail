@@ -42,6 +42,7 @@ export const MailIframe = ({
   }, [iframeRef, setHeight]);
 
   const actualHTML: any = html;
+
   let processedHtml = useProcessedHtml({
     reactNodes: actualHTML,
     isTrustedSender: false,

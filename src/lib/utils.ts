@@ -12,6 +12,7 @@ import { MAX_URL_LENGTH } from "./constants";
 import type { Sender } from "@/types";
 import LZString from "lz-string";
 import { convert } from "html-to-text";
+import sanitizeHtml from "sanitize-html";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -329,7 +330,36 @@ export const constructReplyBody = (
     </div>
   `);
 };
+const cleanEmailHtml = (input: string): string => {
+  if (!input) return "";
 
+  // 1. Escape email addresses in angle brackets (<foo@bar.com> → &lt;foo@bar.com&gt;)
+  // const escaped = input.replace(/<([^\s>]+@[^\s>]+)>/g, "&lt;$1&gt;");
+
+  // 2. Sanitize out unwanted <html>, <head>, <body>, <meta> tags
+  return sanitizeHtml(input, {
+    allowedTags: false, // keep normal tags
+    disallowedTagsMode: "discard",
+    exclusiveFilter: (frame) =>
+      ["html", "head", "body", "meta", "!doctype"].includes(frame.tag),
+  });
+};
+function extractBodyChildren(html: string) {
+  // Parse the HTML into a DOM
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+
+  // Get all body children
+  const bodyChildren = doc.body.children;
+
+  // Return their HTML content combined
+  let result = "";
+  for (let child of bodyChildren) {
+    result += child.outerHTML + "\n";
+  }
+
+  return result.trim();
+}
 export const constructForwardBody = (
   formattedMessage: string,
   originalDate: string,
@@ -344,7 +374,7 @@ export const constructForwardBody = (
   return contentToHTML(`
     <div style="padding: 7px">
       <div style="">
-        ${formattedMessage}
+        ${extractBodyChildren(formattedMessage)}
       </div>
       <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
         <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
@@ -353,14 +383,44 @@ export const constructForwardBody = (
           Date: ${originalDate}<br/>
           Subject: ${originalSender?.subject || "No Subject"}<br/>
           To: ${recipientEmails || "No Recipients"}
-          <p style="text-decoration: italic;">
-            ${quotedMessage?.slice(0, 300)}
-          </p>
+
         </div>
       </div>
     </div>
   `);
 };
+
+// export const constructForwardBody = (
+//   formattedMessage: string,
+//   originalDate: string,
+//   originalSender: Sender | undefined,
+//   otherRecipients: Sender[],
+//   quotedMessage?: string,
+// ) => {
+//   const senderName =
+//     originalSender?.name || originalSender?.email || "Unknown Sender";
+//   const recipientEmails = otherRecipients.map((r) => r.email).join(", ");
+
+//   return contentToHTML(`
+//     <div style="padding: 7px">
+//       <div style="">
+//         ${formattedMessage}
+//       </div>
+//       <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+//         <div style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+//           ---------- Forwarded message ----------<br/>
+//           From: ${senderName} ${originalSender?.email ? `&lt;${originalSender.email}&gt;` : ""}<br/>
+//           Date: ${originalDate}<br/>
+//           Subject: ${originalSender?.subject || "No Subject"}<br/>
+//           To: ${recipientEmails || "No Recipients"}
+//           <p style="text-decoration: italic;">
+//             ${quotedMessage?.slice(0, 300)}
+//           </p>
+//         </div>
+//       </div>
+//     </div>
+//   `);
+// };
 
 export function stripHtmlTags(input: string): string {
   return input.replace(/<[^>]*>/g, "").trim();

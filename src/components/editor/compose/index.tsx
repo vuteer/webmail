@@ -39,7 +39,9 @@ interface EmailComposeProps {
     attachments: File[];
     fromEmail?: string;
     draftId: string | null;
-  }) => Promise<string>;
+    inReplyTo?: string;
+    references?: string;
+  }) => Promise<Record<string, any>>;
   onClose?: () => void;
   className?: string;
   autofocus?: boolean;
@@ -79,7 +81,7 @@ export const EmailCompose = ({
   const user = session?.user;
   const mounted = useMounted();
   const { mails, mailsLoading } = useMailStoreState();
-  const { appendThread, removeThread } = useThreadStore();
+  const { appendThread, removeThread, threads } = useThreadStore();
   const { setInitialNumbers } = useMailNumbersStore();
 
   const [threadId, setThreadId] = useQueryState("threadId");
@@ -94,7 +96,6 @@ export const EmailCompose = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  // const [messageLength, setMessageLength] = useState(0);
 
   const [aiGeneratedMessage, setAiGeneratedMessage] = useState<string | null>(
     null,
@@ -115,6 +116,11 @@ export const EmailCompose = ({
   const ccInputRef = useRef<HTMLInputElement>(null);
   const bccInputRef = useRef<HTMLInputElement>(null);
 
+  function cleanSubject(subject: string) {
+    return subject
+      .replace(/^(?:\s*(?:RE|FWD?|FW)\s*:\s*)+/gi, "") // strip RE:, FWD:, FW:
+      .trim(); // remove leading/trailing spaces
+  }
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -123,7 +129,7 @@ export const EmailCompose = ({
       bcc: initialBcc,
       subject:
         (mode === "forward" ? "FWD: " : mode?.includes("reply") ? "RE: " : "") +
-        initialSubject,
+        cleanSubject(initialSubject),
       message: initialMessage,
       attachments: initialAttachments,
       fromEmail: session?.user?.email || "",
@@ -141,26 +147,15 @@ export const EmailCompose = ({
   useEffect(() => {
     if (!mounted) return;
 
-    const pre = initialSubject?.slice(0, 3);
-    const replied = pre?.toLowerCase() === "re:";
-    const forwarded = pre?.toLowerCase() === "fwd:";
-
     form.reset({
       to: initialTo,
       cc: initialCc,
       bcc: initialBcc,
       subject:
-        (mode === "forward"
-          ? !forwarded && !replied
-            ? "FWD: "
-            : ""
-          : mode?.includes("reply")
-            ? !replied && !forwarded
-              ? "RE: "
-              : ""
-            : "") + initialSubject,
+        (mode === "forward" ? "FWD: " : mode?.includes("reply") ? "RE: " : "") +
+        cleanSubject(initialSubject),
       message: initialMessage,
-      attachments: initialAttachments,
+      attachments: mode?.includes("reply") ? [] : initialAttachments,
       fromEmail: session?.user?.email || "",
     });
   }, [mode, mounted]);
@@ -168,8 +163,8 @@ export const EmailCompose = ({
   useEffect(() => {
     if (mailsLoading || !activeReplyId) return;
     // get replyTo based on activeReplyId
-    const m: any = mails.find((ml) => ml.messageId === activeReplyId);
-    if (m) setReplyToMessage(m);
+    const m: any = mails.find((ml) => ml._id === activeReplyId);
+    if (m) setReplyToMessage({ ...m, attachments: [] });
   }, [mails, mailsLoading, activeReplyId]);
 
   // editor
@@ -203,7 +198,6 @@ export const EmailCompose = ({
   const handleSend = async () => {
     try {
       if (isLoading || isSavingDraft || !user) return;
-      // console.log(values.attachments);
       const values = getValues();
 
       // Validate recipient field
@@ -216,7 +210,19 @@ export const EmailCompose = ({
       setIsLoading(true);
       setAiGeneratedMessage(null);
 
-      const messageId = await onSendEmail({
+      const inReplyTo: any =
+        mode === "reply" || mode === "replyAll"
+          ? threads?.find((t) => t._id === threadId)
+          : "";
+
+      const references =
+        mode === "reply"
+          ? `${inReplyTo?.messageId ?? ""} ${replyToMessage?.references?.join(" ") ?? ""} ${replyToMessage.messageId}`.trim()
+          : mode === "replyAll"
+            ? `${mails[0].messageId ?? ""}`
+            : "";
+
+      const res = await onSendEmail({
         to: values.to,
         cc: showCc ? values.cc : undefined,
         bcc: showBcc ? values.bcc : undefined,
@@ -225,16 +231,18 @@ export const EmailCompose = ({
         attachments: values.attachments || [],
         fromEmail: values.fromEmail,
         draftId: sec === "drafts" ? threadId : draftId,
+        inReplyTo: inReplyTo ? inReplyTo.messageId : "",
+        references,
       });
 
       // push to threads if no threadId & sec === sent
       // append to mails if threadId exists
-      if (messageId) {
+      if (res) {
         if (sec === "sent") {
           const thread: any = {
             uid: Math.floor(Math.random() * 3000),
-            id: messageId,
-            messageId,
+            _id: res.thread,
+            messageId: res.messageId,
             subject: values.subject,
             from: { address: user.email, name: user.name },
             to: [{ address: values.to, name: values.to }],
@@ -244,6 +252,7 @@ export const EmailCompose = ({
             trashed: false,
           };
           appendThread(thread);
+          // append to current mails too
         }
 
         if (sec === "drafts") {
@@ -327,9 +336,6 @@ export const EmailCompose = ({
         threadId,
       );
 
-      // console.log(draftData)
-      // const response = await createDraft(draftData);
-
       if (res) setDraftId(res);
       // if (response?.id && response.id !== draftId) {
       //   setDraftId(response.id);
@@ -350,7 +356,6 @@ export const EmailCompose = ({
     if (mode === "forward" || mode === "draft") return;
 
     const autoSaveTimer = setTimeout(() => {
-      console.log("Saving draft...");
       // saveDraft();
     }, 3000);
 

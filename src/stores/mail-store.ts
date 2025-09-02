@@ -6,20 +6,22 @@ import { ThreadType } from "@/types";
 type MailStoreState = {
   mails: ThreadType[];
   mailsLoading: boolean;
-  fetchThreads: (threadId: string, page: number, sec: string) => Promise<void>;
+  fetchMails: (threadId: string, page: number, sec: string) => Promise<void>;
   deletedMails: string[];
   newMails: ThreadType[];
   addDeletedThreads: (threadId: string) => void;
   addNewThread: (mail: ThreadType) => void;
+  clearMails: () => void;
 };
 
 export const useMailStoreState = create<MailStoreState>((set, get) => ({
   mails: [],
   mailsLoading: false,
-  fetchThreads: async (threadId: string, page: number, sec: string) => {
+  fetchMails: async (threadId: string, page: number, sec: string) => {
     set({ mailsLoading: true });
 
-    let res = await getMails(threadId, page, sec);
+    let res = await getMails(threadId, sec, page);
+
     if (res) {
       let docs = res.docs.map((doc: any) => ({
         ...doc,
@@ -50,5 +52,8 @@ export const useMailStoreState = create<MailStoreState>((set, get) => ({
         set({ newMails: mails });
       }, 1000);
     }
+  },
+  clearMails: () => {
+    set({ mails: [] });
   },
 }));

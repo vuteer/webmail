@@ -19,7 +19,7 @@ import { createToast } from "@/utils/toast";
 import { jsxToHtml } from "@/components/editor/compose/jsx-to-html";
 import { useSession } from "@/lib/auth-client";
 import { sendingMail } from "@/components/editor/compose/send";
-import { m } from "motion/react";
+
 import { useThreadStore } from "@/stores/threads";
 import { useQueryState } from "nuqs";
 
@@ -101,7 +101,6 @@ export const ForwardToInputs = ({
       cc: cc || [],
       bcc: bcc || [],
       message: jsxToHtml(emailData.html || emailData.text),
-      inReplyTo: emailData.inReplyTo,
       attachments: emailData.attachments,
     };
 
@@ -111,7 +110,7 @@ export const ForwardToInputs = ({
       image: user.image,
     };
 
-    const messageId = await sendingMail(
+    const res = await sendingMail(
       mail,
       sendingUser,
       "forward",
@@ -119,12 +118,12 @@ export const ForwardToInputs = ({
       emailData,
     );
 
-    if (messageId) {
+    if (res) {
       if (sec === "sent") {
         const thread: any = {
           uid: Math.floor(Math.random() * 3000),
-          id: messageId,
-          messageId,
+          _id: res.thread,
+          messageId: res.messageId,
           subject: mail.subject,
           from: { address: user.email, name: user.name },
           to: to.map((m: string) => ({ address: m, name: m })),
@@ -135,6 +134,7 @@ export const ForwardToInputs = ({
         };
         appendThread(thread);
       }
+
       setDialogOpen(false);
     }
     setLoading(false);

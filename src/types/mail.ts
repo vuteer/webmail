@@ -33,7 +33,7 @@ export type AttachmentType = {
 
 export type MailType = {
   messageId: string;
-  id: string;
+  _id: string;
   text: string;
   html?: string;
   info: ThreadInfoType;
@@ -41,7 +41,7 @@ export type MailType = {
   attachments?: AttachmentType[];
 };
 export type ThreadType = {
-  id: string;
+  _id: string;
   from: ContactType;
   to: ContactType | ContactType[];
   subject: string;
@@ -60,6 +60,8 @@ export type ThreadType = {
   signedBy?: string;
   security?: string;
   tags?: string[];
+  lastMessageAt?: string;
+  unreadCount?: number;
 };
 
 export type ThreadInfoType = {

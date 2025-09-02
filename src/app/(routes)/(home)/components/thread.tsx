@@ -21,10 +21,10 @@ import { AppAvatar } from "@/components";
 import { ExclamationCircle, Star2 } from "@/components/icons/icons";
 import { formatDate } from "@/lib/utils";
 import { useThreadStore } from "@/stores/threads";
-import { updateMailFlags } from "@/lib/api-calls/mails";
 import { handleToggleFlag, includesFlag } from "./thread-items/actions";
 import { Paperclip } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { handleReadThread } from "@/lib/api-calls/threads";
 
 interface ThreadProps {
   thread: ThreadType;
@@ -40,41 +40,38 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
   const { updateThread } = useThreadStore();
 
   const {
+    _id,
     from,
     to,
     date,
+    lastMessageAt,
     subject,
     flags,
+    unreadCount,
     labels,
     cc,
     bcc,
     attachments,
-    messageId,
   } = thread;
 
   // zustand state
   const { inbox, lessFromNumber } = useMailNumbersStore();
 
   const mailAdmin = from?.name === "Mail Delivery System";
-  const handleOpenMail = async () => {
-    if (!includesFlag("\\Seen", flags) && !mailAdmin) {
-      // 1. Optimistic update
-      const previousFlags = [...thread.flags];
-      const newFlags = [...previousFlags, "\\Seen"];
-      updateThread(messageId, { flags: newFlags });
+  const savedNumber: number = unreadCount || 0;
 
-      let success = await updateMailFlags(
-        thread.messageId,
-        sec || "inbox",
-        "Seen",
-        "add",
-      );
+  const handleOpenMail = async () => {
+    if (unreadCount && !mailAdmin && sec === "inbox") {
+      updateThread(_id, { unreadCount: 0 });
+      const success = await handleReadThread(_id);
+      console.log("READ", success);
       if (!success) {
-        updateThread(messageId, { flags: previousFlags });
+        updateThread(_id, { unreadCount: savedNumber });
       }
     }
-    setThreadId(messageId);
-    if (inbox && !mailAdmin) lessFromNumber("unread", 1);
+
+    setThreadId(_id);
+    if (inbox && !mailAdmin) lessFromNumber("unread", savedNumber);
   };
 
   const combinedTos = Array.isArray(to)
@@ -84,8 +81,8 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
   return (
     <div
       className={cn(
-        "group relative duration-700 p-1 py-2 rounded-lg my-1 w-full cursor-pointer overflow-hidden hover:bg-background  ",
-        threadId === messageId ? "bg-secondary" : "",
+        "group relative duration-700 p-1 py-2 rounded-lg my-1 w-full cursor-pointer overflow-hidden hover:bg-secondary  ",
+        threadId === _id ? "bg-secondary" : "",
       )}
       onClick={handleOpenMail}
     >
@@ -130,12 +127,13 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
                 <div
                   className={cn(
                     "h-2 w-2 rounded-full",
-                    !mailAdmin &&
-                      (includesFlag("\\Seen", flags) || sec !== "inbox")
+                    !mailAdmin && sec !== "inbox"
                       ? "bg-transparent"
                       : mailAdmin
                         ? "bg-red-500"
-                        : "bg-main-color",
+                        : unreadCount
+                          ? "bg-main-color"
+                          : "bg-transparent",
                   )}
                 />
                 <Star2
@@ -158,7 +156,7 @@ const Thread: React.FC<ThreadProps> = ({ thread, index }) => {
                     </span>
                   </span>
                 ) : null}
-                {formatDate(date.split(".")[0] || "")}
+                {formatDate(lastMessageAt?.split(".")[0] || "")}
               </Paragraph>
             </div>
           </div>

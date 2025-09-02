@@ -28,14 +28,20 @@ export const ReplyCompose = () => {
   React.useEffect(() => {
     if (mailsLoading || !activeReplyId) return;
     // get replyTo based on activeReplyId
-    const m: any = mails.find((ml) => ml.messageId === activeReplyId);
-    if (m) setReplyToMessage(m);
+    if (mode === "replyAll") {
+      setReplyToMessage(mails[0]);
+    } else {
+      const m: any = mails.find((ml) => ml._id === activeReplyId);
+      if (m) setReplyToMessage(m);
+    }
   }, [mails, mailsLoading, activeReplyId]);
 
   const handleSendEmail = async (data: {
     to: string[];
     cc?: string[];
     bcc?: string[];
+    inReplyTo?: string;
+    references?: string;
     subject: string;
     message: string;
     attachments: File[];
@@ -79,7 +85,13 @@ export const ReplyCompose = () => {
           replyToMessage
             ? mode == "forward"
               ? []
-              : [replyToMessage?.from?.email || replyToMessage?.from?.address]
+              : mode == "reply"
+                ? user?.email ===
+                  (replyToMessage?.to[0]?.email ||
+                    replyToMessage?.to[0]?.address)
+                  ? [replyToMessage?.from?.address]
+                  : [replyToMessage?.to[0]?.address]
+                : [replyToMessage?.from?.email || replyToMessage?.from?.address]
             : []
         }
         initialAttachments={replyToMessage?.attachments.map(

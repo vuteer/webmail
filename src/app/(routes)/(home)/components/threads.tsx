@@ -28,6 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
 import { formatDate } from "@/lib/utils";
 import Menu from "../../components/menu";
+import { AppImage } from "@/components";
+import { images } from "@/assets";
 
 const Threads = () => {
   const {
@@ -41,7 +43,7 @@ const Threads = () => {
     lessFromNumber,
     setInitialNumbers,
   } = useMailNumbersStore();
-  const { threads, fetchThreads, threadsLoading, updateThread } =
+  const { threads, threadsCount, fetchThreads, threadsLoading, updateThread } =
     useThreadStore();
   const mounted = useMounted();
   const [page] = useQueryState("page");
@@ -68,10 +70,9 @@ const Threads = () => {
     trash,
   };
   useCustomEffect(() => {
-    const countValue = sectionsMap[sec || "inbox"] ?? 0;
-
-    setCount(countValue);
-  }, [sectionsMap, sec]);
+    if (!mounted) return;
+    setCount(threadsCount);
+  }, [mounted, threadsCount, sec]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -93,7 +94,7 @@ const Threads = () => {
             {sec === "inbox" ? (
               <div className="flex gap-2 items-center text-xs lg:text-xs font-normal mt-1">
                 <span>{`Total - ${numberWithCommas(inbox)}`}</span>
-                {inbox && sec === "inbox" ? (
+                {inbox && sec === "inbox" && unread ? (
                   <>
                     <div className="h-[13px] w-[1px] bg-gray-500" />
                     <span>{`Unread - ${numberWithCommas(unread)}`}</span>
@@ -175,11 +176,21 @@ const Threads = () => {
               <></>
             )}
             {!threadsLoading && !count && (
-              <>
-                <Paragraph className="my-4 text-center">
+              <div className="h-[80vh] flex flex-col items-center justify-center">
+                <div className="w-[250px] h-[250px]">
+                  <AppImage
+                    alt="No mail"
+                    title="No mail"
+                    src={images.no_mail}
+                    width={400}
+                    height={400}
+                    cls="w-full h-full object-contain"
+                  />
+                </div>
+                <Paragraph className=" text-center font-bold">
                   You have no mail.
                 </Paragraph>
-              </>
+              </div>
             )}
             <PaginateThreads count={count} />
             <div className="h-[100px]" />

@@ -22,7 +22,7 @@ import {
   FileText,
   CalendarDays,
   Files,
-  Cog,
+  // Cog,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -210,7 +210,7 @@ const more: MenuItemType[] = [
   // { text: "Appointments", icon: <Clock size={18} />, href: "/appointments" },
   { text: "Calendar", icon: <CalendarDays size={18} />, href: "/calendar" },
   { text: "Files", icon: <Files size={18} />, href: "/files" },
-  { text: "Settings", icon: <Cog size={18} />, href: "/settings" },
+  // { text: "Settings", icon: <Cog size={18} />, href: "/settings" },
   // { text: "Contacts", icon: <CircleUser size={18} />, href: "/contacts" },
 ];
 

@@ -25,8 +25,7 @@ export const useSocket = (userId: string | null) => {
   const connect = () => {
     if (!userId || !mounted) return;
 
-    const protocol = "wss";
-    // window.location.protocol === "https:" ? "wss" : "ws";
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const socket = new WebSocket(
       `${protocol}://${process.env.NEXT_PUBLIC_SOCKET_URL}?userId=${userId}`,
     );

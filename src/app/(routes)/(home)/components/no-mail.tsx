@@ -9,10 +9,10 @@ import { ComposeButton } from "../../components/side-menu";
 const NoMailId = () => {
   return (
     <div className="h-full flex flex-col items-center justify-center gap-2">
-      <div className="relative w-[60%] h-[50vh] flex justify-center">
+      <div className="relative w-[250px] h-[250px] flex justify-center">
         <Image
           alt="no mail"
-          src={images.no_mail.src}
+          src={images.no_mail}
           fill
           className="object-contain"
         />

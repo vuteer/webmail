@@ -7,16 +7,16 @@ export const getNumbers = async () => {
 };
 
 // get mails
-export const getThreads = async (
-  section: string,
-  page: number,
-  queryStr?: string,
+export const getMails = async (
+  threadId: string,
+  folder: string,
+  page?: number,
 ) => {
   let res = await getDoc(
-    `/mails/${section}?page=${page || 0}&${queryStr ? queryStr : ""}`,
+    `/mails/${threadId}/${folder}/list?page=${page || 0}`,
     true,
   );
-  return res?.data?.docs || false;
+  return res?.data || false;
 };
 
 // get mail & thread
@@ -25,54 +25,9 @@ export const getThread = async (id: string) => {
   return res?.data || false;
 };
 
-// get thread mails
-export const getMails = async (
-  threadId: string,
-  page: number,
-  section: string,
-) => {
-  let res = await getDoc(
-    `/mails/${threadId}/thread?page=${page}&section=${section}`,
-    true,
-  );
-
-  return res?.data || false;
-};
-
-// update mail flags
-export const updateMailFlags = async (
-  messageId: string,
-  folder: string,
-  flag: string,
-  action: string,
-) => {
-  let res = await patchDoc(
-    `/mails/${messageId}/${folder}?flag=${flag}&action=${action}`,
-    {},
-    true,
-  );
-  return res?.success;
-};
-
-//toggle archive and trash
-export const toggleLocation = async (
-  messageId: string,
-  folder: string,
-  location: string,
-  action: string,
-) => {
-  let res = await patchDoc(
-    `/mails/${messageId}/${folder}/${location}?action=${action}`,
-    {},
-    true,
-  );
-
-  return res?.success;
-};
-
 export const sendMail = async (data: any) => {
   const res = await postDoc("/mails", data, true);
-  return res?.data?.doc || false;
+  return res?.data || false;
 };
 
 // draft

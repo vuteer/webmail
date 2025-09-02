@@ -54,14 +54,14 @@ const forceExternalLinks = (html: string): string => {
   return doc.body.innerHTML;
 };
 
-const getProxiedUrl = (url: string) => {
-  if (url.startsWith("data:") || url.startsWith("blob:")) return url;
+// const getProxiedUrl = (url: string) => {
+//   if (url.startsWith("data:") || url.startsWith("blob:")) return url;
 
-  const proxyUrl = import.meta.env.VITE_PUBLIC_IMAGE_PROXY?.trim();
-  if (!proxyUrl) return url;
+//   const proxyUrl = import.meta.env.VITE_PUBLIC_IMAGE_PROXY?.trim();
+//   if (!proxyUrl) return url;
 
-  return proxyUrl + encodeURIComponent(url);
-};
+//   return proxyUrl + encodeURIComponent(url);
+// };
 
 const proxyImageUrls = (html: string): string => {
   const parser = new DOMParser();
