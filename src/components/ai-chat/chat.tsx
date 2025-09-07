@@ -27,11 +27,6 @@ export const AIChat = () => {
               height={40}
               className="w-full h-full object-fit"
             />
-            {/*<img
-              src="/white-icon.svg"
-              alt="Zero Logo"
-              className="hidden dark:block"
-            />*/}
           </div>
           <Heading4>Coming Soon...</Heading4>
           <p className="mb-1 mt-2 hidden text-center text-sm font-medium text-black md:block dark:text-white">
