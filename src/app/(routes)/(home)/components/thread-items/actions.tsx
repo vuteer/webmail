@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { format } from "date-fns";
 import { Docx, Figma, ImageFile, PDF } from "@/components/icons/icons";
 import { ThreadType } from "@/stores/threads";
-import { toggleLocation } from "@/lib/api-calls/mails";
+// import { toggleLocation } from "@/lib/api-calls/mails";
 import { createToast } from "@/utils/toast";
 import { sanitizeHtml } from "@/hooks/use-process-html";
 import { updateThreadApi } from "@/lib/api-calls/threads";

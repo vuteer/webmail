@@ -59,7 +59,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
 
   // updating password to something user centered.
   const [currentPassword, setCurrentPassword] = useState<string>("");
-  const [psassword, setPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 

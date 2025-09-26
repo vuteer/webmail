@@ -136,7 +136,7 @@ export const Mail = ({
         <div className="flex w-full justify-center items-center gap-2">
           <AppAvatar
             src={emailData.from?.picture || emailData.from.image || ""}
-            name={emailData.from.name || emailData.from.email}
+            name={emailData.from.name || emailData.from.address}
             dimension="w-7 h-7"
           />
           <div className="flex w-full items-center justify-between">
