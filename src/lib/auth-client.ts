@@ -1,6 +1,6 @@
 // import { adminClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { multiSessionClient } from "better-auth/client/plugins";
+// import { multiSessionClient } from "better-auth/client/plugins";
 
 export const {
   signIn,
@@ -13,5 +13,5 @@ export const {
   changePassword,
 } = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
-  plugins: [multiSessionClient()],
+  plugins: [],
 });
