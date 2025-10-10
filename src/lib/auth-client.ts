@@ -14,4 +14,9 @@ export const {
 } = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   plugins: [],
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
+    },
+  },
 });
