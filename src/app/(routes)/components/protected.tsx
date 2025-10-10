@@ -45,16 +45,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
   const mounted = useMounted();
 
   const { data: session, isPending, error, refetch } = useSession();
-  const user: any = {
-    id: "68e75fe612c9dd339d452cd5",
-    email: "k.nyagadn@gmail.com",
-    name: "Kinyua Nyaga",
-    emailVerified: false,
-    createdAt: "2025-10-09T07:10:30.216Z",
-    updatedAt: "2025-10-09T07:10:30.216Z",
-  };
-
-  // session?.user;
+  const user: any = session?.user;
   const first_password = user?.first_password;
 
   const first_password_changed_at: any =
@@ -73,8 +64,8 @@ const Protected = ({ title, children }: ProtectedProps) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   // ❌ Unauthorized
-  // if (!session?.user && !isPending) {
-  if (!user && !isPending) {
+  if (!session?.user && !isPending) {
+    // if (!user && !isPending) {
     return (
       <div className="animate-fade-in flex flex-1 flex-col items-center justify-center p-10">
         <div className="relative h-[500px] w-[500px] overflow-hidden rounded-lg">
@@ -195,8 +186,8 @@ const Protected = ({ title, children }: ProtectedProps) => {
       <FinalizeSetup />
       <AIToggleButton />
 
-      {user && <NotificationHandler user={user.id} />}
-      {/*{session?.user && <NotificationHandler user={session.user.id} />}*/}
+      {/*{user && <NotificationHandler user={user.id} />}*/}
+      {session?.user && <NotificationHandler user={session.user.id} />}
       <div
         className={cn(
           "my-1 flex-1 h-[99vh] overflow-hidden gap-2 flex flex-col ",

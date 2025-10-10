@@ -13,7 +13,7 @@ const handleSubmit = async (
     if (screen === "login") {
       // res = await login(data);
       res = await signIn.email({ email: data.email, password: data.password });
-      console.log(res);
+
       if (res.error) throw new Error(res.error.message);
       if (res) {
         createToast("Success", "Login successful", "success");
