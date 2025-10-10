@@ -195,7 +195,7 @@ const Protected = ({ title, children }: ProtectedProps) => {
       <FinalizeSetup />
       <AIToggleButton />
 
-      {user && <NotificationHandler user={session.user.id} />}
+      {user && <NotificationHandler user={user.id} />}
       {/*{session?.user && <NotificationHandler user={session.user.id} />}*/}
       <div
         className={cn(
