@@ -45,7 +45,16 @@ const Protected = ({ title, children }: ProtectedProps) => {
   const mounted = useMounted();
 
   const { data: session, isPending, error, refetch } = useSession();
-  const user: any = session?.user;
+  const user: any = {
+    id: "68e75fe612c9dd339d452cd5",
+    email: "k.nyagadn@gmail.com",
+    name: "Kinyua Nyaga",
+    emailVerified: false,
+    createdAt: "2025-10-09T07:10:30.216Z",
+    updatedAt: "2025-10-09T07:10:30.216Z",
+  };
+
+  // session?.user;
   const first_password = user?.first_password;
 
   const first_password_changed_at: any =
