@@ -73,7 +73,8 @@ const Protected = ({ title, children }: ProtectedProps) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   // ❌ Unauthorized
-  if (!session?.user && !isPending) {
+  // if (!session?.user && !isPending) {
+  if (!user && !isPending) {
     return (
       <div className="animate-fade-in flex flex-1 flex-col items-center justify-center p-10">
         <div className="relative h-[500px] w-[500px] overflow-hidden rounded-lg">
@@ -194,7 +195,8 @@ const Protected = ({ title, children }: ProtectedProps) => {
       <FinalizeSetup />
       <AIToggleButton />
 
-      {session?.user && <NotificationHandler user={session.user.id} />}
+      {user && <NotificationHandler user={session.user.id} />}
+      {/*{session?.user && <NotificationHandler user={session.user.id} />}*/}
       <div
         className={cn(
           "my-1 flex-1 h-[99vh] overflow-hidden gap-2 flex flex-col ",
