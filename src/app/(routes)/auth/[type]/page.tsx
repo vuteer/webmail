@@ -56,38 +56,40 @@ const Auth = async ({ params }: { params: Promise<{ type: string }> }) => {
 export default Auth;
 
 const Welcome = () => (
-  <div className="flex flex-col items-center justify-center w-full lg:w-[50%] bg-[#020817] lg:h-full h-[50vh]">
-    <AppImage
-      src={images.logo.src}
-      alt="logo"
-      title="logo"
-      width={70}
-      height={70}
-      cls="my-3 lg:h-[60px] lg:w-[60px] w-[40px] h-[40px]"
-    />
-    <Heading1 className="text-white text-center">Welcome to Vu.Mail</Heading1>
-    <Paragraph className="text-white my-3 text-center">
-      The modern way to receive and send your business emails.
-    </Paragraph>
-    <div className="-mt-5 w-[80%] h-[55%] my-3 lg:h-[50%] relative overflow-hidden rounded-lg">
+  <div className=" w-full lg:w-[50%] lg:h-full h-[50vh] flex items-center justify-center bg-[#020817]">
+    <div className="flex flex-col items-center justify-center w-full  h-[50vh]">
       <AppImage
-        src={images.auth_screen.src}
-        alt="auth screen"
-        title="auth screen"
-        objectFit="contain"
-        cls="object-contain rounded-lg"
-        fill
+        src={images.logo.src}
+        alt="logo"
+        title="logo"
+        width={70}
+        height={70}
+        cls="my-3 lg:h-[60px] lg:w-[60px] w-[40px] h-[40px]"
       />
+      <Heading1 className="text-white text-center">Welcome to Vu.Mail</Heading1>
+      <Paragraph className="text-white my-3 text-center">
+        The modern way to receive and send your business emails.
+      </Paragraph>
+      <div className="my-4 w-[80%] h-[150px] lg:h-[300px] relative overflow-hidden rounded-lg">
+        <AppImage
+          src={images.auth_screen.src}
+          alt="auth screen"
+          title="auth screen"
+          objectFit="contain"
+          cls="object-contain rounded-lg"
+          fill
+        />
+      </div>
+      <Paragraph className="text-white  z-[40] text-center">
+        <span>Register your business </span>
+        <Link
+          href="https://app.vumail.app"
+          target="_blank"
+          className="text-blue-500 hover:text-red-500"
+        >
+          HERE
+        </Link>
+      </Paragraph>
     </div>
-    <Paragraph className="text-white -mt-5 z-[40] text-center">
-      <span>Register your business </span>
-      <Link
-        href="https://app.vumail.app"
-        target="_blank"
-        className="text-blue-500 hover:text-red-500"
-      >
-        HERE
-      </Link>
-    </Paragraph>
   </div>
 );
