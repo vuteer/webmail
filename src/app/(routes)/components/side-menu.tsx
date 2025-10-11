@@ -56,7 +56,12 @@ const SideMenu = () => {
 
   const { data: session } = useSession();
   const user: any = session?.user;
-  const first_password = user?.first_password;
+  // const first_password = user?.first_password;
+  const first_password = user
+    ? Object.keys(user).includes("first_password")
+      ? user.first_password
+      : true
+    : true;
 
   const mounted = useMounted();
 

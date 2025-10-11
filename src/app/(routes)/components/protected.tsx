@@ -46,11 +46,17 @@ const Protected = ({ title, children }: ProtectedProps) => {
 
   const { data: session, isPending, error, refetch } = useSession();
   const user: any = session?.user;
-  const first_password = user?.first_password;
+
+  const first_password = user
+    ? Object.keys(user).includes("first_password")
+      ? user.first_password
+      : true
+    : true;
 
   const first_password_changed_at: any =
     user?.first_password_changed_at || new Date();
   const date = new Date(first_password_changed_at);
+
   // Add 30 days
   date.setDate(date.getDate() + 30);
   const now = new Date();
