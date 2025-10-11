@@ -129,7 +129,6 @@ const Protected = ({ title, children }: ProtectedProps) => {
     }
   };
 
-  console.log(user);
   if (!isPending && user && (first_password || timePassed)) {
     return (
       <div className="py-7 bg-background flex flex-col items-center justify-center w-screen h-screen">
